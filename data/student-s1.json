@@ -1,0 +1,157 @@
+{
+  "student": {
+    "id": 1,
+    "name": "佐藤 美咲",
+    "grade": "中学2年",
+    "group": "A23",
+    "goal": "7月模试偏差值 58 -> 64",
+    "score": 82,
+    "attendance": 91,
+    "progress": [55, 63, 60, 74, 81],
+    "risk": "中风险",
+    "summary": "应用题审题速度偏慢，但基础计算稳定。",
+    "parentNote": "建议本周重点做限时审题训练。",
+    "teacherFeedback": "这周状态回升，建议继续针对读题与时间控制做训练。",
+    "quizHistory": [
+      { "date": "2026-03-08", "name": "一次函数基础", "score": 78, "note": "计算没问题，文字转式偏慢" },
+      { "date": "2026-03-15", "name": "英语长文主旨", "score": 70, "note": "主旨提取失分明显" },
+      { "date": "2026-03-29", "name": "应用题短测", "score": 84, "note": "步骤拆解后有改善" }
+    ],
+    "homework": [
+      { "date": "2026-03-19", "title": "一次函数作业", "status": "已提交", "score": 80 },
+      { "date": "2026-03-24", "title": "读解训练", "status": "已提交", "score": 74 },
+      { "date": "2026-03-31", "title": "应用题复盘", "status": "待批改", "score": null }
+    ],
+    "teacherMessages": [
+      { "from": "teacher", "title": "山田老师", "body": "今天你的计算部分很稳定，下次我们重点练审题速度。", "time": "昨天 18:40" },
+      { "from": "student", "title": "佐藤 美咲", "body": "我觉得应用题一长就容易慌，能不能给我更短一点的训练？", "time": "昨天 20:15" }
+    ],
+    "aiMessages": [
+      { "from": "ai", "title": "AI 学习助手", "body": "你最近最大的进步是步骤更清楚了。接下来先把每道题的条件圈出来再动笔。", "time": "今天 08:20" }
+    ],
+    "abilities": [
+      { "label": "计算", "value": 84 },
+      { "label": "读解", "value": 63 },
+      { "label": "逻辑", "value": 79 },
+      { "label": "稳定性", "value": 72 },
+      { "label": "自走力", "value": 68 }
+    ]
+  },
+  "courses": [
+    {
+      "id": "course-waseda",
+      "studentIds": [1],
+      "title": "早稻田大学入试备考课程",
+      "subject": "综合备考",
+      "totalLessons": 16,
+      "completedLessons": 6,
+      "nextLesson": "4/08 18:30",
+      "schedule": "每周二 / 周五",
+      "teacher": "山田老师",
+      "milestones": ["基础梳理", "阅读强化", "志望校题型训练", "模拟面试"],
+      "lessonIds": ["lesson-1", "lesson-4"]
+    },
+    {
+      "id": "course-japanese",
+      "studentIds": [1],
+      "title": "日语精读课程",
+      "subject": "日语",
+      "totalLessons": 12,
+      "completedLessons": 8,
+      "nextLesson": "4/10 19:00",
+      "schedule": "每周三",
+      "teacher": "佐佐木老师",
+      "milestones": ["文法", "长文精读", "表达训练"],
+      "lessonIds": ["lesson-5"]
+    },
+    {
+      "id": "course-english",
+      "studentIds": [1],
+      "title": "英语读解强化课程",
+      "subject": "英语",
+      "totalLessons": 10,
+      "completedLessons": 5,
+      "nextLesson": "4/12 18:00",
+      "schedule": "每周六",
+      "teacher": "桥本老师",
+      "milestones": ["词汇基础", "主旨提取", "限时训练"],
+      "lessonIds": ["lesson-6"]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "lesson-1",
+      "date": "4/02",
+      "weekday": "Wed",
+      "time": "18:30-20:00",
+      "title": "一次函数基础",
+      "studentIds": [1],
+      "ppt": "一次函数入门 12 页",
+      "notes": "讲了 y=ax+b 的含义、图像斜率、截距，并做了 4 道基础题。",
+      "highlights": ["固定量和变化量的区分", "把文字条件转成函数式", "看图像判断增减"],
+      "mistakes": ["把 b 看成斜率", "文字题列式漏掉初始值"],
+      "completion": 86,
+      "understanding": 78,
+      "homeworkStatus": "已提交",
+      "wrongCount": 2,
+      "metrics": [62, 74, 81, 86]
+    },
+    {
+      "id": "lesson-4",
+      "date": "4/08",
+      "weekday": "Tue",
+      "time": "18:30-20:00",
+      "title": "应用题错题复盘",
+      "studentIds": [1],
+      "ppt": "错题复盘模板 7 页",
+      "notes": "围绕最近在线做题结果，拆解错因并做针对性练习。",
+      "highlights": ["错题按类型归类", "先讲错因再讲解法", "老师给出复盘模板"],
+      "mistakes": ["只改答案不复盘", "没有记录错因关键词"],
+      "completion": 80,
+      "understanding": 73,
+      "homeworkStatus": "进行中",
+      "wrongCount": 3,
+      "metrics": [59, 67, 75, 80]
+    },
+    {
+      "id": "lesson-5",
+      "date": "4/10",
+      "weekday": "Thu",
+      "time": "19:00-20:30",
+      "title": "日语长文精读",
+      "studentIds": [1],
+      "ppt": "日语长文精读 10 页",
+      "notes": "训练段落主旨提取和关键词定位，强调阅读速度与结构理解。",
+      "highlights": ["主旨句定位", "连接词判断", "细节排除"],
+      "mistakes": ["只看单词不看上下文", "连接词忽略导致误判"],
+      "completion": 84,
+      "understanding": 76,
+      "homeworkStatus": "已提交",
+      "wrongCount": 2,
+      "metrics": [64, 72, 79, 84]
+    },
+    {
+      "id": "lesson-6",
+      "date": "4/12",
+      "weekday": "Sat",
+      "time": "18:00-19:30",
+      "title": "英语主旨提取强化",
+      "studentIds": [1],
+      "ppt": "英语主旨提取 8 页",
+      "notes": "训练首段抓主旨和选项排除，配合限时阅读节奏。",
+      "highlights": ["首段抓主题", "排除细节干扰项", "限时阅读节奏"],
+      "mistakes": ["细节项误认为主旨", "段落结构没看完就答题"],
+      "completion": 74,
+      "understanding": 69,
+      "homeworkStatus": "待提交",
+      "wrongCount": 4,
+      "metrics": [55, 61, 68, 74]
+    }
+  ],
+  "quizTemplates": [
+    { "id": "q1", "abilityIndex": 0, "type": "text", "question": "3x + 5 = 17，x 等于多少？", "answer": "4" },
+    { "id": "q2", "abilityIndex": 2, "type": "text", "question": "一个数加上 8 后再乘 2 等于 26，这个数是多少？", "answer": "5" },
+    { "id": "q3", "abilityIndex": 1, "type": "choice", "question": "主旨句最主要的作用是什么？", "choices": ["列举细节", "说明段落中心", "解释词性", "表示顺序"], "answer": "说明段落中心" },
+    { "id": "q4", "abilityIndex": 4, "type": "choice", "question": "一道题做错后最好的下一步是什么？", "choices": ["直接跳过", "只看答案", "找错因再做一遍", "等老师再讲"], "answer": "找错因再做一遍" }
+  ]
+}

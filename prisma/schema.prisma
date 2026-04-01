@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id              Int              @id @default(autoincrement())
+  name            String
+  grade           String
+  groupName       String
+  goal            String
+  score           Int
+  attendance      Int
+  risk            String
+  summary         String
+  parentNote      String
+  teacherFeedback String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  abilities       StudentAbility[]
+  quizSubmissions QuizSubmission[]
+  homeworks       Homework[]
+  messages        Message[]
+  enrollments     StudentCourse[]
+}
+
+model Course {
+  id               String          @id
+  title            String
+  subject          String
+  totalLessons     Int
+  completedLessons Int
+  nextLessonAt     String
+  schedule         String
+  teacherName      String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  lessons          Lesson[]
+  enrollments      StudentCourse[]
+}
+
+model StudentCourse {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  courseId  String
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+}
+
+model Lesson {
+  id             String   @id
+  courseId       String
+  dateLabel      String
+  weekday        String
+  timeLabel      String
+  title          String
+  ppt            String
+  notes          String
+  completion     Int
+  understanding  Int
+  homeworkStatus String
+  wrongCount     Int
+  metrics        Json
+  highlights     Json
+  mistakes       Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  homeworks      Homework[]
+}
+
+model StudentAbility {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  label     String
+  value     Int
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, label])
+}
+
+model QuizSubmission {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  name      String
+  score     Int
+  note      String
+  dateLabel String
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Homework {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  lessonId  String?
+  title     String
+  status    String
+  score     Int?
+  content   String?
+  dateLabel String
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson    Lesson?  @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  channel   String
+  fromRole  String
+  title     String
+  body      String
+  timeLabel String
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}

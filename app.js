@@ -270,12 +270,87 @@ const roleMenus = {
   ]
 };
 
-const state = { role: null, view: null, selectedStudentId: 1, teacherFilter: "all", selectedLessonId: "lesson-1", selectedCourseId: "course-waseda" };
+const state = {
+  role: null,
+  view: null,
+  selectedStudentId: 1,
+  teacherFilter: "all",
+  selectedLessonId: "lesson-1",
+  selectedCourseId: "course-waseda",
+  studentApiLoading: false,
+  studentApiError: "",
+  studentApiSuccess: "",
+  lessonHomeworkDrafts: {},
+  studentLearningRecords: null
+};
 
 const loginScreen = document.getElementById("login-screen");
 const appShell = document.getElementById("app-shell");
 const navEl = document.getElementById("sidebar-nav");
 const contentEl = document.getElementById("app-content");
+let studentToastTimer = null;
+
+async function fetchStudentOverview() {
+  const response = await fetch("/api/student/1/overview");
+  if (!response.ok) throw new Error("Failed to load student overview");
+  return response.json();
+}
+
+async function fetchStudentLearningRecords() {
+  const response = await fetch("/api/student/1/learning-records");
+  if (!response.ok) throw new Error("Failed to load learning records");
+  return response.json();
+}
+
+function replaceCollection(target, items) {
+  target.splice(0, target.length, ...items);
+}
+
+function syncStudentApiData(payload) {
+  if (!payload) return;
+  const studentIndex = students.findIndex((student) => student.id === payload.student.id);
+  if (studentIndex >= 0) {
+    students.splice(studentIndex, 1, payload.student);
+  } else {
+    students.push(payload.student);
+  }
+  replaceCollection(coursePrograms, payload.courses);
+  replaceCollection(lessonCalendar, payload.lessons);
+  replaceCollection(quizTemplates, payload.quizTemplates);
+  state.selectedStudentId = payload.student.id;
+  if (!coursePrograms.find((course) => course.id === state.selectedCourseId)) {
+    state.selectedCourseId = coursePrograms[0]?.id || state.selectedCourseId;
+  }
+  const selectedCourse = getSelectedCourse();
+  if (selectedCourse && !selectedCourse.lessonIds.includes(state.selectedLessonId)) {
+    state.selectedLessonId = selectedCourse.lessonIds[0];
+  }
+  state.studentLearningRecords = {
+    quizHistory: payload.student.quizHistory,
+    homework: payload.student.homework,
+    progress: payload.student.progress
+  };
+}
+
+async function loadStudentS1Data() {
+  state.studentApiLoading = true;
+  state.studentApiError = "";
+  state.studentApiSuccess = "";
+  renderApp();
+  try {
+    const [payload, records] = await Promise.all([
+      fetchStudentOverview(),
+      fetchStudentLearningRecords()
+    ]);
+    syncStudentApiData(payload);
+    state.studentLearningRecords = records;
+  } catch (error) {
+    state.studentApiError = "学生端真实数据加载失败，当前显示的是本地演示数据。";
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
 
 function getSelectedStudent() {
   return students.find((student) => student.id === state.selectedStudentId) || students[0];
@@ -291,6 +366,12 @@ function getSelectedCourse() {
 
 function getStudentCourses(studentId) {
   return coursePrograms.filter((course) => course.studentIds.includes(studentId));
+}
+
+function getLessonStatus(lesson) {
+  if (lesson.homeworkStatus === "已完成" || lesson.homeworkStatus === "已提交") return "已完成";
+  if (lesson.homeworkStatus === "进行中") return "进行中";
+  return "待开始";
 }
 
 function courseProgress(course) {
@@ -369,12 +450,34 @@ function renderNewsView() {
   `;
 }
 
+function renderStudentLoading() {
+  if (!state.studentApiLoading && !state.studentApiError && !state.studentApiSuccess) return "";
+  const statusClass = state.studentApiLoading ? "student-status-loading" : state.studentApiError ? "student-status-error" : "student-status-success";
+  const heading = state.studentApiLoading
+    ? "正在加载学生真实数据..."
+    : state.studentApiError
+      ? "本次操作没有保存成功"
+      : "已经保存到数据库";
+  const message = state.studentApiLoading
+    ? "正在从本地后端读取课程、课次和学习记录。"
+    : state.studentApiError || state.studentApiSuccess;
+  return `
+    <section class="panel student-status-banner ${statusClass}" style="margin-bottom:18px;">
+      <p class="eyebrow">Student S1</p>
+      <h3>${heading}</h3>
+      <p class="profile-meta">${message}</p>
+    </section>
+  `;
+}
+
 function lessonCard(lesson, active) {
+  const status = getLessonStatus(lesson);
   return `
     <button class="lesson-card ${active ? "active" : ""}" data-lesson-id="${lesson.id}" type="button">
       <span>${lesson.weekday}</span>
       <strong>${lesson.date}</strong>
       <p>${lesson.title}</p>
+      <span class="lesson-status lesson-status-${status === "已完成" ? "done" : status === "进行中" ? "active" : "pending"}">${status}</span>
       <small>${lesson.time}</small>
     </button>
   `;
@@ -422,6 +525,16 @@ function renderLessonDetail(lesson) {
       <div class="todo-list" style="margin-top:16px;">
         <div class="todo-item"><strong>课堂资料汇总</strong><p>PPT、课堂笔记、重难点、错题、完成度都沉淀在本节课页面里，方便学生、老师和家长回看。</p></div>
       </div>
+      ${state.role === "student" ? `
+        <div class="feedback-box" style="margin-top:16px;">
+          <p class="eyebrow">Homework Submission</p>
+          <h4>提交本节课课后作业</h4>
+          <textarea class="feedback-input" id="lesson-homework-input" placeholder="例如：我这节课复盘了 y=ax+b 的题型，并把两道错题重新做了一遍。">${state.lessonHomeworkDrafts[lesson.id] ?? lesson.homeworkContent ?? ""}</textarea>
+          <div class="feedback-toolbar" style="margin-top:12px;">
+            <button class="primary-btn" id="submit-lesson-homework-btn" data-lesson-id="${lesson.id}" type="button" ${state.studentApiLoading ? "disabled" : ""}>${state.studentApiLoading ? "提交中..." : "提交课后作业"}</button>
+          </div>
+        </div>
+      ` : ""}
     </article>
   `;
 }
@@ -433,6 +546,7 @@ function renderStudentCalendarView() {
   const lessons = selectedCourse ? lessonCalendar.filter((lesson) => selectedCourse.lessonIds.includes(lesson.id)) : [];
   const selectedLesson = lessons.find((lesson) => lesson.id === state.selectedLessonId) || lessons[0];
   return `
+    ${renderStudentLoading()}
     <section class="course-flow-layout">
       <article class="panel">
         <div class="panel-head">
@@ -537,6 +651,7 @@ function renderStudentQuizView() {
   const delta = quizDelta(student);
   const weakSummary = latest.note.includes("主要薄弱点") ? latest.note.replace("主要薄弱点: ", "") : "基础稳定";
   return `
+    ${renderStudentLoading()}
     <section class="grid-2">
       <article class="panel">
         <div class="panel-head"><div><p class="eyebrow">Online Quiz</p><h3>欢迎，${student.name}</h3></div><span class="tag">${student.grade}</span></div>
@@ -577,15 +692,26 @@ function renderStudentQuizView() {
 
 function renderStudentProgressView() {
   const student = getSelectedStudent();
+  const records = state.studentLearningRecords || {
+    quizHistory: student.quizHistory,
+    homework: student.homework,
+    progress: student.progress
+  };
+  const latestRecord = records.quizHistory[records.quizHistory.length - 1];
   return `
+    ${renderStudentLoading()}
     <section class="student-dashboard">
       <article class="panel"><p class="eyebrow">My Summary</p><h3>${student.goal}</h3><p class="profile-meta">${student.summary}</p><div class="score-box" style="margin-top:16px;"><span>当前总评</span><strong>${student.score}</strong></div></article>
-      <article class="panel"><p class="eyebrow">Progress</p><h3>最近学习进度</h3><div class="sparkline">${student.progress.map((value) => `<i style="height:${Math.max(18, value * 0.8)}px"></i>`).join("")}</div></article>
+      <article class="panel"><p class="eyebrow">Progress</p><h3>最近学习进度</h3><div class="sparkline">${records.progress.map((value) => `<i style="height:${Math.max(18, value * 0.8)}px"></i>`).join("")}</div></article>
       <article class="panel"><p class="eyebrow">Parent Summary</p><h3>本周反馈摘要</h3><p class="profile-meta">${student.parentNote}</p></article>
     </section>
     <section class="grid-2" style="margin-top:18px;">
       <article class="panel radar-box"><p class="eyebrow">Ability Radar</p><h4>能力维度</h4><svg id="radar-chart" viewBox="0 0 320 320"></svg></article>
-      <article class="panel"><p class="eyebrow">Homework</p><h3>我的作业记录</h3><div class="homework-list">${student.homework.map((item) => `<div class="homework-row"><div><strong>${item.title}</strong><span class="small-note">${item.date}</span></div><div><strong>${item.status}</strong><span class="small-note">${item.score === null ? "待评分" : `${item.score} 分`}</span></div></div>`).join("")}</div></article>
+      <article class="panel"><p class="eyebrow">Homework</p><h3>我的作业记录</h3><div class="homework-list">${records.homework.map((item) => `<div class="homework-row"><div><strong>${item.title}</strong><span class="small-note">${item.date}</span></div><div><strong>${item.status}</strong><span class="small-note">${item.score === null ? "待评分" : `${item.score} 分`}</span></div></div>`).join("")}</div></article>
+    </section>
+    <section class="grid-2" style="margin-top:18px;">
+      <article class="panel"><p class="eyebrow">Learning Records</p><h3>最近测验记录</h3><div class="todo-list">${records.quizHistory.slice().reverse().map((item) => `<div class="todo-item"><strong>${item.date} · ${item.name}</strong><p>${item.score} 分 · ${item.note}</p></div>`).join("")}</div></article>
+      <article class="panel"><p class="eyebrow">Latest Snapshot</p><h3>最新一次学习快照</h3><div class="todo-list"><div class="todo-item"><strong>最近一次测验</strong><p>${latestRecord ? `${latestRecord.name} · ${latestRecord.score} 分` : "暂无记录"}</p></div><div class="todo-item"><strong>最近学习节奏</strong><p>${records.progress.join(" / ")}</p></div><div class="todo-item"><strong>数据库状态</strong><p>当前页面优先展示后端 learning-records 接口返回的数据。</p></div></div></article>
     </section>
   `;
 }
@@ -615,6 +741,7 @@ function renderMessages(messages, promptId, buttonLabel, placeholder) {
 function renderStudentTeacherView() {
   const student = getSelectedStudent();
   return `
+    ${renderStudentLoading()}
     <section class="grid-2">
       <article class="panel"><p class="eyebrow">Teacher Chat</p><h3>和老师沟通</h3>${renderMessages(student.teacherMessages, "teacher-message-input", "发送给老师", "例如：老师，我想要更多短题训练。")}</article>
       <article class="panel"><p class="eyebrow">Next Advice</p><h3>老师最近给你的反馈</h3><div class="todo-list"><div class="todo-item"><strong>下次上课重点</strong><p>${student.teacherFeedback}</p></div><div class="todo-item"><strong>建议你课前准备</strong><p>先复盘最近一次错题，再做 10 分钟限时练习。</p></div><div class="todo-item"><strong>当前状态</strong><p>${student.risk} · 最近测验 ${latestQuiz(student).score} 分</p></div></div></article>
@@ -625,6 +752,7 @@ function renderStudentTeacherView() {
 function renderStudentAIView() {
   const student = getSelectedStudent();
   return `
+    ${renderStudentLoading()}
     <section class="grid-2">
       <article class="panel"><p class="eyebrow">AI Chat</p><h3>和 AI 沟通</h3>${renderMessages(student.aiMessages, "ai-message-input", "发送给 AI", "例如：请告诉我这周怎么复习最有效。")}</article>
       <article class="panel"><p class="eyebrow">Prompt Suggestions</p><h3>你可以这样问</h3><div class="todo-list"><div class="todo-item"><strong>请解释我最近最弱的知识点</strong><p>适合做题后使用。</p></div><div class="todo-item"><strong>给我一份 15 分钟复习计划</strong><p>适合回家前快速安排。</p></div><div class="todo-item"><strong>把老师的反馈改成我更容易懂的话</strong><p>适合低年龄学生。</p></div></div><div class="profile-section" style="margin-top:16px;"><div class="section-row"><strong>推荐模式</strong><span>短时间复习</span></div><div class="section-row"><strong>建议时长</strong><span>15 分钟</span></div><div class="section-row"><strong>当前重点</strong><span>${student.summary}</span></div></div></article>
@@ -858,6 +986,19 @@ function attachViewEvents() {
       renderApp();
     });
   });
+  const submitLessonHomeworkButton = document.getElementById("submit-lesson-homework-btn");
+  if (submitLessonHomeworkButton) {
+    submitLessonHomeworkButton.addEventListener("click", submitLessonHomework);
+  }
+  const lessonHomeworkInput = document.getElementById("lesson-homework-input");
+  if (lessonHomeworkInput) {
+    const persistDraft = () => {
+      state.lessonHomeworkDrafts[state.selectedLessonId] = lessonHomeworkInput.value;
+    };
+    lessonHomeworkInput.addEventListener("input", persistDraft);
+    lessonHomeworkInput.addEventListener("change", persistDraft);
+    lessonHomeworkInput.addEventListener("compositionend", persistDraft);
+  }
   contentEl.querySelectorAll("[data-filter]").forEach((button) => {
     button.addEventListener("click", () => {
       state.teacherFilter = button.dataset.filter;
@@ -884,7 +1025,7 @@ function attachViewEvents() {
 function renderApp() {
   renderNav();
   renderHeader();
-  contentEl.innerHTML = renderView();
+  contentEl.innerHTML = `${renderStudentToast()}${renderView()}`;
   attachViewEvents();
 }
 
@@ -894,6 +1035,9 @@ function loginAs(role) {
   loginScreen.classList.add("hidden");
   appShell.classList.remove("hidden");
   renderApp();
+  if (role === "student") {
+    loadStudentS1Data();
+  }
 }
 
 function logout() {
@@ -928,34 +1072,207 @@ function sendMessage(type) {
   renderApp();
 }
 
-function submitStudentQuiz() {
+async function submitStudentQuiz() {
   const student = getSelectedStudent();
   const formData = new FormData(document.getElementById("student-quiz-form"));
-  let correct = 0;
-  const weakLabels = [];
+  const answers = {};
   quizTemplates.forEach((question) => {
-    const raw = (formData.get(question.id) || "").toString().trim().replace(/\s+/g, "").toLowerCase();
-    const answer = question.answer.replace(/\s+/g, "").toLowerCase();
-    if (raw === answer) {
-      correct += 1;
-    } else {
-      weakLabels.push(student.abilities[question.abilityIndex].label);
-      student.abilities[question.abilityIndex].value = Math.max(40, student.abilities[question.abilityIndex].value - 5);
-    }
+    answers[question.id] = (formData.get(question.id) || "").toString();
   });
-  const score = Math.round((correct / quizTemplates.length) * 100);
-  const weakText = [...new Set(weakLabels)];
-  student.quizHistory.push({ date: "2026-04-01", name: "在线练习", score, note: weakText.length ? `主要薄弱点: ${weakText.join("、")}` : "整体稳定，可增加难度" });
-  student.homework.unshift({ date: "2026-04-01", title: "在线练习", status: "已提交", score });
-  student.progress = [...student.progress.slice(1), score];
-  student.score = Math.round(student.score * 0.75 + score * 0.25);
-  student.summary = weakText.length ? `刚完成在线做题，系统识别出 ${weakText.join("、")} 需要补强。` : "刚完成在线做题，整体稳定，适合进入更高阶训练。";
-  student.teacherFeedback = weakText.length ? `建议下节课优先复盘 ${weakText.join("、")} 相关题型，再安排短练。` : "建议提高题目难度，并观察迁移题表现。";
-  student.parentNote = weakText.length ? `本次在线做题 ${score} 分，主要卡点在 ${weakText.join("、")}，建议先针对性补强。` : `本次在线做题 ${score} 分，基础表现稳定，可逐步增加难度。`;
-  student.risk = student.score < 75 || student.attendance < 80 ? "高风险" : student.score < 85 ? "中风险" : "低风险";
-  student.teacherMessages.push({ from: "teacher", title: "系统通知", body: `已收到你的在线做题结果：${score} 分。老师会根据结果调整下次辅导。`, time: "刚刚" });
-  state.view = "student-progress";
+
+  try {
+    state.studentApiLoading = true;
+    state.studentApiSuccess = "";
+    renderApp();
+    const response = await fetch("/api/student/1/quiz-submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, answers })
+    });
+    if (!response.ok) throw new Error("Failed to submit quiz");
+    const payload = await response.json();
+    syncStudentApiData(payload.overview);
+    state.studentLearningRecords = {
+      quizHistory: payload.overview.student.quizHistory,
+      homework: payload.overview.student.homework,
+      progress: payload.overview.student.progress
+    };
+    state.view = "student-progress";
+    state.studentApiError = "";
+    state.studentApiSuccess = "做题结果已保存，学习记录和能力画像已经更新。";
+  } catch (error) {
+    state.studentApiError = "做题结果提交失败，本次没有保存到本地后端。";
+    state.studentApiSuccess = "";
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
+
+async function submitLessonHomework(event) {
+  const lessonId = event.currentTarget.dataset.lessonId;
+  const input = document.getElementById("lesson-homework-input");
+  const content = (state.lessonHomeworkDrafts[lessonId] ?? input.value ?? "").trim();
+  if (!content) {
+    state.studentApiError = "请先填写课后作业内容。";
+    state.studentApiSuccess = "";
+    renderApp();
+    return;
+  }
+
+  try {
+    state.studentApiLoading = true;
+    state.studentApiError = "";
+    state.studentApiSuccess = "";
+    renderApp();
+    const response = await fetch(`/api/student/1/lessons/${lessonId}/homework`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
+    });
+    if (!response.ok) throw new Error("Failed to submit homework");
+    const payload = await response.json();
+    syncStudentApiData(payload.overview);
+    state.studentLearningRecords = payload.learningRecords;
+    state.lessonHomeworkDrafts[lessonId] = content;
+    state.studentApiSuccess = "课后作业已提交并保存到数据库，这节课的状态已经更新。";
+  } catch (error) {
+    state.studentApiError = "课后作业提交失败，本次没有保存到数据库。";
+    state.studentApiSuccess = "";
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
+
+async function loadStudentS1Data() {
+  state.studentApiLoading = true;
+  state.studentApiError = "";
+  state.studentApiSuccess = "";
   renderApp();
+  try {
+    const [payload, records] = await Promise.all([
+      fetchStudentOverview(),
+      fetchStudentLearningRecords()
+    ]);
+    syncStudentApiData(payload);
+    state.studentLearningRecords = records;
+  } catch (error) {
+    showStudentToast("error", "学生端真实数据加载失败，当前显示的是本地演示数据。");
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
+
+function renderStudentLoading() {
+  if (!state.studentApiLoading) return "";
+  return `
+    <section class="panel student-status-banner student-status-loading" style="margin-bottom:18px;">
+      <p class="eyebrow">Student S1</p>
+      <h3>正在加载学生真实数据...</h3>
+      <p class="profile-meta">正在从本地后端读取课程、课次和学习记录。</p>
+    </section>
+  `;
+}
+
+function renderStudentToast() {
+  const message = state.studentApiError || state.studentApiSuccess;
+  if (!message) return "";
+  const typeClass = state.studentApiError ? "student-toast-error" : "student-toast-success";
+  const title = state.studentApiError ? "保存失败" : "保存成功";
+  return `
+    <div class="student-toast-wrap">
+      <div class="student-toast ${typeClass}">
+        <strong>${title}</strong>
+        <p>${message}</p>
+      </div>
+    </div>
+  `;
+}
+
+function showStudentToast(type, message) {
+  if (studentToastTimer) {
+    clearTimeout(studentToastTimer);
+  }
+  state.studentApiError = type === "error" ? message : "";
+  state.studentApiSuccess = type === "success" ? message : "";
+  renderApp();
+  studentToastTimer = setTimeout(() => {
+    state.studentApiError = "";
+    state.studentApiSuccess = "";
+    studentToastTimer = null;
+    renderApp();
+  }, 2200);
+}
+
+async function submitStudentQuiz() {
+  const student = getSelectedStudent();
+  const formData = new FormData(document.getElementById("student-quiz-form"));
+  const answers = {};
+  quizTemplates.forEach((question) => {
+    answers[question.id] = (formData.get(question.id) || "").toString();
+  });
+
+  try {
+    state.studentApiLoading = true;
+    state.studentApiError = "";
+    state.studentApiSuccess = "";
+    renderApp();
+    const response = await fetch("/api/student/1/quiz-submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, answers })
+    });
+    if (!response.ok) throw new Error("Failed to submit quiz");
+    const payload = await response.json();
+    syncStudentApiData(payload.overview);
+    state.studentLearningRecords = {
+      quizHistory: payload.overview.student.quizHistory,
+      homework: payload.overview.student.homework,
+      progress: payload.overview.student.progress
+    };
+    state.view = "student-progress";
+    showStudentToast("success", "做题结果已保存，学习记录和能力画像已经更新。");
+  } catch (error) {
+    showStudentToast("error", "做题结果提交失败，本次没有保存到本地后端。");
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
+
+async function submitLessonHomework(event) {
+  const lessonId = event.currentTarget.dataset.lessonId;
+  const input = document.getElementById("lesson-homework-input");
+  const content = (state.lessonHomeworkDrafts[lessonId] ?? input.value ?? "").trim();
+  if (!content) {
+    showStudentToast("error", "请先填写课后作业内容。");
+    return;
+  }
+
+  try {
+    state.studentApiLoading = true;
+    state.studentApiError = "";
+    state.studentApiSuccess = "";
+    renderApp();
+    const response = await fetch(`/api/student/1/lessons/${lessonId}/homework`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
+    });
+    if (!response.ok) throw new Error("Failed to submit homework");
+    const payload = await response.json();
+    syncStudentApiData(payload.overview);
+    state.studentLearningRecords = payload.learningRecords;
+    state.lessonHomeworkDrafts[lessonId] = content;
+    showStudentToast("success", "课后作业已提交并保存到数据库，这节课的状态已经更新。");
+  } catch (error) {
+    showStudentToast("error", "课后作业提交失败，本次没有保存到数据库。");
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
 }
 
 function renderRadar(abilities) {
