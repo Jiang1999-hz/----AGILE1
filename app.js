@@ -126,6 +126,119 @@ const quizTemplates = [
   { id: "q4", abilityIndex: 4, type: "choice", question: "一道题做错后最好的下一步是什么？", choices: ["直接跳过", "只看答案", "找错因再做一遍", "等老师再讲"], answer: "找错因再做一遍" }
 ];
 
+const lessonCalendar = [
+  {
+    id: "lesson-1",
+    date: "4/02",
+    weekday: "Wed",
+    time: "18:30-20:00",
+    title: "一次函数基础",
+    studentIds: [1],
+    ppt: "一次函数入门 12 页",
+    notes: "讲了 y=ax+b 的含义、图像斜率、截距，并做了 4 道基础题。",
+    highlights: ["固定量和变化量的区分", "把文字条件转成函数式", "看图像判断增减"],
+    mistakes: ["把 b 看成斜率", "文字题列式漏掉初始值"],
+    completion: 86,
+    understanding: 78,
+    homeworkStatus: "已提交",
+    wrongCount: 2,
+    metrics: [62, 74, 81, 86]
+  },
+  {
+    id: "lesson-2",
+    date: "4/04",
+    weekday: "Fri",
+    time: "19:00-20:30",
+    title: "英语长文主旨训练",
+    studentIds: [2],
+    ppt: "长文阅读技巧 9 页",
+    notes: "训练首段主旨提取和段落结构判断，重点在速度与信息筛选。",
+    highlights: ["首段抓主题", "排除细节干扰项", "限时阅读节奏"],
+    mistakes: ["细节项误认为主旨", "读得太慢导致后面没时间"],
+    completion: 71,
+    understanding: 65,
+    homeworkStatus: "待提交",
+    wrongCount: 4,
+    metrics: [58, 61, 68, 71]
+  },
+  {
+    id: "lesson-3",
+    date: "4/05",
+    weekday: "Sat",
+    time: "10:00-11:30",
+    title: "图形思维进阶",
+    studentIds: [3],
+    ppt: "图形与面积关系 11 页",
+    notes: "结合受验题练习图形拆分和面积转化。",
+    highlights: ["拆分复杂图形", "找辅助线", "用等积变形简化计算"],
+    mistakes: ["辅助线添加过多", "面积公式使用顺序混乱"],
+    completion: 92,
+    understanding: 89,
+    homeworkStatus: "已完成",
+    wrongCount: 1,
+    metrics: [76, 83, 88, 92]
+  },
+  {
+    id: "lesson-4",
+    date: "4/08",
+    weekday: "Tue",
+    time: "18:30-20:00",
+    title: "应用题错题复盘",
+    studentIds: [1, 2],
+    ppt: "错题复盘模板 7 页",
+    notes: "围绕最近在线做题结果，拆解错因并做针对性练习。",
+    highlights: ["错题按类型归类", "先讲错因再讲解法", "老师给出复盘模板"],
+    mistakes: ["只改答案不复盘", "没有记录错因关键词"],
+    completion: 80,
+    understanding: 73,
+    homeworkStatus: "进行中",
+    wrongCount: 3,
+    metrics: [59, 67, 75, 80]
+  }
+];
+
+const coursePrograms = [
+  {
+    id: "course-waseda",
+    studentIds: [1, 2],
+    title: "早稻田大学入试备考课程",
+    subject: "综合备考",
+    totalLessons: 16,
+    completedLessons: 6,
+    nextLesson: "4/08 18:30",
+    schedule: "每周二 / 周五",
+    teacher: "山田老师",
+    milestones: ["基础梳理", "阅读强化", "志望校题型训练", "模拟面试"],
+    lessonIds: ["lesson-1", "lesson-2", "lesson-4"]
+  },
+  {
+    id: "course-japanese",
+    studentIds: [1, 3],
+    title: "日语精读课程",
+    subject: "日语",
+    totalLessons: 12,
+    completedLessons: 8,
+    nextLesson: "4/10 19:00",
+    schedule: "每周三",
+    teacher: "佐佐木老师",
+    milestones: ["文法", "长文精读", "表达训练"],
+    lessonIds: ["lesson-2"]
+  },
+  {
+    id: "course-english",
+    studentIds: [1, 2],
+    title: "英语读解强化课程",
+    subject: "英语",
+    totalLessons: 10,
+    completedLessons: 5,
+    nextLesson: "4/12 18:00",
+    schedule: "每周六",
+    teacher: "桥本老师",
+    milestones: ["词汇基础", "主旨提取", "限时训练"],
+    lessonIds: ["lesson-2", "lesson-4"]
+  }
+];
+
 const accounts = {
   student: { name: "佐藤 美咲", roleLabel: "学生", defaultView: "news" },
   teacher: { name: "山田老师", roleLabel: "老师", defaultView: "news" },
@@ -135,6 +248,7 @@ const accounts = {
 const roleMenus = {
   student: [
     { id: "news", label: "塾 News" },
+    { id: "student-calendar", label: "课程日历" },
     { id: "student-quiz", label: "在线做题" },
     { id: "student-progress", label: "我的学习情况" },
     { id: "student-teacher", label: "和老师沟通" },
@@ -142,6 +256,7 @@ const roleMenus = {
   ],
   teacher: [
     { id: "news", label: "塾 News" },
+    { id: "teacher-calendar", label: "课程日历" },
     { id: "teacher-db", label: "学生数据库" },
     { id: "teacher-student", label: "学生详情与反馈" },
     { id: "teacher-ai", label: "教学助手" }
@@ -155,7 +270,7 @@ const roleMenus = {
   ]
 };
 
-const state = { role: null, view: null, selectedStudentId: 1, teacherFilter: "all" };
+const state = { role: null, view: null, selectedStudentId: 1, teacherFilter: "all", selectedLessonId: "lesson-1", selectedCourseId: "course-waseda" };
 
 const loginScreen = document.getElementById("login-screen");
 const appShell = document.getElementById("app-shell");
@@ -164,6 +279,22 @@ const contentEl = document.getElementById("app-content");
 
 function getSelectedStudent() {
   return students.find((student) => student.id === state.selectedStudentId) || students[0];
+}
+
+function getSelectedLesson() {
+  return lessonCalendar.find((lesson) => lesson.id === state.selectedLessonId) || lessonCalendar[0];
+}
+
+function getSelectedCourse() {
+  return coursePrograms.find((course) => course.id === state.selectedCourseId) || coursePrograms[0];
+}
+
+function getStudentCourses(studentId) {
+  return coursePrograms.filter((course) => course.studentIds.includes(studentId));
+}
+
+function courseProgress(course) {
+  return Math.round((course.completedLessons / course.totalLessons) * 100);
 }
 
 function average(values) {
@@ -180,12 +311,37 @@ function getRiskClass(risk) {
   return "risk-low";
 }
 
+function getRowRiskDot(risk) {
+  if (risk === "高风险") return "dot-high";
+  if (risk === "中风险") return "dot-medium";
+  return "dot-low";
+}
+
 function bar(value) {
   return `<div class="progress-bar"><i style="width:${value}%"></i></div>`;
 }
 
 function tinySpark(values) {
   return `<div class="tiny-spark">${values.map((value) => `<i style="height:${Math.max(8, value * 0.24)}px"></i>`).join("")}</div>`;
+}
+
+function latestQuiz(student) {
+  return student.quizHistory[student.quizHistory.length - 1];
+}
+
+function latestHomework(student) {
+  return student.homework[0];
+}
+
+function quizDelta(student) {
+  if (student.quizHistory.length < 2) return 0;
+  const latest = student.quizHistory[student.quizHistory.length - 1].score;
+  const previous = student.quizHistory[student.quizHistory.length - 2].score;
+  return latest - previous;
+}
+
+function riskCount(level) {
+  return students.filter((student) => student.risk === level).length;
 }
 
 function renderNav() {
@@ -213,8 +369,173 @@ function renderNewsView() {
   `;
 }
 
+function lessonCard(lesson, active) {
+  return `
+    <button class="lesson-card ${active ? "active" : ""}" data-lesson-id="${lesson.id}" type="button">
+      <span>${lesson.weekday}</span>
+      <strong>${lesson.date}</strong>
+      <p>${lesson.title}</p>
+      <small>${lesson.time}</small>
+    </button>
+  `;
+}
+
+function renderLessonDetail(lesson) {
+  const studentNames = lesson.studentIds.map((id) => students.find((student) => student.id === id)?.name).filter(Boolean).join(" / ");
+  return `
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Lesson Detail</p>
+          <h3>${lesson.title}</h3>
+        </div>
+        <span class="tag">${lesson.date} ${lesson.time}</span>
+      </div>
+      <div class="profile-section">
+        <div class="section-row"><strong>学生</strong><span>${studentNames}</span></div>
+        <div class="section-row"><strong>PPT</strong><span>${lesson.ppt}</span></div>
+        <div class="section-row"><strong>课堂笔记</strong><span>${lesson.notes}</span></div>
+      </div>
+      <div class="lesson-stats">
+        <div class="inline-stat"><span>完成度</span><strong>${lesson.completion}%</strong></div>
+        <div class="inline-stat"><span>理解度</span><strong>${lesson.understanding}%</strong></div>
+        <div class="inline-stat"><span>课后作业</span><strong>${lesson.homeworkStatus}</strong></div>
+        <div class="inline-stat"><span>错题数</span><strong>${lesson.wrongCount}</strong></div>
+      </div>
+      <div class="lesson-chart-card">
+        <p class="eyebrow">Lesson Performance</p>
+        <h4>本节课表现趋势</h4>
+        <div class="lesson-chart">
+          ${lesson.metrics.map((value) => `<i style="height:${Math.max(18, value * 0.9)}px"></i>`).join("")}
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="todo-item">
+          <strong>重难点</strong>
+          <p>${lesson.highlights.join(" / ")}</p>
+        </div>
+        <div class="todo-item">
+          <strong>易错点</strong>
+          <p>${lesson.mistakes.join(" / ")}</p>
+        </div>
+      </div>
+      <div class="todo-list" style="margin-top:16px;">
+        <div class="todo-item"><strong>课堂资料汇总</strong><p>PPT、课堂笔记、重难点、错题、完成度都沉淀在本节课页面里，方便学生、老师和家长回看。</p></div>
+      </div>
+    </article>
+  `;
+}
+
+function renderStudentCalendarView() {
+  const student = getSelectedStudent();
+  const courses = getStudentCourses(student.id);
+  const selectedCourse = courses.find((course) => course.id === state.selectedCourseId) || courses[0];
+  const lessons = selectedCourse ? lessonCalendar.filter((lesson) => selectedCourse.lessonIds.includes(lesson.id)) : [];
+  const selectedLesson = lessons.find((lesson) => lesson.id === state.selectedLessonId) || lessons[0];
+  return `
+    <section class="course-flow-layout">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Programs</p>
+            <h3>${student.name} 的所有课程</h3>
+          </div>
+          <span class="tag">${courses.length} 门课程</span>
+        </div>
+        <div class="course-program-list">
+          ${courses.map((course) => `
+            <button class="course-program-card ${selectedCourse && course.id === selectedCourse.id ? "active" : ""}" data-course-id="${course.id}" type="button">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">${course.subject}</p>
+                  <h4>${course.title}</h4>
+                </div>
+                <span class="tag">${course.completedLessons}/${course.totalLessons}</span>
+              </div>
+              <div class="course-progress-bar"><i style="width:${courseProgress(course)}%"></i></div>
+              <div class="course-meta-list">
+                <div class="section-row"><strong>进度</strong><span>${courseProgress(course)}%</span></div>
+                <div class="section-row"><strong>时间</strong><span>${course.schedule}</span></div>
+                <div class="section-row"><strong>下节课</strong><span>${course.nextLesson}</span></div>
+                <div class="section-row"><strong>老师</strong><span>${course.teacher}</span></div>
+              </div>
+            </button>
+          `).join("")}
+        </div>
+      </article>
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Course Calendar</p>
+            <h3>${selectedCourse ? selectedCourse.title : "课程日历"}</h3>
+          </div>
+          <span class="tag">共 ${selectedCourse ? selectedCourse.totalLessons : 0} 节</span>
+        </div>
+        <div class="calendar-board">
+          ${lessons.map((lesson) => lessonCard(lesson, selectedLesson && lesson.id === selectedLesson.id)).join("")}
+        </div>
+      </article>
+      ${selectedLesson ? renderLessonDetail(selectedLesson) : `<article class="panel"><h3>暂无课程详情</h3></article>`}
+    </section>
+  `;
+}
+
+function renderTeacherCalendarView() {
+  const selectedCourse = getSelectedCourse();
+  const lessons = selectedCourse ? lessonCalendar.filter((lesson) => selectedCourse.lessonIds.includes(lesson.id)) : [];
+  const selectedLesson = lessons.find((lesson) => lesson.id === state.selectedLessonId) || lessons[0];
+  return `
+    <section class="course-flow-layout">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Teacher Programs</p>
+            <h3>老师课程模块</h3>
+          </div>
+          <span class="tag">${coursePrograms.length} 门课程</span>
+        </div>
+        <div class="course-program-list">
+          ${coursePrograms.map((course) => `
+            <button class="course-program-card ${selectedCourse && course.id === selectedCourse.id ? "active" : ""}" data-course-id="${course.id}" type="button">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">${course.subject}</p>
+                  <h4>${course.title}</h4>
+                </div>
+                <span class="tag">${course.completedLessons}/${course.totalLessons}</span>
+              </div>
+              <div class="course-progress-bar"><i style="width:${courseProgress(course)}%"></i></div>
+              <div class="course-meta-list">
+                <div class="section-row"><strong>学生数</strong><span>${course.studentIds.length}</span></div>
+                <div class="section-row"><strong>时间</strong><span>${course.schedule}</span></div>
+                <div class="section-row"><strong>下节课</strong><span>${course.nextLesson}</span></div>
+              </div>
+            </button>
+          `).join("")}
+        </div>
+      </article>
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Course Calendar</p>
+            <h3>${selectedCourse ? selectedCourse.title : "课程日历"}</h3>
+          </div>
+          <span class="tag">按课次查看</span>
+        </div>
+        <div class="calendar-board">
+          ${lessons.map((lesson) => lessonCard(lesson, selectedLesson && lesson.id === selectedLesson.id)).join("")}
+        </div>
+      </article>
+      ${selectedLesson ? renderLessonDetail(selectedLesson) : `<article class="panel"><h3>暂无课程详情</h3></article>`}
+    </section>
+  `;
+}
+
 function renderStudentQuizView() {
   const student = getSelectedStudent();
+  const latest = latestQuiz(student);
+  const delta = quizDelta(student);
+  const weakSummary = latest.note.includes("主要薄弱点") ? latest.note.replace("主要薄弱点: ", "") : "基础稳定";
   return `
     <section class="grid-2">
       <article class="panel">
@@ -241,7 +562,11 @@ function renderStudentQuizView() {
       <article class="panel">
         <p class="eyebrow">Latest Result</p>
         <h3>最近一次做题记录</h3>
-        <div class="score-box"><span>上次分数</span><strong>${student.quizHistory[student.quizHistory.length - 1].score}</strong></div>
+        <div class="score-box"><span>上次分数</span><strong>${latest.score}</strong></div>
+        <div class="quiz-result-grid" style="margin-top:16px;">
+          <div class="result-card"><span>与上次相比</span><strong>${delta >= 0 ? `+${delta}` : delta}</strong><p>${delta >= 0 ? "有提升，适合继续追踪" : "有下降，需要尽快复盘"}</p></div>
+          <div class="result-card"><span>系统判断</span><strong>${student.risk}</strong><p>${weakSummary}</p></div>
+        </div>
         <div class="todo-list" style="margin-top:16px;">
           ${student.quizHistory.slice().reverse().map((item) => `<div class="todo-item"><strong>${item.date} · ${item.name}</strong><p>${item.score} 分 · ${item.note}</p></div>`).join("")}
         </div>
@@ -267,12 +592,22 @@ function renderStudentProgressView() {
 
 function renderMessages(messages, promptId, buttonLabel, placeholder) {
   return `
-    <div class="message-list">
+    <div class="chat-shell">
+      <div class="chat-header">
+        <span class="tag">在线</span>
+        <span class="small-note">最近更新：刚刚</span>
+      </div>
+      <div class="message-list chat-thread">
       ${messages.map((message) => `<div class="message-card ${message.from}"><div class="message-meta"><strong>${message.title}</strong><span class="small-note">${message.time}</span></div><p class="message-body">${message.body}</p></div>`).join("")}
+      </div>
     </div>
-    <div class="prompt-actions">
+    </div>
+    <div class="chat-input-shell">
       <textarea class="prompt-input" id="${promptId}" rows="4" placeholder="${placeholder}"></textarea>
-      <button class="primary-btn" type="button" data-action="${buttonLabel}">${buttonLabel}</button>
+      <div class="prompt-actions">
+        <button class="ghost-btn" type="button">附件</button>
+        <button class="primary-btn" type="button" data-action="${buttonLabel}">${buttonLabel}</button>
+      </div>
     </div>
   `;
 }
@@ -282,7 +617,7 @@ function renderStudentTeacherView() {
   return `
     <section class="grid-2">
       <article class="panel"><p class="eyebrow">Teacher Chat</p><h3>和老师沟通</h3>${renderMessages(student.teacherMessages, "teacher-message-input", "发送给老师", "例如：老师，我想要更多短题训练。")}</article>
-      <article class="panel"><p class="eyebrow">Next Advice</p><h3>老师最近给你的反馈</h3><div class="todo-list"><div class="todo-item"><strong>下次上课重点</strong><p>${student.teacherFeedback}</p></div><div class="todo-item"><strong>建议你课前准备</strong><p>先复盘最近一次错题，再做 10 分钟限时练习。</p></div></div></article>
+      <article class="panel"><p class="eyebrow">Next Advice</p><h3>老师最近给你的反馈</h3><div class="todo-list"><div class="todo-item"><strong>下次上课重点</strong><p>${student.teacherFeedback}</p></div><div class="todo-item"><strong>建议你课前准备</strong><p>先复盘最近一次错题，再做 10 分钟限时练习。</p></div><div class="todo-item"><strong>当前状态</strong><p>${student.risk} · 最近测验 ${latestQuiz(student).score} 分</p></div></div></article>
     </section>
   `;
 }
@@ -292,7 +627,7 @@ function renderStudentAIView() {
   return `
     <section class="grid-2">
       <article class="panel"><p class="eyebrow">AI Chat</p><h3>和 AI 沟通</h3>${renderMessages(student.aiMessages, "ai-message-input", "发送给 AI", "例如：请告诉我这周怎么复习最有效。")}</article>
-      <article class="panel"><p class="eyebrow">Prompt Suggestions</p><h3>你可以这样问</h3><div class="todo-list"><div class="todo-item"><strong>请解释我最近最弱的知识点</strong><p>适合做题后使用。</p></div><div class="todo-item"><strong>给我一份 15 分钟复习计划</strong><p>适合回家前快速安排。</p></div><div class="todo-item"><strong>把老师的反馈改成我更容易懂的话</strong><p>适合低年龄学生。</p></div></div></article>
+      <article class="panel"><p class="eyebrow">Prompt Suggestions</p><h3>你可以这样问</h3><div class="todo-list"><div class="todo-item"><strong>请解释我最近最弱的知识点</strong><p>适合做题后使用。</p></div><div class="todo-item"><strong>给我一份 15 分钟复习计划</strong><p>适合回家前快速安排。</p></div><div class="todo-item"><strong>把老师的反馈改成我更容易懂的话</strong><p>适合低年龄学生。</p></div></div><div class="profile-section" style="margin-top:16px;"><div class="section-row"><strong>推荐模式</strong><span>短时间复习</span></div><div class="section-row"><strong>建议时长</strong><span>15 分钟</span></div><div class="section-row"><strong>当前重点</strong><span>${student.summary}</span></div></div></article>
     </section>
   `;
 }
@@ -300,8 +635,20 @@ function renderStudentAIView() {
 function renderTeacherDbView() {
   const filteredStudents = state.teacherFilter === "all" ? students : students.filter((student) => student.risk === state.teacherFilter);
   const selected = getSelectedStudent();
+  const selectedLatestQuiz = latestQuiz(selected);
   return `
     <section class="table-card">
+      <div class="teacher-workspace-head">
+        <div>
+          <p class="eyebrow">Teacher Workspace</p>
+          <h3>Students</h3>
+        </div>
+        <div class="workspace-actions">
+          <span class="tag">All Classes</span>
+          <span class="tag">A23 优先跟进</span>
+          <button class="ghost-btn" type="button">Filters</button>
+        </div>
+      </div>
       <div class="table-toolbar">
         <input class="search-input" value="" placeholder="搜索学生姓名或年级（演示版仅样式）">
         <div class="chip-group">
@@ -311,13 +658,27 @@ function renderTeacherDbView() {
           <button class="chip-btn ${state.teacherFilter === "低风险" ? "active" : ""}" data-filter="低风险" type="button">低风险</button>
         </div>
       </div>
+      <div class="table-meta-row">
+        <span>${filteredStudents.length} 名学生</span>
+        <div class="table-meta-actions">
+          <span>Sort by 最近测验</span>
+          <span>显示 1-${filteredStudents.length}</span>
+        </div>
+      </div>
+      <div class="db-summary-row">
+        <div class="mini-stat"><span>学生总数</span><strong>${students.length}</strong></div>
+        <div class="mini-stat"><span>高风险</span><strong>${riskCount("高风险")}</strong></div>
+        <div class="mini-stat"><span>中风险</span><strong>${riskCount("中风险")}</strong></div>
+        <div class="mini-stat"><span>平均到课</span><strong>${average(students.map((student) => student.attendance))}%</strong></div>
+      </div>
       <div class="student-database">
-        <div>
+        <div class="db-main">
+          <div class="db-caption">按学生学习状态快速筛选，点击任意学生可查看详情与最近作业情况。</div>
           <div class="db-header"><span>姓名</span><span>组别</span><span>年级</span><span>进度</span><span>到课</span></div>
           <div class="db-table">
             ${filteredStudents.map((student) => `
               <button class="db-row ${student.id === selected.id ? "active" : ""}" data-student-id="${student.id}" type="button">
-                <div class="table-name"><div class="avatar-mini">${student.name.slice(0, 1)}</div><div><strong>${student.name}</strong><span class="small-note">${student.risk}</span></div></div>
+                <div class="table-name"><div class="avatar-mini">${student.name.slice(0, 1)}</div><div><strong>${student.name}</strong><span class="small-note"><i class="risk-dot ${getRowRiskDot(student.risk)}"></i>${student.risk} · 最近测验 ${latestQuiz(student).score}</span></div></div>
                 <span>${student.group}</span>
                 <span>${student.grade}</span>
                 ${tinySpark(student.progress)}
@@ -326,7 +687,7 @@ function renderTeacherDbView() {
             `).join("")}
           </div>
         </div>
-        <article class="profile-card">
+        <article class="profile-card profile-sidebar">
           <p class="eyebrow">Student Information</p>
           <div class="profile-hero">
             <div class="avatar">${selected.name.slice(0, 1)}</div>
@@ -337,10 +698,35 @@ function renderTeacherDbView() {
               <div class="score-box" style="margin-top:14px;"><span>当前总评</span><strong>${selected.score}</strong></div>
             </div>
           </div>
+          <div class="sidebar-top-actions">
+            <button class="ghost-btn" type="button">Message</button>
+            <button class="ghost-btn" type="button">Report</button>
+          </div>
+          <div class="profile-badges">
+            <span class="risk-tag ${getRiskClass(selected.risk)}">${selected.risk}</span>
+            <span class="tag">最近作业 ${latestHomework(selected).status}</span>
+            <span class="tag">最近测验 ${selectedLatestQuiz.score} 分</span>
+          </div>
+          <div class="profile-stats">
+            <div class="profile-stat"><span>到课率</span><strong>${selected.attendance}%</strong></div>
+            <div class="profile-stat"><span>最近波动</span><strong>${quizDelta(selected) >= 0 ? `+${quizDelta(selected)}` : quizDelta(selected)}</strong></div>
+            <div class="profile-stat"><span>本周重点</span><strong>${selectedLatestQuiz.note.includes("主要薄弱点") ? "补弱" : "进阶"}</strong></div>
+            <div class="profile-stat"><span>管理老师</span><strong>山田</strong></div>
+          </div>
+          <div class="profile-section">
+            <div class="section-row"><strong>目标</strong><span>${selected.goal}</span></div>
+            <div class="section-row"><strong>科目</strong><span>${selected.grade.includes("高") ? "英语 / 数学" : "数学 / 国語 / 英语"}</span></div>
+            <div class="section-row"><strong>最近消息</strong><span>${selected.teacherMessages[selected.teacherMessages.length - 1].time}</span></div>
+          </div>
+          <div class="profile-subpanel">
+            <div class="subpanel-item"><span>最近一次作业</span><strong>${latestHomework(selected).title}</strong><p>${latestHomework(selected).status} · ${latestHomework(selected).score === null ? "待评分" : `${latestHomework(selected).score} 分`}</p></div>
+            <div class="subpanel-item"><span>最近一次测验</span><strong>${selectedLatestQuiz.name}</strong><p>${selectedLatestQuiz.score} 分 · ${selectedLatestQuiz.note}</p></div>
+          </div>
           <div class="todo-list">
             <div class="todo-item"><strong>学习摘要</strong><p>${selected.summary}</p></div>
             <div class="todo-item"><strong>家长沟通建议</strong><p>${selected.parentNote}</p></div>
-            <div class="todo-item"><strong>最近一次作业</strong><p>${selected.homework[0].title} · ${selected.homework[0].status}</p></div>
+            <div class="todo-item"><strong>最近一次作业</strong><p>${latestHomework(selected).title} · ${latestHomework(selected).status}</p></div>
+            <div class="todo-item"><strong>最近一次测验</strong><p>${selectedLatestQuiz.name} · ${selectedLatestQuiz.score} 分 · ${selectedLatestQuiz.note}</p></div>
           </div>
         </article>
       </div>
@@ -354,10 +740,15 @@ function renderTeacherStudentView() {
     <section class="teacher-layout">
       <article class="panel">
         <div class="teacher-header"><div><p class="eyebrow">Homework History</p><h3>${student.name} 的每次作业情况</h3></div><span class="risk-tag ${getRiskClass(student.risk)}">${student.risk}</span></div>
+        <div class="teacher-inline-stats">
+          <div class="inline-stat"><span>当前总评</span><strong>${student.score}</strong></div>
+          <div class="inline-stat"><span>到课率</span><strong>${student.attendance}%</strong></div>
+          <div class="inline-stat"><span>最近测验</span><strong>${latestQuiz(student).score}</strong></div>
+        </div>
         <div class="homework-list">${student.homework.map((item) => `<div class="homework-row"><div><strong>${item.title}</strong><span class="small-note">${item.date}</span></div><div><strong>${item.status}</strong><span class="small-note">${item.score === null ? "待评分" : `${item.score} 分`}</span></div></div>`).join("")}</div>
         <div class="feedback-box"><p class="eyebrow">Write Feedback</p><h4>老师反馈</h4><textarea class="feedback-input" id="teacher-feedback-input">${student.teacherFeedback}</textarea><div class="feedback-toolbar" style="margin-top:12px;"><button class="primary-btn" id="save-feedback-btn" type="button">保存反馈</button><button class="ghost-btn" id="copy-parent-feedback-btn" type="button">生成家长版反馈</button></div></div>
       </article>
-      <article class="panel"><p class="eyebrow">Quiz History</p><h3>做题与诊断记录</h3><div class="todo-list">${student.quizHistory.slice().reverse().map((item) => `<div class="todo-item"><strong>${item.date} · ${item.name}</strong><p>${item.score} 分 · ${item.note}</p></div>`).join("")}</div></article>
+      <article class="panel"><p class="eyebrow">Quiz History</p><h3>做题与诊断记录</h3><div class="todo-list">${student.quizHistory.slice().reverse().map((item) => `<div class="todo-item"><strong>${item.date} · ${item.name}</strong><p>${item.score} 分 · ${item.note}</p></div>`).join("")}</div><div class="profile-section" style="margin-top:16px;"><div class="section-row"><strong>老师备注</strong><span>本周适合短练 + 复盘组合</span></div><div class="section-row"><strong>家长反馈状态</strong><span>可发送</span></div><div class="section-row"><strong>下次课准备</strong><span>应用题复盘</span></div></div></article>
     </section>
   `;
 }
@@ -376,7 +767,7 @@ function renderAdminDashboardView() {
   return `
     <section class="admin-grid">
       <article class="stat-card"><span>总学生数</span><strong>${students.length}</strong><p>演示版样本数据</p></article>
-      <article class="stat-card"><span>高风险学生</span><strong>${students.filter((student) => student.risk === "高风险").length}</strong><p>建议优先安排面談与时段调整</p></article>
+      <article class="stat-card"><span>高风险学生</span><strong>${riskCount("高风险")}</strong><p>建议优先安排面談与时段调整</p></article>
       <article class="stat-card"><span>平均到课率</span><strong>${average(students.map((student) => student.attendance))}%</strong><p>可衡量留存与课堂参与度</p></article>
       <article class="stat-card"><span>在线做题活跃度</span><strong>${completionRate()}%</strong><p>反映学生是否进入学习闭环</p></article>
     </section>
@@ -384,15 +775,19 @@ function renderAdminDashboardView() {
       <article class="panel"><p class="eyebrow">Admin Todo</p><h3>本周管理动作</h3><div class="todo-list"><div class="todo-item"><strong>安排高风险学生家长面談</strong><p>优先处理出勤下降和做题分数下滑的学生。</p></div><div class="todo-item"><strong>检查周三晚间席位</strong><p>考虑把专注力差的学生调整到更早时段。</p></div><div class="todo-item"><strong>追踪老师反馈提交率</strong><p>保证家长每周都能收到清晰反馈。</p></div></div></article>
       <article class="panel"><p class="eyebrow">Announcements</p><h3>管理员公告</h3><div class="news-grid">${newsFeed.map((item) => `<div class="news-card"><h4>${item.title}</h4><p>${item.body}</p></div>`).join("")}</div></article>
     </section>
+    <section class="grid-2" style="margin-top:18px;">
+      <article class="panel"><p class="eyebrow">Risk Queue</p><h3>需要优先跟进的学生</h3><div class="todo-list">${students.filter((student) => student.risk !== "低风险").map((student) => `<div class="todo-item"><strong>${student.name} · ${student.risk}</strong><p>${student.summary}</p></div>`).join("")}</div></article>
+      <article class="panel"><p class="eyebrow">Service Health</p><h3>本周服务质量观察</h3><div class="ops-grid"><div class="ops-card"><span>反馈提交率</span><strong>86%</strong><p>老师反馈提交较稳定</p></div><div class="ops-card"><span>面談待安排</span><strong>3 件</strong><p>集中在风险学生家庭</p></div><div class="ops-card"><span>待批改作业</span><strong>${students.reduce((sum, student) => sum + student.homework.filter((item) => item.status === "待批改").length, 0)}</strong><p>可提醒老师及时处理</p></div><div class="ops-card"><span>家长满意预估</span><strong>4.4 / 5</strong><p>来自反馈及时性与进度透明度</p></div></div></article>
+    </section>
   `;
 }
 
 function renderAdminClassesView() {
-  return `<section class="ops-grid"><article class="ops-card"><span>活跃老师</span><strong>4 名</strong><p>其中 2 名负责个别指導</p></article><article class="ops-card"><span>班级数</span><strong>7 个</strong><p>A23 班当前学生预警最多</p></article><article class="ops-card"><span>面談待安排</span><strong>3 件</strong><p>建议优先高风险学生</p></article><article class="ops-card"><span>老师反馈提交率</span><strong>86%</strong><p>可作为服务质量管理指标</p></article></section>`;
+  return `<section class="grid-2"><article class="panel"><p class="eyebrow">Classes</p><h3>班级与老师配置</h3><div class="todo-list"><div class="todo-item"><strong>A23 班</strong><p>山田老师 · 2 名中高风险学生 · 晚间时段偏满</p></div><div class="todo-item"><strong>B11 班</strong><p>佐佐木老师 · 整体稳定 · 可加进阶课程</p></div><div class="todo-item"><strong>C07 班</strong><p>桥本老师 · 新学期新生较多 · 需增加家长说明</p></div></div></article><article class="panel"><p class="eyebrow">Teacher Capacity</p><h3>老师负载情况</h3><div class="ops-grid"><div class="ops-card"><span>活跃老师</span><strong>4 名</strong><p>其中 2 名负责个别指導</p></div><div class="ops-card"><span>班级数</span><strong>7 个</strong><p>A23 班当前学生预警最多</p></div><div class="ops-card"><span>面談待安排</span><strong>3 件</strong><p>建议优先高风险学生</p></div><div class="ops-card"><span>老师反馈提交率</span><strong>86%</strong><p>可作为服务质量管理指标</p></div></div></article></section>`;
 }
 
 function renderAdminBillingView() {
-  return `<section class="grid-2"><article class="panel"><p class="eyebrow">Billing</p><h3>缴费与风险</h3><div class="todo-list"><div class="todo-item"><strong>4 月待缴费</strong><p>8 笔，其中 2 笔超过 7 天。</p></div><div class="todo-item"><strong>退塾风险</strong><p>1 名学生因出勤下降和学习停滞被标记。</p></div><div class="todo-item"><strong>续费机会</strong><p>2 名低风险高成长学生适合升级课程。</p></div></div></article><article class="panel"><p class="eyebrow">Why it matters</p><h3>管理员最关心的价值</h3><div class="todo-list"><div class="todo-item"><strong>降本</strong><p>老师写反馈和整理面談资料的时间减少。</p></div><div class="todo-item"><strong>增效</strong><p>更早识别风险学生，及时跟进，减少流失。</p></div><div class="todo-item"><strong>增值</strong><p>把教学过程可视化，家长更容易感知服务价值。</p></div></div></article></section>`;
+  return `<section class="grid-2"><article class="panel"><p class="eyebrow">Billing</p><h3>缴费与风险</h3><div class="todo-list"><div class="todo-item"><strong>4 月待缴费</strong><p>8 笔，其中 2 笔超过 7 天。</p></div><div class="todo-item"><strong>退塾风险</strong><p>1 名学生因出勤下降和学习停滞被标记。</p></div><div class="todo-item"><strong>续费机会</strong><p>2 名低风险高成长学生适合升级课程。</p></div></div></article><article class="panel"><p class="eyebrow">Charge Table</p><h3>本月重点账务</h3><div class="todo-list"><div class="todo-item"><strong>佐藤 美咲</strong><p>4 月学费正常 · 已确认续费意向</p></div><div class="todo-item"><strong>高桥 翔太</strong><p>待确认 4 月缴费 · 建议结合面談同步跟进</p></div><div class="todo-item"><strong>田中 遥</strong><p>可推荐进阶课程包 · 存在升级机会</p></div></div></article></section>`;
 }
 
 function renderAdminSettingsView() {
@@ -401,10 +796,12 @@ function renderAdminSettingsView() {
 
 function renderView() {
   if (state.view === "news") return renderNewsView();
+  if (state.view === "student-calendar") return renderStudentCalendarView();
   if (state.view === "student-quiz") return renderStudentQuizView();
   if (state.view === "student-progress") return renderStudentProgressView();
   if (state.view === "student-teacher") return renderStudentTeacherView();
   if (state.view === "student-ai") return renderStudentAIView();
+  if (state.view === "teacher-calendar") return renderTeacherCalendarView();
   if (state.view === "teacher-db") return renderTeacherDbView();
   if (state.view === "teacher-student") return renderTeacherStudentView();
   if (state.view === "teacher-ai") return renderTeacherAIView();
@@ -418,10 +815,12 @@ function renderView() {
 function renderHeader() {
   const titles = {
     news: "塾 News",
+    "student-calendar": "我的课程日历",
     "student-quiz": "学生在线做题",
     "student-progress": "我的学习情况",
     "student-teacher": "和老师沟通",
     "student-ai": "和 AI 沟通",
+    "teacher-calendar": "老师课程日历",
     "teacher-db": "老师学生数据库",
     "teacher-student": "学生详情与反馈",
     "teacher-ai": "老师教学助手",
@@ -442,6 +841,20 @@ function attachViewEvents() {
     button.addEventListener("click", () => {
       state.selectedStudentId = Number(button.dataset.studentId);
       state.view = "teacher-student";
+      renderApp();
+    });
+  });
+  contentEl.querySelectorAll("[data-lesson-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedLessonId = button.dataset.lessonId;
+      renderApp();
+    });
+  });
+  contentEl.querySelectorAll("[data-course-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedCourseId = button.dataset.courseId;
+      const selectedCourse = getSelectedCourse();
+      state.selectedLessonId = selectedCourse.lessonIds[0];
       renderApp();
     });
   });
