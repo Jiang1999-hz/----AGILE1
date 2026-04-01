@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juku AI Cloud Demo</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div>
+        <div class="brand">
+          <div class="brand-mark">J</div>
+          <div>
+            <p class="eyebrow">Juku x AI Cloud</p>
+            <h1>私塾智能中枢</h1>
+          </div>
+        </div>
+
+        <div class="vision-card">
+          <p class="eyebrow">Demo Focus</p>
+          <h2>帮助小私塾降本增效</h2>
+          <p>用一个可演示的 Demo 说明：学生做题、老师诊断、家长沟通、塾长运营可以放在同一套系统里。</p>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-link active" data-panel="diagnosis">能力诊断</button>
+          <button class="nav-link" data-panel="quiz">在线做题</button>
+          <button class="nav-link" data-panel="copilot">老师助手</button>
+          <button class="nav-link" data-panel="operations">经营看板</button>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <p class="eyebrow">可演示痛点</p>
+        <ul>
+          <li>老师整理学生情况很花时间</li>
+          <li>家长难以看见真实进步</li>
+          <li>学生做题结果没有沉淀成可用数据</li>
+          <li>塾长很难提前发现流失风险</li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">演示主线</p>
+          <h2>让学生在线做题，把结果直接变成老师能用、家长能懂、塾长能管理的数据</h2>
+          <p class="hero-copy">
+            这版 Demo 的重点不是做全，而是做出一个完整闭环：学生在线答题，系统即时评分，自动更新学习进度，并生成 AI 辅导建议。
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button class="primary-btn" id="next-student">切换学生</button>
+          <button class="ghost-btn" id="simulate-ai">生成 AI 建议</button>
+        </div>
+      </section>
+
+      <section class="metrics">
+        <article class="metric-card">
+          <span>本周到课率</span>
+          <strong id="attendance-rate">0%</strong>
+          <small>帮助识别是否需要跟进</small>
+        </article>
+        <article class="metric-card">
+          <span>平均诊断分</span>
+          <strong id="diagnostic-score">0</strong>
+          <small>根据表现动态更新</small>
+        </article>
+        <article class="metric-card">
+          <span>在线做题完成率</span>
+          <strong id="quiz-completion">0%</strong>
+          <small>体现学习参与度</small>
+        </article>
+        <article class="metric-card highlight">
+          <span>需立即跟进学生</span>
+          <strong id="risk-count">0</strong>
+          <small>结合到课、得分、波动判断</small>
+        </article>
+      </section>
+
+      <section class="panels active" id="diagnosis">
+        <div class="layout-grid">
+          <article class="panel student-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Students</p>
+                <h3>演示学生列表</h3>
+              </div>
+              <span class="tag">可切换</span>
+            </div>
+            <div class="student-list" id="student-list"></div>
+          </article>
+
+          <article class="panel profile-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Selected student</p>
+                <h3 id="student-name">-</h3>
+              </div>
+              <span class="tag" id="student-grade">-</span>
+            </div>
+
+            <div class="profile-top">
+              <div>
+                <p class="profile-meta" id="student-goal">-</p>
+                <p class="profile-summary" id="student-summary"></p>
+              </div>
+              <div class="score-pill">
+                <span>总评</span>
+                <strong id="student-score">0</strong>
+              </div>
+            </div>
+
+            <div class="radar-card">
+              <div>
+                <p class="eyebrow">Ability radar</p>
+                <h4>5 轴能力诊断</h4>
+              </div>
+              <svg id="radar-chart" viewBox="0 0 320 320" aria-label="radar chart"></svg>
+            </div>
+
+            <div class="trend-grid">
+              <div class="trend-card">
+                <span>最近 5 次学习进度</span>
+                <div class="sparkline" id="progress-sparkline"></div>
+              </div>
+              <div class="trend-card">
+                <span>家长沟通摘要</span>
+                <p id="parent-note"></p>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel insight-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">AI insight</p>
+                <h3>诊断与下一步动作</h3>
+              </div>
+              <span class="tag danger" id="risk-badge">-</span>
+            </div>
+
+            <div class="insight-list" id="insight-list"></div>
+
+            <div class="task-box">
+              <p class="eyebrow">推荐动作</p>
+              <div id="task-list" class="task-list"></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panels" id="quiz">
+        <div class="layout-grid two-column">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Student online quiz</p>
+                <h3>学生在线做题</h3>
+              </div>
+              <span class="tag" id="quiz-student-name">-</span>
+            </div>
+
+            <p class="quiz-intro">模拟学生在网页上做一组练习题。提交后，系统会自动评分，并把结果更新到学习进度和 AI 建议中。</p>
+            <form id="quiz-form" class="quiz-form"></form>
+            <div class="quiz-actions">
+              <button class="primary-btn" id="submit-quiz" type="button">提交并评分</button>
+              <button class="ghost-btn" id="reset-quiz" type="button">重置作答</button>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Quiz result</p>
+                <h3>本次做题结果</h3>
+              </div>
+              <span class="tag" id="quiz-result-tag">等待提交</span>
+            </div>
+
+            <div class="quiz-score-card">
+              <span>本次得分</span>
+              <strong id="quiz-score">-</strong>
+              <small id="quiz-score-note">提交后会自动生成结果</small>
+            </div>
+
+            <div class="insight-list" id="quiz-feedback"></div>
+
+            <div class="task-box">
+              <p class="eyebrow">演示可讲的价值</p>
+              <div class="task-list">
+                <div class="task-item">
+                  <strong>学生做题后，老师不需要手动统计。</strong>
+                  <p>系统会直接把结果转成分数、能力变化和风险提示。</p>
+                </div>
+                <div class="task-item">
+                  <strong>家长反馈更具体。</strong>
+                  <p>不用只说“今天上得还不错”，而是能明确说清哪里做对、哪里卡住。</p>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panels" id="copilot">
+        <div class="layout-grid two-column">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Teacher copilot</p>
+                <h3>老师辅导助手</h3>
+              </div>
+              <span class="tag">课中课后都可用</span>
+            </div>
+
+            <div class="chat-window" id="chat-window"></div>
+
+            <div class="copilot-actions">
+              <button class="ghost-btn prompt-btn" data-prompt="explain">生成易懂解释</button>
+              <button class="ghost-btn prompt-btn" data-prompt="worksheet">生成补强题</button>
+              <button class="ghost-btn prompt-btn" data-prompt="homework">生成家长反馈</button>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Teacher efficiency</p>
+                <h3>老师节省时间的地方</h3>
+              </div>
+              <span class="tag">小私塾友好</span>
+            </div>
+
+            <div class="schedule-list">
+              <div class="schedule-item">
+                <strong>做题后</strong>
+                <div>
+                  <p>自动评分与知识点总结</p>
+                  <small>减少老师批改与整理时间</small>
+                </div>
+              </div>
+              <div class="schedule-item">
+                <strong>课后</strong>
+                <div>
+                  <p>自动生成家长反馈</p>
+                  <small>减少重复性的沟通工作</small>
+                </div>
+              </div>
+              <div class="schedule-item">
+                <strong>面谈前</strong>
+                <div>
+                  <p>自动汇总学生进度与风险</p>
+                  <small>更快准备保護者面談</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="mini-kpis">
+              <div>
+                <span>预计节省</span>
+                <strong>5-8h / 周</strong>
+              </div>
+              <div>
+                <span>信息透明度</span>
+                <strong>明显提升</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panels" id="operations">
+        <div class="layout-grid two-column">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Operations</p>
+                <h3>塾长经营看板</h3>
+              </div>
+              <span class="tag">可扩展</span>
+            </div>
+
+            <div class="ops-grid">
+              <div class="ops-card">
+                <span>需要跟进</span>
+                <strong>3 名</strong>
+                <small>根据到课与做题表现判断</small>
+              </div>
+              <div class="ops-card">
+                <span>在线做题完成率</span>
+                <strong id="ops-quiz-rate">0%</strong>
+                <small>可作为教学参与度指标</small>
+              </div>
+              <div class="ops-card">
+                <span>老师整理反馈时间</span>
+                <strong>下降</strong>
+                <small>自动生成总结与建议</small>
+              </div>
+              <div class="ops-card">
+                <span>家长感知价值</span>
+                <strong>上升</strong>
+                <small>从“补课”升级为“可视化服务”</small>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Pain points</p>
+                <h3>这版 Demo 主要打的痛点</h3>
+              </div>
+              <span class="tag">建议演示顺序</span>
+            </div>
+
+            <ol class="roadmap">
+              <li>学生做题数据散落，老师无法快速沉淀为诊断结果。</li>
+              <li>老师批改、写反馈、准备面谈很耗时。</li>
+              <li>家长只能看到成绩，很难理解孩子具体进步和薄弱点。</li>
+              <li>塾长难以及时发现风险学生和服务价值。</li>
+            </ol>
+
+            <div class="architecture-note">
+              <p>先把这 4 个痛点讲清楚，Demo 就足够有说服力。后续再决定是否扩展到排课、收费、校区管理等更深的经营模块。</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
