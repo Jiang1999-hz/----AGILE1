@@ -1,3 +1,8 @@
+const { accounts: appAccounts, pageTitles, roleMenus: appRoleMenus } = window.AppViewConfig;
+const buildInitialState = window.createInitialState;
+const formatScheduleDateLabelRule = window.formatScheduleDateLabelRule;
+const canStudentCancelScheduleRule = window.canStudentCancelScheduleRule;
+
 const newsFeed = [
   { title: "4 月模试周开始报名", body: "本周五前完成报名的学生，将自动分配到本月能力诊断批次。", meta: "塾 News · 今天 09:00" },
   { title: "保護者面談模板已更新", body: "系统新增“学习进度 + 风险提示”版本，老师可直接复制给家长。", meta: "塾 News · 今天 11:20" },
@@ -239,6 +244,27 @@ const coursePrograms = [
   }
 ];
 
+const scheduleRequests = [
+  {
+    id: "schedule-1",
+    studentId: 1,
+    studentName: "佐藤 美咲",
+    courseId: "course-waseda",
+    courseTitle: "早稻田大学入试备考课程",
+    title: "1v1 应用题补强",
+    date: "2026-04-09",
+    dateLabel: "4/09 Thu",
+    time: "19:30-20:30",
+    location: "线上 Zoom",
+    status: "待学生确认",
+    cancelDeadline: "2026-04-08 23:59",
+    studentCancelReason: "",
+    teacherCancelReason: "",
+    createdBy: "teacher",
+    lastUpdate: "今天 15:20"
+  }
+];
+
 const accounts = {
   student: { name: "佐藤 美咲", roleLabel: "学生", defaultView: "news" },
   teacher: { name: "山田老师", roleLabel: "老师", defaultView: "news" },
@@ -248,6 +274,7 @@ const accounts = {
 const roleMenus = {
   student: [
     { id: "news", label: "塾 News" },
+    { id: "student-inbox", label: "Checklist" },
     { id: "student-calendar", label: "课程日历" },
     { id: "student-quiz", label: "在线做题" },
     { id: "student-progress", label: "我的学习情况" },
@@ -256,6 +283,7 @@ const roleMenus = {
   ],
   teacher: [
     { id: "news", label: "塾 News" },
+    { id: "teacher-inbox", label: "Checklist" },
     { id: "teacher-calendar", label: "课程日历" },
     { id: "teacher-db", label: "学生数据库" },
     { id: "teacher-student", label: "学生详情与反馈" },
@@ -270,12 +298,100 @@ const roleMenus = {
   ]
 };
 
-const state = { role: null, view: null, selectedStudentId: 1, teacherFilter: "all", selectedLessonId: "lesson-1", selectedCourseId: "course-waseda" };
+const state = {
+  ...buildInitialState(),
+  role: null,
+  view: null,
+  selectedStudentId: 1,
+  teacherFilter: "all",
+  selectedLessonId: "lesson-1",
+  selectedCourseId: "course-waseda",
+  studentApiLoading: false,
+  studentApiError: "",
+  studentApiSuccess: "",
+  lessonHomeworkDrafts: {},
+  teacherReviewDrafts: {},
+  teacherReviewSavingId: null,
+  teacherLessonPolicySavingId: null,
+  teacherScheduleDraft: {
+    title: "1v1 个别指導",
+    date: "2026-04-10",
+    time: "19:30-20:30",
+    location: "线上 Zoom"
+  },
+  scheduleCancelDrafts: {},
+  selectedScheduleId: "schedule-1",
+  studentSeenReviews: {},
+  studentLearningRecords: null
+};
 
 const loginScreen = document.getElementById("login-screen");
 const appShell = document.getElementById("app-shell");
 const navEl = document.getElementById("sidebar-nav");
 const contentEl = document.getElementById("app-content");
+let studentToastTimer = null;
+
+async function fetchStudentOverview() {
+  const response = await fetch("/api/student/1/overview");
+  if (!response.ok) throw new Error("Failed to load student overview");
+  return response.json();
+}
+
+async function fetchStudentLearningRecords() {
+  const response = await fetch("/api/student/1/learning-records");
+  if (!response.ok) throw new Error("Failed to load learning records");
+  return response.json();
+}
+
+function replaceCollection(target, items) {
+  target.splice(0, target.length, ...items);
+}
+
+function syncStudentApiData(payload) {
+  if (!payload) return;
+  const studentIndex = students.findIndex((student) => student.id === payload.student.id);
+  if (studentIndex >= 0) {
+    students.splice(studentIndex, 1, payload.student);
+  } else {
+    students.push(payload.student);
+  }
+  replaceCollection(coursePrograms, payload.courses);
+  replaceCollection(lessonCalendar, payload.lessons);
+  replaceCollection(quizTemplates, payload.quizTemplates);
+  state.selectedStudentId = payload.student.id;
+  if (!coursePrograms.find((course) => course.id === state.selectedCourseId)) {
+    state.selectedCourseId = coursePrograms[0]?.id || state.selectedCourseId;
+  }
+  const selectedCourse = getSelectedCourse();
+  if (selectedCourse && !selectedCourse.lessonIds.includes(state.selectedLessonId)) {
+    state.selectedLessonId = selectedCourse.lessonIds[0];
+  }
+  state.studentLearningRecords = {
+    quizHistory: payload.student.quizHistory,
+    homework: payload.student.homework,
+    progress: payload.student.progress
+  };
+}
+
+async function loadStudentS1Data() {
+  state.studentApiLoading = true;
+  state.studentApiError = "";
+  state.studentApiSuccess = "";
+  renderApp();
+  try {
+    const [payload, records] = await Promise.all([
+      fetchStudentOverview(),
+      fetchStudentLearningRecords()
+    ]);
+    syncStudentApiData(payload);
+    state.studentLearningRecords = records;
+  } catch (error) {
+    state.studentApiError = "学生端真实数据加载失败，当前显示的是本地演示数据。";
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
 
 function getSelectedStudent() {
   return students.find((student) => student.id === state.selectedStudentId) || students[0];
@@ -291,6 +407,124 @@ function getSelectedCourse() {
 
 function getStudentCourses(studentId) {
   return coursePrograms.filter((course) => course.studentIds.includes(studentId));
+}
+
+function getStudentSchedules(studentId) {
+  return scheduleRequests.filter((item) => item.studentId === studentId);
+}
+
+function getSelectedSchedule() {
+  return scheduleRequests.find((item) => item.id === state.selectedScheduleId) || null;
+}
+
+function getChecklistItemsForRole(role) {
+  if (role === "student") {
+    const student = getSelectedStudent();
+    return [
+      ...getStudentSchedules(student.id)
+        .filter((item) => item.status === "待学生确认" || item.status === "老师已取消")
+        .map((item) => ({
+          id: `schedule-${item.id}`,
+          type: "schedule",
+          targetView: "student-calendar",
+          title: item.status === "待学生确认" ? "待确认的 1v1 排课" : "老师取消了排课",
+          body: `${item.title} · ${item.dateLabel} ${item.time} · ${item.status === "待学生确认" ? "请确认时间是否可行" : item.teacherCancelReason || "请查看老师取消说明"}`,
+          studentId: item.studentId,
+          scheduleId: item.id
+        })),
+      ...student.homework
+        .filter((item) => item.teacherNote && !state.studentSeenReviews[item.id])
+        .map((item) => ({
+          id: `review-${item.id}`,
+          type: "review",
+          targetView: "student-progress",
+          title: "老师批改了你的作业",
+          body: `${item.title} · ${item.score === null ? "待评分" : `${item.score} 分`} · 点击查看老师点评`,
+          studentId: student.id,
+          homeworkId: item.id
+        }))
+    ];
+  }
+
+  if (role === "teacher") {
+    return [
+      ...students.flatMap((student) =>
+        student.homework
+          .filter((item) => item.status === "已提交")
+          .map((item) => ({
+            id: `teacher-homework-${student.id}-${item.id}`,
+            type: "homework-review",
+            targetView: "teacher-student",
+            title: "有学生提交了课后作业",
+            body: `${student.name} · ${item.title} · 请尽快批改`,
+            studentId: student.id,
+            homeworkId: item.id
+          }))
+      ),
+      ...scheduleRequests
+        .filter((item) => item.status === "待学生确认" || item.status === "学生已取消")
+        .map((item) => ({
+          id: `teacher-schedule-${item.id}`,
+          type: "teacher-schedule",
+          targetView: "teacher-student",
+          title: item.status === "待学生确认" ? "等待学生确认排课" : "学生取消了排课",
+          body: `${item.studentName} · ${item.title} · ${item.status === "待学生确认" ? "等待学生确认时间" : item.studentCancelReason || "请查看取消原因"}`,
+          studentId: item.studentId,
+          scheduleId: item.id
+        }))
+    ];
+  }
+
+  return [];
+}
+
+function getChecklistCount(role = state.role) {
+  return getChecklistItemsForRole(role).length;
+}
+
+function openChecklist() {
+  if (state.role === "student") {
+    state.view = "student-inbox";
+  } else if (state.role === "teacher") {
+    state.view = "teacher-inbox";
+  }
+  renderApp();
+}
+
+function openChecklistItem(itemId) {
+  const item = getChecklistItemsForRole(state.role).find((entry) => entry.id === itemId);
+  if (!item) return;
+  if (item.studentId) state.selectedStudentId = item.studentId;
+  if (item.scheduleId) state.selectedScheduleId = item.scheduleId;
+  if (item.type === "teacher-schedule" && item.studentId) {
+    const studentCourses = getStudentCourses(item.studentId);
+    if (studentCourses[0]) state.selectedCourseId = studentCourses[0].id;
+  }
+  state.view = item.targetView;
+  renderApp();
+}
+
+function quickScheduleStudent(studentId) {
+  const student = students.find((item) => item.id === studentId);
+  if (!student) return;
+  state.selectedStudentId = studentId;
+  state.selectedScheduleId = null;
+  state.teacherScheduleDraft = {
+    title: `${student.name} 1v1 个别指導`,
+    date: "2026-04-10",
+    time: "19:30-20:30",
+    location: "线上 Zoom"
+  };
+  state.view = "teacher-student";
+  showStudentToast("success", `已为 ${student.name} 打开排课表单，可以直接发起 1v1 排课确认。`);
+  renderApp();
+}
+
+function getLessonStatus(lesson) {
+  if (lesson.homeworkStatus === "无作业") return "无作业";
+  if (lesson.homeworkStatus === "已完成") return "已完成";
+  if (lesson.homeworkStatus === "已提交") return "进行中";
+  return "待开始";
 }
 
 function courseProgress(course) {
@@ -333,6 +567,36 @@ function latestHomework(student) {
   return student.homework[0];
 }
 
+function homeworkPreview(item) {
+  if (!item || !item.content) return "学生尚未填写具体作业内容。";
+  return item.content.length > 72 ? `${item.content.slice(0, 72)}...` : item.content;
+}
+
+function getLessonHomeworkRecord(lessonId) {
+  const student = getSelectedStudent();
+  return student.homework.find((item) => item.lessonId === lessonId) || null;
+}
+
+function getUnreadReviewedHomeworkCount(student = getSelectedStudent()) {
+  return student.homework.filter((item) => item.teacherNote && !state.studentSeenReviews[item.id]).length;
+}
+
+function markReviewedHomeworkAsSeen(student = getSelectedStudent()) {
+  student.homework.forEach((item) => {
+    if (item.teacherNote) {
+      state.studentSeenReviews[item.id] = true;
+    }
+  });
+}
+
+function getTeacherReviewDraft(item) {
+  const draft = state.teacherReviewDrafts[item.id];
+  return {
+    score: draft?.score ?? (item.score ?? ""),
+    teacherNote: draft?.teacherNote ?? (item.teacherNote ?? "")
+  };
+}
+
 function quizDelta(student) {
   if (student.quizHistory.length < 2) return 0;
   const latest = student.quizHistory[student.quizHistory.length - 1].score;
@@ -345,7 +609,7 @@ function riskCount(level) {
 }
 
 function renderNav() {
-  navEl.innerHTML = roleMenus[state.role].map((item) => `
+  navEl.innerHTML = appRoleMenus[state.role].map((item) => `
     <button class="nav-link ${state.view === item.id ? "active" : ""}" data-view="${item.id}" type="button">${item.label}</button>
   `).join("");
   navEl.querySelectorAll(".nav-link").forEach((button) => {
@@ -369,12 +633,35 @@ function renderNewsView() {
   `;
 }
 
+function renderStudentLoading() {
+  if (!state.studentApiLoading && !state.studentApiError && !state.studentApiSuccess) return "";
+  const statusClass = state.studentApiLoading ? "student-status-loading" : state.studentApiError ? "student-status-error" : "student-status-success";
+  const heading = state.studentApiLoading
+    ? "正在加载学生真实数据..."
+    : state.studentApiError
+      ? "本次操作没有保存成功"
+      : "已经保存到数据库";
+  const message = state.studentApiLoading
+    ? "正在从本地后端读取课程、课次和学习记录。"
+    : state.studentApiError || state.studentApiSuccess;
+  return `
+    <section class="panel student-status-banner ${statusClass}" style="margin-bottom:18px;">
+      <p class="eyebrow">Student S1</p>
+      <h3>${heading}</h3>
+      <p class="profile-meta">${message}</p>
+    </section>
+  `;
+}
+
 function lessonCard(lesson, active) {
+  const status = getLessonStatus(lesson);
+  const statusClass = status === "已完成" ? "done" : status === "进行中" ? "active" : status === "无作业" ? "nohomework" : "pending";
   return `
     <button class="lesson-card ${active ? "active" : ""}" data-lesson-id="${lesson.id}" type="button">
       <span>${lesson.weekday}</span>
       <strong>${lesson.date}</strong>
       <p>${lesson.title}</p>
+      <span class="lesson-status lesson-status-${statusClass}">${status}</span>
       <small>${lesson.time}</small>
     </button>
   `;
@@ -382,6 +669,7 @@ function lessonCard(lesson, active) {
 
 function renderLessonDetail(lesson) {
   const studentNames = lesson.studentIds.map((id) => students.find((student) => student.id === id)?.name).filter(Boolean).join(" / ");
+  const lessonHomework = getLessonHomeworkRecord(lesson.id);
   return `
     <article class="panel">
       <div class="panel-head">
@@ -421,7 +709,33 @@ function renderLessonDetail(lesson) {
       </div>
       <div class="todo-list" style="margin-top:16px;">
         <div class="todo-item"><strong>课堂资料汇总</strong><p>PPT、课堂笔记、重难点、错题、完成度都沉淀在本节课页面里，方便学生、老师和家长回看。</p></div>
+        ${state.role === "student" && lessonHomework ? `<div class="todo-item"><strong>老师批改结果</strong><p>${lessonHomework.score === null ? "老师尚未评分" : `${lessonHomework.score} 分`} · ${lessonHomework.teacherNote || "老师暂时还没有写点评，稍后会更新。"}</p></div>` : ""}
+        ${state.role === "teacher" ? `
+          <div class="todo-item">
+            <strong>作业布置设置</strong>
+            <p>${lesson.requiresHomework ? "本节课需要提交课后作业。学生端会显示作业提交入口。" : "本节课不布置作业。学生端会显示“无作业”。"}</p>
+            <div class="feedback-toolbar" style="margin-top:12px;">
+              <button class="ghost-btn" data-homework-policy-btn="${lesson.id}" data-requires-homework="${lesson.requiresHomework ? "false" : "true"}" type="button" ${state.teacherLessonPolicySavingId === lesson.id ? "disabled" : ""}>${state.teacherLessonPolicySavingId === lesson.id ? "保存中..." : lesson.requiresHomework ? "改为无作业" : "改为布置作业"}</button>
+            </div>
+          </div>
+        ` : ""}
       </div>
+      ${state.role === "student" && lesson.requiresHomework ? `
+        <div class="feedback-box" style="margin-top:16px;">
+          <p class="eyebrow">Homework Submission</p>
+          <h4>提交本节课课后作业</h4>
+          <textarea class="feedback-input" id="lesson-homework-input" placeholder="例如：我这节课复盘了 y=ax+b 的题型，并把两道错题重新做了一遍。">${state.lessonHomeworkDrafts[lesson.id] ?? lesson.homeworkContent ?? ""}</textarea>
+          <div class="feedback-toolbar" style="margin-top:12px;">
+            <button class="primary-btn" id="submit-lesson-homework-btn" data-lesson-id="${lesson.id}" type="button" ${state.studentApiLoading ? "disabled" : ""}>${state.studentApiLoading ? "提交中..." : "提交课后作业"}</button>
+          </div>
+        </div>
+      ` : state.role === "student" ? `
+        <div class="feedback-box" style="margin-top:16px;">
+          <p class="eyebrow">Homework Status</p>
+          <h4>本节课没有布置课后作业</h4>
+          <p class="profile-meta">老师将这节课设置为“无作业”，你可以直接复盘课堂笔记和重难点。</p>
+        </div>
+      ` : ""}
     </article>
   `;
 }
@@ -429,10 +743,54 @@ function renderLessonDetail(lesson) {
 function renderStudentCalendarView() {
   const student = getSelectedStudent();
   const courses = getStudentCourses(student.id);
+  const schedules = getStudentSchedules(student.id);
+  const selectedSchedule = schedules.find((item) => item.id === state.selectedScheduleId) || schedules[0] || null;
   const selectedCourse = courses.find((course) => course.id === state.selectedCourseId) || courses[0];
   const lessons = selectedCourse ? lessonCalendar.filter((lesson) => selectedCourse.lessonIds.includes(lesson.id)) : [];
   const selectedLesson = lessons.find((lesson) => lesson.id === state.selectedLessonId) || lessons[0];
   return `
+    ${renderStudentLoading()}
+    ${selectedSchedule ? `
+      <section class="panel" style="margin-bottom:18px;">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">1v1 Schedule</p>
+            <h3>${selectedSchedule.title}</h3>
+          </div>
+          <span class="tag">${selectedSchedule.status}</span>
+        </div>
+        <div class="profile-section">
+          <div class="section-row"><strong>时间</strong><span>${selectedSchedule.dateLabel} · ${selectedSchedule.time}</span></div>
+          <div class="section-row"><strong>地点</strong><span>${selectedSchedule.location}</span></div>
+          <div class="section-row"><strong>取消截止</strong><span>${selectedSchedule.cancelDeadline}</span></div>
+        </div>
+        ${selectedSchedule.status === "待学生确认" ? `
+          <div class="feedback-toolbar">
+            <button class="primary-btn" data-schedule-confirm-btn="${selectedSchedule.id}" type="button">确认时间</button>
+            <button class="ghost-btn" data-schedule-cancel-btn="${selectedSchedule.id}" type="button">取消并说明原因</button>
+          </div>
+          <textarea class="feedback-input" data-schedule-cancel-reason="${selectedSchedule.id}" placeholder="例如：学校活动冲突，这个时间无法参加。">${state.scheduleCancelDrafts[selectedSchedule.id] || ""}</textarea>
+        ` : selectedSchedule.status === "已确认" ? `
+          <div class="todo-list">
+            <div class="todo-item"><strong>已确认排课</strong><p>你已确认这个 1v1 课次。如需取消，请最晚在上课前一天填写原因并联系老师。</p></div>
+          </div>
+          ${canStudentCancelSchedule(selectedSchedule) ? `
+            <textarea class="feedback-input" data-schedule-cancel-reason="${selectedSchedule.id}" placeholder="例如：学校活动冲突，这个时间无法参加。">${state.scheduleCancelDrafts[selectedSchedule.id] || ""}</textarea>
+            <div class="feedback-toolbar" style="margin-top:12px;">
+              <button class="ghost-btn" data-schedule-cancel-btn="${selectedSchedule.id}" type="button">上课前一天内取消并说明原因</button>
+            </div>
+          ` : ``}
+        ` : selectedSchedule.status === "老师已取消" ? `
+          <div class="todo-list">
+            <div class="todo-item"><strong>老师取消说明</strong><p>${selectedSchedule.teacherCancelReason || "老师临时调整了时间，请查看新的排课消息。"}</p></div>
+          </div>
+        ` : `
+          <div class="todo-list">
+            <div class="todo-item"><strong>学生取消原因</strong><p>${selectedSchedule.studentCancelReason || "你已取消本次排课。"}</p></div>
+          </div>
+        `}
+      </section>
+    ` : ""}
     <section class="course-flow-layout">
       <article class="panel">
         <div class="panel-head">
@@ -537,6 +895,7 @@ function renderStudentQuizView() {
   const delta = quizDelta(student);
   const weakSummary = latest.note.includes("主要薄弱点") ? latest.note.replace("主要薄弱点: ", "") : "基础稳定";
   return `
+    ${renderStudentLoading()}
     <section class="grid-2">
       <article class="panel">
         <div class="panel-head"><div><p class="eyebrow">Online Quiz</p><h3>欢迎，${student.name}</h3></div><span class="tag">${student.grade}</span></div>
@@ -577,15 +936,49 @@ function renderStudentQuizView() {
 
 function renderStudentProgressView() {
   const student = getSelectedStudent();
+  const records = state.studentLearningRecords || {
+    quizHistory: student.quizHistory,
+    homework: student.homework,
+    progress: student.progress
+  };
+  const latestRecord = records.quizHistory[records.quizHistory.length - 1];
+  const unreadReviewCount = getUnreadReviewedHomeworkCount(student);
   return `
+    ${renderStudentLoading()}
     <section class="student-dashboard">
       <article class="panel"><p class="eyebrow">My Summary</p><h3>${student.goal}</h3><p class="profile-meta">${student.summary}</p><div class="score-box" style="margin-top:16px;"><span>当前总评</span><strong>${student.score}</strong></div></article>
-      <article class="panel"><p class="eyebrow">Progress</p><h3>最近学习进度</h3><div class="sparkline">${student.progress.map((value) => `<i style="height:${Math.max(18, value * 0.8)}px"></i>`).join("")}</div></article>
+      <article class="panel"><p class="eyebrow">Progress</p><h3>最近学习进度</h3><div class="sparkline">${records.progress.map((value) => `<i style="height:${Math.max(18, value * 0.8)}px"></i>`).join("")}</div></article>
       <article class="panel"><p class="eyebrow">Parent Summary</p><h3>本周反馈摘要</h3><p class="profile-meta">${student.parentNote}</p></article>
     </section>
+    ${unreadReviewCount ? `
+      <section class="panel unread-review-banner" style="margin-top:18px;">
+        <p class="eyebrow">New Review</p>
+        <h3>老师刚批改了 ${unreadReviewCount} 份作业</h3>
+        <p class="profile-meta">下方作业记录里可以直接查看分数和点评。</p>
+      </section>
+    ` : ""}
     <section class="grid-2" style="margin-top:18px;">
       <article class="panel radar-box"><p class="eyebrow">Ability Radar</p><h4>能力维度</h4><svg id="radar-chart" viewBox="0 0 320 320"></svg></article>
-      <article class="panel"><p class="eyebrow">Homework</p><h3>我的作业记录</h3><div class="homework-list">${student.homework.map((item) => `<div class="homework-row"><div><strong>${item.title}</strong><span class="small-note">${item.date}</span></div><div><strong>${item.status}</strong><span class="small-note">${item.score === null ? "待评分" : `${item.score} 分`}</span></div></div>`).join("")}</div></article>
+      <article class="panel"><p class="eyebrow">Homework</p><h3>我的作业记录</h3><div class="homework-list">${records.homework.map((item) => `
+        <div class="homework-entry">
+          <div class="homework-row">
+            <div><strong>${item.title}</strong>${item.teacherNote && !state.studentSeenReviews[item.id] ? `<span class="inline-review-badge">老师新反馈</span>` : ""}<span class="small-note">${item.date}</span></div>
+            <div><strong>${item.status}</strong><span class="small-note">${item.score === null ? "待评分" : `${item.score} 分`}</span></div>
+          </div>
+          <div class="homework-content-card">
+            <span class="eyebrow">My Submission</span>
+            <p>${item.content || "这次作业还没有填写文字内容。"}</p>
+          </div>
+          <div class="homework-review-card">
+            <span class="eyebrow">Teacher Review</span>
+            <p>${item.teacherNote || "老师还没有写点评，等老师批改后会显示在这里。"}</p>
+          </div>
+        </div>
+      `).join("")}</div></article>
+    </section>
+    <section class="grid-2" style="margin-top:18px;">
+      <article class="panel"><p class="eyebrow">Learning Records</p><h3>最近测验记录</h3><div class="todo-list">${records.quizHistory.slice().reverse().map((item) => `<div class="todo-item"><strong>${item.date} · ${item.name}</strong><p>${item.score} 分 · ${item.note}</p></div>`).join("")}</div></article>
+      <article class="panel"><p class="eyebrow">Latest Snapshot</p><h3>最新一次学习快照</h3><div class="todo-list"><div class="todo-item"><strong>最近一次测验</strong><p>${latestRecord ? `${latestRecord.name} · ${latestRecord.score} 分` : "暂无记录"}</p></div><div class="todo-item"><strong>最近学习节奏</strong><p>${records.progress.join(" / ")}</p></div><div class="todo-item"><strong>数据库状态</strong><p>当前页面优先展示后端 learning-records 接口返回的数据。</p></div></div></article>
     </section>
   `;
 }
@@ -615,6 +1008,7 @@ function renderMessages(messages, promptId, buttonLabel, placeholder) {
 function renderStudentTeacherView() {
   const student = getSelectedStudent();
   return `
+    ${renderStudentLoading()}
     <section class="grid-2">
       <article class="panel"><p class="eyebrow">Teacher Chat</p><h3>和老师沟通</h3>${renderMessages(student.teacherMessages, "teacher-message-input", "发送给老师", "例如：老师，我想要更多短题训练。")}</article>
       <article class="panel"><p class="eyebrow">Next Advice</p><h3>老师最近给你的反馈</h3><div class="todo-list"><div class="todo-item"><strong>下次上课重点</strong><p>${student.teacherFeedback}</p></div><div class="todo-item"><strong>建议你课前准备</strong><p>先复盘最近一次错题，再做 10 分钟限时练习。</p></div><div class="todo-item"><strong>当前状态</strong><p>${student.risk} · 最近测验 ${latestQuiz(student).score} 分</p></div></div></article>
@@ -625,6 +1019,7 @@ function renderStudentTeacherView() {
 function renderStudentAIView() {
   const student = getSelectedStudent();
   return `
+    ${renderStudentLoading()}
     <section class="grid-2">
       <article class="panel"><p class="eyebrow">AI Chat</p><h3>和 AI 沟通</h3>${renderMessages(student.aiMessages, "ai-message-input", "发送给 AI", "例如：请告诉我这周怎么复习最有效。")}</article>
       <article class="panel"><p class="eyebrow">Prompt Suggestions</p><h3>你可以这样问</h3><div class="todo-list"><div class="todo-item"><strong>请解释我最近最弱的知识点</strong><p>适合做题后使用。</p></div><div class="todo-item"><strong>给我一份 15 分钟复习计划</strong><p>适合回家前快速安排。</p></div><div class="todo-item"><strong>把老师的反馈改成我更容易懂的话</strong><p>适合低年龄学生。</p></div></div><div class="profile-section" style="margin-top:16px;"><div class="section-row"><strong>推荐模式</strong><span>短时间复习</span></div><div class="section-row"><strong>建议时长</strong><span>15 分钟</span></div><div class="section-row"><strong>当前重点</strong><span>${student.summary}</span></div></div></article>
@@ -726,6 +1121,7 @@ function renderTeacherDbView() {
             <div class="todo-item"><strong>学习摘要</strong><p>${selected.summary}</p></div>
             <div class="todo-item"><strong>家长沟通建议</strong><p>${selected.parentNote}</p></div>
             <div class="todo-item"><strong>最近一次作业</strong><p>${latestHomework(selected).title} · ${latestHomework(selected).status}</p></div>
+            <div class="todo-item"><strong>作业内容</strong><p>${homeworkPreview(latestHomework(selected))}</p></div>
             <div class="todo-item"><strong>最近一次测验</strong><p>${selectedLatestQuiz.name} · ${selectedLatestQuiz.score} 分 · ${selectedLatestQuiz.note}</p></div>
           </div>
         </article>
@@ -736,6 +1132,7 @@ function renderTeacherDbView() {
 
 function renderTeacherStudentView() {
   const student = getSelectedStudent();
+  const studentSchedules = getStudentSchedules(student.id);
   return `
     <section class="teacher-layout">
       <article class="panel">
@@ -745,10 +1142,69 @@ function renderTeacherStudentView() {
           <div class="inline-stat"><span>到课率</span><strong>${student.attendance}%</strong></div>
           <div class="inline-stat"><span>最近测验</span><strong>${latestQuiz(student).score}</strong></div>
         </div>
-        <div class="homework-list">${student.homework.map((item) => `<div class="homework-row"><div><strong>${item.title}</strong><span class="small-note">${item.date}</span></div><div><strong>${item.status}</strong><span class="small-note">${item.score === null ? "待评分" : `${item.score} 分`}</span></div></div>`).join("")}</div>
+        <div class="homework-list">${student.homework.map((item) => {
+          const draft = getTeacherReviewDraft(item);
+          return `
+          <div class="homework-entry">
+            <div class="homework-row">
+              <div><strong>${item.title}</strong><span class="small-note">${item.date}</span></div>
+              <div><strong>${item.status}</strong><span class="small-note">${item.score === null ? "待评分" : `${item.score} 分`}</span></div>
+            </div>
+            <div class="homework-content-card">
+              <span class="eyebrow">Student Submission</span>
+              <p>${item.content || "这次作业还没有填写具体内容，老师可以在下次课提醒学生补交文字说明。"}</p>
+            </div>
+            <div class="homework-review-card">
+              <div class="review-grid">
+                <label class="review-field">
+                  <span>老师评分</span>
+                  <input class="search-input" type="number" min="0" max="100" value="${draft.score}" data-homework-score="${item.id}" placeholder="0-100" />
+                </label>
+                <label class="review-field">
+                  <span>批改状态</span>
+                  <div class="review-status-text">${item.status === "已批改" ? "已完成批改" : "等待老师批改"}</div>
+                </label>
+              </div>
+              <label class="review-field">
+                <span>老师点评</span>
+                <textarea class="feedback-input" data-homework-note="${item.id}" placeholder="例如：函数图像判断已经明显进步，下一节课重点继续巩固应用题转化。">${draft.teacherNote}</textarea>
+              </label>
+              <div class="feedback-toolbar" style="margin-top:12px;">
+                <button class="primary-btn" data-homework-review-btn="${item.id}" data-student-id="${student.id}" type="button" ${state.teacherReviewSavingId === item.id ? "disabled" : ""}>${state.teacherReviewSavingId === item.id ? "保存中..." : "保存批改"}</button>
+              </div>
+            </div>
+          </div>
+        `;
+        }).join("")}</div>
         <div class="feedback-box"><p class="eyebrow">Write Feedback</p><h4>老师反馈</h4><textarea class="feedback-input" id="teacher-feedback-input">${student.teacherFeedback}</textarea><div class="feedback-toolbar" style="margin-top:12px;"><button class="primary-btn" id="save-feedback-btn" type="button">保存反馈</button><button class="ghost-btn" id="copy-parent-feedback-btn" type="button">生成家长版反馈</button></div></div>
       </article>
-      <article class="panel"><p class="eyebrow">Quiz History</p><h3>做题与诊断记录</h3><div class="todo-list">${student.quizHistory.slice().reverse().map((item) => `<div class="todo-item"><strong>${item.date} · ${item.name}</strong><p>${item.score} 分 · ${item.note}</p></div>`).join("")}</div><div class="profile-section" style="margin-top:16px;"><div class="section-row"><strong>老师备注</strong><span>本周适合短练 + 复盘组合</span></div><div class="section-row"><strong>家长反馈状态</strong><span>可发送</span></div><div class="section-row"><strong>下次课准备</strong><span>应用题复盘</span></div></div></article>
+      <article class="panel">
+        <p class="eyebrow">1v1 Schedule</p>
+        <h3>排课与确认</h3>
+        <div class="feedback-box" style="margin-bottom:16px;">
+          <label class="review-field"><span>课次主题</span><input class="search-input" id="teacher-schedule-title" value="${state.teacherScheduleDraft.title}" /></label>
+          <div class="review-grid" style="margin-top:12px;">
+            <label class="review-field"><span>日期</span><input class="search-input" id="teacher-schedule-date" type="date" value="${state.teacherScheduleDraft.date}" /></label>
+            <label class="review-field"><span>时间</span><input class="search-input" id="teacher-schedule-time" value="${state.teacherScheduleDraft.time}" placeholder="19:30-20:30" /></label>
+          </div>
+          <label class="review-field" style="margin-top:12px;"><span>地点</span><input class="search-input" id="teacher-schedule-location" value="${state.teacherScheduleDraft.location}" /></label>
+          <div class="feedback-toolbar" style="margin-top:12px;">
+            <button class="primary-btn" id="create-schedule-btn" type="button">发起排课确认</button>
+          </div>
+        </div>
+        <div class="todo-list">
+          ${studentSchedules.length ? studentSchedules.map((item) => `
+            <div class="todo-item">
+              <strong>${item.title} · ${item.dateLabel} ${item.time}</strong>
+              <p>${item.status} · ${item.location}</p>
+              ${item.status === "学生已取消" ? `<p>学生取消原因：${item.studentCancelReason || "未填写"}</p>` : ""}
+              <div class="feedback-toolbar" style="margin-top:8px;">
+                ${item.status !== "老师已取消" ? `<button class="ghost-btn" data-teacher-cancel-schedule-btn="${item.id}" type="button">老师取消</button>` : ""}
+              </div>
+            </div>
+          `).join("") : `<div class="todo-item"><strong>暂无 1v1 排课</strong><p>可以先给这位学生发起一条排课确认。</p></div>`}
+        </div>
+      </article>
     </section>
   `;
 }
@@ -759,6 +1215,140 @@ function renderTeacherAIView() {
     <section class="grid-2">
       <article class="panel"><p class="eyebrow">Teacher AI Copilot</p><h3>教学辅助 Prompt</h3><div class="todo-list"><div class="todo-item"><strong>请基于 ${student.name} 最近三次作业，给我下节课的辅导顺序</strong><p>适合课前准备。</p></div><div class="todo-item"><strong>请把这位学生的情况改写成家长能听懂的一段话</strong><p>适合面谈前使用。</p></div><div class="todo-item"><strong>请生成 5 道针对 ${student.risk} 风险学生的补强题</strong><p>适合课后追练。</p></div></div></article>
       <article class="panel"><p class="eyebrow">AI Draft</p><h3>自动生成示例</h3><div class="message-list"><div class="message-card ai"><div class="message-meta"><strong>AI 教学助手</strong><span class="small-note">刚刚</span></div><p class="message-body">建议先复盘 ${student.name} 最近两次错题，再用 10 分钟做同型短题，最后留 1 道迁移题观察是否真正理解。</p></div></div></article>
+    </section>
+  `;
+}
+
+function renderTeacherDbView() {
+  const filteredStudents = state.teacherFilter === "all" ? students : students.filter((student) => student.risk === state.teacherFilter);
+  const selected = getSelectedStudent();
+  const selectedLatestQuiz = latestQuiz(selected);
+  return `
+    <section class="table-card">
+      <div class="teacher-workspace-head">
+        <div>
+          <p class="eyebrow">Teacher Workspace</p>
+          <h3>Students</h3>
+        </div>
+        <div class="workspace-actions">
+          <span class="tag">All Classes</span>
+          <span class="tag">A23 优先跟进</span>
+          <button class="ghost-btn" type="button">Filters</button>
+        </div>
+      </div>
+      <div class="table-toolbar">
+        <input class="search-input" value="" placeholder="搜索学生姓名或年级（演示版仅样式）">
+        <div class="chip-group">
+          <button class="chip-btn ${state.teacherFilter === "all" ? "active" : ""}" data-filter="all" type="button">全部</button>
+          <button class="chip-btn ${state.teacherFilter === "高风险" ? "active" : ""}" data-filter="高风险" type="button">高风险</button>
+          <button class="chip-btn ${state.teacherFilter === "中风险" ? "active" : ""}" data-filter="中风险" type="button">中风险</button>
+          <button class="chip-btn ${state.teacherFilter === "低风险" ? "active" : ""}" data-filter="低风险" type="button">低风险</button>
+        </div>
+      </div>
+      <div class="table-meta-row">
+        <span>${filteredStudents.length} 名学生</span>
+        <div class="table-meta-actions">
+          <span>Sort by 最近测验</span>
+          <span>显示 1-${filteredStudents.length}</span>
+        </div>
+      </div>
+      <div class="db-summary-row">
+        <div class="mini-stat"><span>学生总数</span><strong>${students.length}</strong></div>
+        <div class="mini-stat"><span>高风险</span><strong>${riskCount("高风险")}</strong></div>
+        <div class="mini-stat"><span>中风险</span><strong>${riskCount("中风险")}</strong></div>
+        <div class="mini-stat"><span>平均到课</span><strong>${average(students.map((student) => student.attendance))}%</strong></div>
+      </div>
+      <div class="student-database">
+        <div class="db-main">
+          <div class="db-caption">点击学生进入详情，或直接用每行右侧快捷按钮发起排课等动作。</div>
+          <div class="db-header db-header-actions"><span>姓名</span><span>组别</span><span>年级</span><span>进度</span><span>到课</span><span>快捷操作</span></div>
+          <div class="db-table">
+            ${filteredStudents.map((student) => `
+              <div class="db-row-shell ${student.id === selected.id ? "active" : ""}">
+                <button class="db-row" data-student-id="${student.id}" type="button">
+                  <div class="table-name"><div class="avatar-mini">${student.name.slice(0, 1)}</div><div><strong>${student.name}</strong><span class="small-note"><i class="risk-dot ${getRowRiskDot(student.risk)}"></i>${student.risk} · 最近测验 ${latestQuiz(student).score}</span></div></div>
+                  <span>${student.group}</span>
+                  <span>${student.grade}</span>
+                  ${tinySpark(student.progress)}
+                  <div>${bar(student.attendance)}<span class="small-note">${student.attendance}%</span></div>
+                </button>
+                <div class="db-row-actions">
+                  <button class="ghost-btn" data-quick-schedule-btn="${student.id}" type="button">排课</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        <article class="profile-card profile-sidebar">
+          <p class="eyebrow">Student Information</p>
+          <div class="profile-hero">
+            <div class="avatar">${selected.name.slice(0, 1)}</div>
+            <div>
+              <h3>${selected.name}</h3>
+              <p class="profile-meta">${selected.grade} · ${selected.group}</p>
+              <p class="profile-meta">${selected.goal}</p>
+              <div class="score-box" style="margin-top:14px;"><span>当前总评</span><strong>${selected.score}</strong></div>
+            </div>
+          </div>
+          <div class="sidebar-top-actions">
+            <button class="ghost-btn" data-quick-schedule-btn="${selected.id}" type="button">排课</button>
+            <button class="ghost-btn" type="button">Report</button>
+          </div>
+          <div class="profile-badges">
+            <span class="risk-tag ${getRiskClass(selected.risk)}">${selected.risk}</span>
+            <span class="tag">最近作业 ${latestHomework(selected).status}</span>
+            <span class="tag">最近测验 ${selectedLatestQuiz.score} 分</span>
+          </div>
+          <div class="profile-stats">
+            <div class="profile-stat"><span>到课率</span><strong>${selected.attendance}%</strong></div>
+            <div class="profile-stat"><span>最近波动</span><strong>${quizDelta(selected) >= 0 ? `+${quizDelta(selected)}` : quizDelta(selected)}</strong></div>
+            <div class="profile-stat"><span>本周重点</span><strong>${selectedLatestQuiz.note.includes("主要薄弱点") ? "补弱" : "进阶"}</strong></div>
+            <div class="profile-stat"><span>管理老师</span><strong>山田</strong></div>
+          </div>
+          <div class="profile-section">
+            <div class="section-row"><strong>目标</strong><span>${selected.goal}</span></div>
+            <div class="section-row"><strong>科目</strong><span>${selected.grade.includes("高") ? "英语 / 数学" : "数学 / 国语 / 英语"}</span></div>
+            <div class="section-row"><strong>最近消息</strong><span>${selected.teacherMessages[selected.teacherMessages.length - 1].time}</span></div>
+          </div>
+          <div class="profile-subpanel">
+            <div class="subpanel-item"><span>最近一次作业</span><strong>${latestHomework(selected).title}</strong><p>${latestHomework(selected).status} · ${latestHomework(selected).score === null ? "待评分" : `${latestHomework(selected).score} 分`}</p></div>
+            <div class="subpanel-item"><span>最近一次测验</span><strong>${selectedLatestQuiz.name}</strong><p>${selectedLatestQuiz.score} 分 · ${selectedLatestQuiz.note}</p></div>
+          </div>
+          <div class="todo-list">
+            <div class="todo-item"><strong>学习摘要</strong><p>${selected.summary}</p></div>
+            <div class="todo-item"><strong>家长沟通建议</strong><p>${selected.parentNote}</p></div>
+            <div class="todo-item"><strong>最近一次作业</strong><p>${latestHomework(selected).title} · ${latestHomework(selected).status}</p></div>
+            <div class="todo-item"><strong>作业内容</strong><p>${homeworkPreview(latestHomework(selected))}</p></div>
+            <div class="todo-item"><strong>最近一次测验</strong><p>${selectedLatestQuiz.name} · ${selectedLatestQuiz.score} 分 · ${selectedLatestQuiz.note}</p></div>
+          </div>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
+function renderChecklistView(role) {
+  const items = getChecklistItemsForRole(role);
+  return `
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Checklist</p>
+          <h3>${role === "student" ? "待你确认的事项" : "待老师处理的事项"}</h3>
+        </div>
+        <span class="tag">${items.length} 项</span>
+      </div>
+      <div class="todo-list">
+        ${items.length ? items.map((item) => `
+          <div class="todo-item">
+            <strong>${item.title}</strong>
+            <p>${item.body}</p>
+            <div class="feedback-toolbar" style="margin-top:10px;">
+              <button class="primary-btn" data-checklist-open-btn="${item.id}" type="button">查看并处理</button>
+            </div>
+          </div>
+        `).join("") : `<div class="todo-item"><strong>当前没有待处理事项</strong><p>新的排课、作业提交、批改和取消消息会汇总在这里。</p></div>`}
+      </div>
     </section>
   `;
 }
@@ -796,11 +1386,13 @@ function renderAdminSettingsView() {
 
 function renderView() {
   if (state.view === "news") return renderNewsView();
+  if (state.view === "student-inbox") return renderChecklistView("student");
   if (state.view === "student-calendar") return renderStudentCalendarView();
   if (state.view === "student-quiz") return renderStudentQuizView();
   if (state.view === "student-progress") return renderStudentProgressView();
   if (state.view === "student-teacher") return renderStudentTeacherView();
   if (state.view === "student-ai") return renderStudentAIView();
+  if (state.view === "teacher-inbox") return renderChecklistView("teacher");
   if (state.view === "teacher-calendar") return renderTeacherCalendarView();
   if (state.view === "teacher-db") return renderTeacherDbView();
   if (state.view === "teacher-student") return renderTeacherStudentView();
@@ -815,11 +1407,13 @@ function renderView() {
 function renderHeader() {
   const titles = {
     news: "塾 News",
+    "student-inbox": "Checklist",
     "student-calendar": "我的课程日历",
     "student-quiz": "学生在线做题",
     "student-progress": "我的学习情况",
     "student-teacher": "和老师沟通",
     "student-ai": "和 AI 沟通",
+    "teacher-inbox": "Checklist",
     "teacher-calendar": "老师课程日历",
     "teacher-db": "老师学生数据库",
     "teacher-student": "学生详情与反馈",
@@ -830,10 +1424,26 @@ function renderHeader() {
     "admin-settings": "系统配置"
   };
   const account = accounts[state.role];
+  const checklistCount = getChecklistCount();
   document.getElementById("account-name").textContent = account.name;
   document.getElementById("account-role").textContent = account.roleLabel;
-  document.getElementById("page-title").textContent = titles[state.view] || "塾 News";
-  document.getElementById("role-badge").textContent = account.roleLabel;
+  document.getElementById("page-title").textContent = `${titles[state.view] || "塾 News"}${checklistCount ? ` · ${checklistCount} 项待处理` : ""}`;
+  document.getElementById("role-badge").textContent = checklistCount ? `${account.roleLabel} · ${checklistCount} 项` : account.roleLabel;
+  const checklistButton = document.getElementById("open-checklist-btn");
+  checklistButton.style.display = state.role === "admin" ? "none" : "inline-flex";
+  checklistButton.textContent = checklistCount ? `Checklist ${checklistCount}` : "Checklist";
+}
+
+function renderHeader() {
+  const account = appAccounts[state.role];
+  const checklistCount = getChecklistCount();
+  document.getElementById("account-name").textContent = account.name;
+  document.getElementById("account-role").textContent = account.roleLabel;
+  document.getElementById("page-title").textContent = `${pageTitles[state.view] || "塾 News"}${checklistCount ? ` · ${checklistCount} 项待处理` : ""}`;
+  document.getElementById("role-badge").textContent = checklistCount ? `${account.roleLabel} · ${checklistCount} 项` : account.roleLabel;
+  const checklistButton = document.getElementById("open-checklist-btn");
+  checklistButton.style.display = state.role === "admin" ? "none" : "inline-flex";
+  checklistButton.textContent = checklistCount ? `Checklist ${checklistCount}` : "Checklist";
 }
 
 function attachViewEvents() {
@@ -858,6 +1468,19 @@ function attachViewEvents() {
       renderApp();
     });
   });
+  const submitLessonHomeworkButton = document.getElementById("submit-lesson-homework-btn");
+  if (submitLessonHomeworkButton) {
+    submitLessonHomeworkButton.addEventListener("click", submitLessonHomework);
+  }
+  const lessonHomeworkInput = document.getElementById("lesson-homework-input");
+  if (lessonHomeworkInput) {
+    const persistDraft = () => {
+      state.lessonHomeworkDrafts[state.selectedLessonId] = lessonHomeworkInput.value;
+    };
+    lessonHomeworkInput.addEventListener("input", persistDraft);
+    lessonHomeworkInput.addEventListener("change", persistDraft);
+    lessonHomeworkInput.addEventListener("compositionend", persistDraft);
+  }
   contentEl.querySelectorAll("[data-filter]").forEach((button) => {
     button.addEventListener("click", () => {
       state.teacherFilter = button.dataset.filter;
@@ -872,6 +1495,70 @@ function attachViewEvents() {
   if (saveFeedbackButton) saveFeedbackButton.addEventListener("click", saveTeacherFeedback);
   const copyParentButton = document.getElementById("copy-parent-feedback-btn");
   if (copyParentButton) copyParentButton.addEventListener("click", copyParentFeedback);
+  const createScheduleButton = document.getElementById("create-schedule-btn");
+  if (createScheduleButton) createScheduleButton.addEventListener("click", createScheduleRequest);
+  const teacherScheduleTitle = document.getElementById("teacher-schedule-title");
+  if (teacherScheduleTitle) teacherScheduleTitle.addEventListener("input", () => {
+    state.teacherScheduleDraft.title = teacherScheduleTitle.value;
+  });
+  const teacherScheduleDate = document.getElementById("teacher-schedule-date");
+  if (teacherScheduleDate) teacherScheduleDate.addEventListener("input", () => {
+    state.teacherScheduleDraft.date = teacherScheduleDate.value;
+  });
+  const teacherScheduleTime = document.getElementById("teacher-schedule-time");
+  if (teacherScheduleTime) teacherScheduleTime.addEventListener("input", () => {
+    state.teacherScheduleDraft.time = teacherScheduleTime.value;
+  });
+  const teacherScheduleLocation = document.getElementById("teacher-schedule-location");
+  if (teacherScheduleLocation) teacherScheduleLocation.addEventListener("input", () => {
+    state.teacherScheduleDraft.location = teacherScheduleLocation.value;
+  });
+  contentEl.querySelectorAll("[data-homework-score]").forEach((input) => {
+    input.addEventListener("input", () => {
+      const homeworkId = Number(input.dataset.homeworkScore);
+      const current = state.teacherReviewDrafts[homeworkId] || {};
+      state.teacherReviewDrafts[homeworkId] = { ...current, score: input.value };
+    });
+  });
+  contentEl.querySelectorAll("[data-homework-note]").forEach((input) => {
+    const persistTeacherNote = () => {
+      const homeworkId = Number(input.dataset.homeworkNote);
+      const current = state.teacherReviewDrafts[homeworkId] || {};
+      state.teacherReviewDrafts[homeworkId] = { ...current, teacherNote: input.value };
+    };
+    input.addEventListener("input", persistTeacherNote);
+    input.addEventListener("change", persistTeacherNote);
+    input.addEventListener("compositionend", persistTeacherNote);
+  });
+  contentEl.querySelectorAll("[data-homework-review-btn]").forEach((button) => {
+    button.addEventListener("click", submitHomeworkReview);
+  });
+  contentEl.querySelectorAll("[data-homework-policy-btn]").forEach((button) => {
+    button.addEventListener("click", toggleLessonHomeworkPolicy);
+  });
+  contentEl.querySelectorAll("[data-schedule-cancel-reason]").forEach((input) => {
+    const persistReason = () => {
+      state.scheduleCancelDrafts[input.dataset.scheduleCancelReason] = input.value;
+    };
+    input.addEventListener("input", persistReason);
+    input.addEventListener("change", persistReason);
+    input.addEventListener("compositionend", persistReason);
+  });
+  contentEl.querySelectorAll("[data-schedule-confirm-btn]").forEach((button) => {
+    button.addEventListener("click", confirmScheduleRequest);
+  });
+  contentEl.querySelectorAll("[data-schedule-cancel-btn]").forEach((button) => {
+    button.addEventListener("click", cancelScheduleAsStudent);
+  });
+  contentEl.querySelectorAll("[data-teacher-cancel-schedule-btn]").forEach((button) => {
+    button.addEventListener("click", cancelScheduleAsTeacher);
+  });
+  contentEl.querySelectorAll("[data-checklist-open-btn]").forEach((button) => {
+    button.addEventListener("click", () => openChecklistItem(button.dataset.checklistOpenBtn));
+  });
+  contentEl.querySelectorAll("[data-quick-schedule-btn]").forEach((button) => {
+    button.addEventListener("click", () => quickScheduleStudent(Number(button.dataset.quickScheduleBtn)));
+  });
   contentEl.querySelectorAll("[data-action]").forEach((button) => {
     button.addEventListener("click", () => {
       if (button.dataset.action === "发送给老师") sendMessage("teacher");
@@ -882,23 +1569,53 @@ function attachViewEvents() {
 }
 
 function renderApp() {
+  if (state.role === "student" && state.view === "student-progress") {
+    markReviewedHomeworkAsSeen();
+  }
   renderNav();
   renderHeader();
-  contentEl.innerHTML = renderView();
+  contentEl.innerHTML = `${renderStudentToast()}${renderView()}`;
   attachViewEvents();
 }
 
 function loginAs(role) {
   state.role = role;
-  state.view = accounts[role].defaultView;
+  state.view = appAccounts[role].defaultView;
   loginScreen.classList.add("hidden");
   appShell.classList.remove("hidden");
   renderApp();
+  if (role === "student") {
+    loadStudentS1Data();
+  }
 }
 
 function logout() {
   loginScreen.classList.remove("hidden");
   appShell.classList.add("hidden");
+}
+
+function formatScheduleDateLabel(date) {
+  if (!date) return "待定日期";
+  const [year, month, day] = date.split("-").map(Number);
+  const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date(year, month - 1, day).getDay()];
+  return `${month}/${String(day).padStart(2, "0")} ${weekday}`;
+}
+
+function canStudentCancelSchedule(schedule) {
+  if (!schedule || schedule.status !== "已确认") return false;
+  const today = new Date();
+  const lessonDate = new Date(`${schedule.date}T00:00:00`);
+  const deadline = new Date(lessonDate);
+  deadline.setDate(deadline.getDate() - 1);
+  return today <= deadline;
+}
+
+function formatScheduleDateLabel(date) {
+  return formatScheduleDateLabelRule(date);
+}
+
+function canStudentCancelSchedule(schedule) {
+  return canStudentCancelScheduleRule(schedule);
 }
 
 function saveTeacherFeedback() {
@@ -911,6 +1628,71 @@ function saveTeacherFeedback() {
 function copyParentFeedback() {
   const student = getSelectedStudent();
   student.parentNote = `老师反馈已更新：${student.teacherFeedback}`;
+  renderApp();
+}
+
+function createScheduleRequest() {
+  const student = getSelectedStudent();
+  const draft = state.teacherScheduleDraft;
+  if (!draft.title.trim() || !draft.date || !draft.time.trim()) {
+    showStudentToast("error", "请先填写完整的排课主题、日期和时间。");
+    return;
+  }
+  const id = `schedule-${Date.now()}`;
+  scheduleRequests.unshift({
+    id,
+    studentId: student.id,
+    studentName: student.name,
+    courseId: state.selectedCourseId,
+    courseTitle: getSelectedCourse()?.title || "1v1 个别指導",
+    title: draft.title.trim(),
+    date: draft.date,
+    dateLabel: formatScheduleDateLabel(draft.date),
+    time: draft.time.trim(),
+    location: draft.location.trim() || "待定",
+    status: "待学生确认",
+    cancelDeadline: `${draft.date} 前一天 23:59`,
+    studentCancelReason: "",
+    teacherCancelReason: "",
+    createdBy: "teacher",
+    lastUpdate: "刚刚"
+  });
+  state.selectedScheduleId = id;
+  showStudentToast("success", "排课请求已发给学生，已进入 Checklist 等待确认。");
+  renderApp();
+}
+
+function confirmScheduleRequest(event) {
+  const schedule = scheduleRequests.find((item) => item.id === event.currentTarget.dataset.scheduleConfirmBtn);
+  if (!schedule) return;
+  schedule.status = "已确认";
+  schedule.lastUpdate = "刚刚";
+  showStudentToast("success", "你已确认这次 1v1 排课，老师会按这个时间准备课程。");
+  renderApp();
+}
+
+function cancelScheduleAsStudent(event) {
+  const schedule = scheduleRequests.find((item) => item.id === event.currentTarget.dataset.scheduleCancelBtn);
+  if (!schedule) return;
+  const reason = (state.scheduleCancelDrafts[schedule.id] || "").trim();
+  if (!reason) {
+    showStudentToast("error", "取消前请先填写原因。");
+    return;
+  }
+  schedule.status = "学生已取消";
+  schedule.studentCancelReason = reason;
+  schedule.lastUpdate = "刚刚";
+  showStudentToast("success", "你已取消这次排课，老师会在 Checklist 里看到你的原因。");
+  renderApp();
+}
+
+function cancelScheduleAsTeacher(event) {
+  const schedule = scheduleRequests.find((item) => item.id === event.currentTarget.dataset.teacherCancelScheduleBtn);
+  if (!schedule) return;
+  schedule.status = "老师已取消";
+  schedule.teacherCancelReason = "老师临时调整课表，请重新确认新的时间。";
+  schedule.lastUpdate = "刚刚";
+  showStudentToast("success", "老师已取消这次排课，学生会在 Checklist 里收到通知。");
   renderApp();
 }
 
@@ -928,34 +1710,285 @@ function sendMessage(type) {
   renderApp();
 }
 
-function submitStudentQuiz() {
+async function submitStudentQuiz() {
   const student = getSelectedStudent();
   const formData = new FormData(document.getElementById("student-quiz-form"));
-  let correct = 0;
-  const weakLabels = [];
+  const answers = {};
   quizTemplates.forEach((question) => {
-    const raw = (formData.get(question.id) || "").toString().trim().replace(/\s+/g, "").toLowerCase();
-    const answer = question.answer.replace(/\s+/g, "").toLowerCase();
-    if (raw === answer) {
-      correct += 1;
-    } else {
-      weakLabels.push(student.abilities[question.abilityIndex].label);
-      student.abilities[question.abilityIndex].value = Math.max(40, student.abilities[question.abilityIndex].value - 5);
-    }
+    answers[question.id] = (formData.get(question.id) || "").toString();
   });
-  const score = Math.round((correct / quizTemplates.length) * 100);
-  const weakText = [...new Set(weakLabels)];
-  student.quizHistory.push({ date: "2026-04-01", name: "在线练习", score, note: weakText.length ? `主要薄弱点: ${weakText.join("、")}` : "整体稳定，可增加难度" });
-  student.homework.unshift({ date: "2026-04-01", title: "在线练习", status: "已提交", score });
-  student.progress = [...student.progress.slice(1), score];
-  student.score = Math.round(student.score * 0.75 + score * 0.25);
-  student.summary = weakText.length ? `刚完成在线做题，系统识别出 ${weakText.join("、")} 需要补强。` : "刚完成在线做题，整体稳定，适合进入更高阶训练。";
-  student.teacherFeedback = weakText.length ? `建议下节课优先复盘 ${weakText.join("、")} 相关题型，再安排短练。` : "建议提高题目难度，并观察迁移题表现。";
-  student.parentNote = weakText.length ? `本次在线做题 ${score} 分，主要卡点在 ${weakText.join("、")}，建议先针对性补强。` : `本次在线做题 ${score} 分，基础表现稳定，可逐步增加难度。`;
-  student.risk = student.score < 75 || student.attendance < 80 ? "高风险" : student.score < 85 ? "中风险" : "低风险";
-  student.teacherMessages.push({ from: "teacher", title: "系统通知", body: `已收到你的在线做题结果：${score} 分。老师会根据结果调整下次辅导。`, time: "刚刚" });
-  state.view = "student-progress";
+
+  try {
+    state.studentApiLoading = true;
+    state.studentApiSuccess = "";
+    renderApp();
+    const response = await fetch("/api/student/1/quiz-submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, answers })
+    });
+    if (!response.ok) throw new Error("Failed to submit quiz");
+    const payload = await response.json();
+    syncStudentApiData(payload.overview);
+    state.studentLearningRecords = {
+      quizHistory: payload.overview.student.quizHistory,
+      homework: payload.overview.student.homework,
+      progress: payload.overview.student.progress
+    };
+    state.view = "student-progress";
+    state.studentApiError = "";
+    state.studentApiSuccess = "做题结果已保存，学习记录和能力画像已经更新。";
+  } catch (error) {
+    state.studentApiError = "做题结果提交失败，本次没有保存到本地后端。";
+    state.studentApiSuccess = "";
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
+
+async function submitLessonHomework(event) {
+  const lessonId = event.currentTarget.dataset.lessonId;
+  const input = document.getElementById("lesson-homework-input");
+  const content = (state.lessonHomeworkDrafts[lessonId] ?? input.value ?? "").trim();
+  if (!content) {
+    state.studentApiError = "请先填写课后作业内容。";
+    state.studentApiSuccess = "";
+    renderApp();
+    return;
+  }
+
+  try {
+    state.studentApiLoading = true;
+    state.studentApiError = "";
+    state.studentApiSuccess = "";
+    renderApp();
+    const response = await fetch(`/api/student/1/lessons/${lessonId}/homework`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
+    });
+    if (!response.ok) throw new Error("Failed to submit homework");
+    const payload = await response.json();
+    syncStudentApiData(payload.overview);
+    state.studentLearningRecords = payload.learningRecords;
+    state.lessonHomeworkDrafts[lessonId] = content;
+    state.studentApiSuccess = "课后作业已提交并保存到数据库，这节课的状态已经更新。";
+  } catch (error) {
+    state.studentApiError = "课后作业提交失败，本次没有保存到数据库。";
+    state.studentApiSuccess = "";
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
+
+async function loadStudentS1Data() {
+  state.studentApiLoading = true;
+  state.studentApiError = "";
+  state.studentApiSuccess = "";
   renderApp();
+  try {
+    const [payload, records] = await Promise.all([
+      fetchStudentOverview(),
+      fetchStudentLearningRecords()
+    ]);
+    syncStudentApiData(payload);
+    state.studentLearningRecords = records;
+  } catch (error) {
+    showStudentToast("error", "学生端真实数据加载失败，当前显示的是本地演示数据。");
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
+
+function renderStudentLoading() {
+  if (!state.studentApiLoading) return "";
+  return `
+    <section class="panel student-status-banner student-status-loading" style="margin-bottom:18px;">
+      <p class="eyebrow">Student S1</p>
+      <h3>正在加载学生真实数据...</h3>
+      <p class="profile-meta">正在从本地后端读取课程、课次和学习记录。</p>
+    </section>
+  `;
+}
+
+function renderStudentToast() {
+  const message = state.studentApiError || state.studentApiSuccess;
+  if (!message) return "";
+  const typeClass = state.studentApiError ? "student-toast-error" : "student-toast-success";
+  const title = state.studentApiError ? "保存失败" : "保存成功";
+  return `
+    <div class="student-toast-wrap">
+      <div class="student-toast ${typeClass}">
+        <strong>${title}</strong>
+        <p>${message}</p>
+      </div>
+    </div>
+  `;
+}
+
+function showStudentToast(type, message) {
+  if (studentToastTimer) {
+    clearTimeout(studentToastTimer);
+  }
+  state.studentApiError = type === "error" ? message : "";
+  state.studentApiSuccess = type === "success" ? message : "";
+  renderApp();
+  studentToastTimer = setTimeout(() => {
+    state.studentApiError = "";
+    state.studentApiSuccess = "";
+    studentToastTimer = null;
+    renderApp();
+  }, 2200);
+}
+
+async function submitStudentQuiz() {
+  const student = getSelectedStudent();
+  const formData = new FormData(document.getElementById("student-quiz-form"));
+  const answers = {};
+  quizTemplates.forEach((question) => {
+    answers[question.id] = (formData.get(question.id) || "").toString();
+  });
+
+  try {
+    state.studentApiLoading = true;
+    state.studentApiError = "";
+    state.studentApiSuccess = "";
+    renderApp();
+    const response = await fetch("/api/student/1/quiz-submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, answers })
+    });
+    if (!response.ok) throw new Error("Failed to submit quiz");
+    const payload = await response.json();
+    syncStudentApiData(payload.overview);
+    state.studentLearningRecords = {
+      quizHistory: payload.overview.student.quizHistory,
+      homework: payload.overview.student.homework,
+      progress: payload.overview.student.progress
+    };
+    state.view = "student-progress";
+    showStudentToast("success", "做题结果已保存，学习记录和能力画像已经更新。");
+  } catch (error) {
+    showStudentToast("error", "做题结果提交失败，本次没有保存到本地后端。");
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
+
+async function submitLessonHomework(event) {
+  const lessonId = event.currentTarget.dataset.lessonId;
+  const input = document.getElementById("lesson-homework-input");
+  const content = (state.lessonHomeworkDrafts[lessonId] ?? input.value ?? "").trim();
+  if (!content) {
+    showStudentToast("error", "请先填写课后作业内容。");
+    return;
+  }
+
+  try {
+    state.studentApiLoading = true;
+    state.studentApiError = "";
+    state.studentApiSuccess = "";
+    renderApp();
+    const response = await fetch(`/api/student/1/lessons/${lessonId}/homework`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
+    });
+    if (!response.ok) throw new Error("Failed to submit homework");
+    const payload = await response.json();
+    syncStudentApiData(payload.overview);
+    state.studentLearningRecords = payload.learningRecords;
+    state.lessonHomeworkDrafts[lessonId] = content;
+    showStudentToast("success", "课后作业已提交并保存到数据库，这节课的状态已经更新。");
+  } catch (error) {
+    showStudentToast("error", "课后作业提交失败，本次没有保存到数据库。");
+  } finally {
+    state.studentApiLoading = false;
+    renderApp();
+  }
+}
+
+async function submitHomeworkReview(event) {
+  const homeworkId = Number(event.currentTarget.dataset.homeworkReviewBtn);
+  const studentId = Number(event.currentTarget.dataset.studentId);
+  const student = students.find((item) => item.id === studentId);
+  const homework = student?.homework.find((item) => item.id === homeworkId);
+  if (!student || !homework) {
+    showStudentToast("error", "没有找到这条作业记录。");
+    return;
+  }
+
+  const draft = getTeacherReviewDraft(homework);
+  const numericScore = Number(draft.score);
+  if (!Number.isFinite(numericScore) || numericScore < 0 || numericScore > 100) {
+    showStudentToast("error", "请输入 0 到 100 之间的作业分数。");
+    return;
+  }
+
+  try {
+    state.teacherReviewSavingId = homeworkId;
+    renderApp();
+
+    if (studentId === 1) {
+      const response = await fetch(`/api/teacher/students/${studentId}/homeworks/${homeworkId}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          score: Math.round(numericScore),
+          teacherNote: draft.teacherNote || ""
+        })
+      });
+      if (!response.ok) throw new Error("Failed to save homework review");
+      const payload = await response.json();
+      syncStudentApiData(payload.overview);
+      state.studentLearningRecords = payload.learningRecords;
+    } else {
+      homework.score = Math.round(numericScore);
+      homework.status = "已批改";
+      homework.teacherNote = draft.teacherNote || "";
+    }
+
+    state.teacherReviewDrafts[homeworkId] = {
+      score: String(Math.round(numericScore)),
+      teacherNote: draft.teacherNote || ""
+    };
+    showStudentToast("success", "老师批改已保存，这条作业已经进入已批改状态。");
+  } catch (error) {
+    showStudentToast("error", "老师批改保存失败，请稍后再试。");
+  } finally {
+    state.teacherReviewSavingId = null;
+    renderApp();
+  }
+}
+
+async function toggleLessonHomeworkPolicy(event) {
+  const lessonId = event.currentTarget.dataset.homeworkPolicyBtn;
+  const requiresHomework = event.currentTarget.dataset.requiresHomework === "true";
+
+  try {
+    state.teacherLessonPolicySavingId = lessonId;
+    renderApp();
+    const response = await fetch(`/api/teacher/lessons/${lessonId}/homework-policy`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requiresHomework })
+    });
+    if (!response.ok) throw new Error("Failed to update lesson homework policy");
+    const payload = await response.json();
+    syncStudentApiData(payload.overview);
+    state.studentLearningRecords = payload.learningRecords;
+    showStudentToast("success", requiresHomework ? "这节课已经改成需要布置作业。" : "这节课已经改成无作业。");
+  } catch (error) {
+    showStudentToast("error", "作业布置设置保存失败，请稍后再试。");
+  } finally {
+    state.teacherLessonPolicySavingId = null;
+    renderApp();
+  }
 }
 
 function renderRadar(abilities) {
@@ -996,6 +2029,7 @@ function renderRadar(abilities) {
 
 document.querySelectorAll(".login-btn").forEach((button) => button.addEventListener("click", () => loginAs(button.dataset.role)));
 document.getElementById("logout-btn").addEventListener("click", logout);
+document.getElementById("open-checklist-btn").addEventListener("click", openChecklist);
 document.getElementById("quick-switch-student").addEventListener("click", () => loginAs("student"));
 document.getElementById("quick-switch-teacher").addEventListener("click", () => loginAs("teacher"));
 document.getElementById("quick-switch-admin").addEventListener("click", () => loginAs("admin"));
