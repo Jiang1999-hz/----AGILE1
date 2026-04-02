@@ -1,4 +1,4 @@
-const { readBody, saveQuizSessionSubmission, sendJson } = require("../../../../server");
+const { readBody, saveQuizSessionSubmission, sendJson } = require("../../../server");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {

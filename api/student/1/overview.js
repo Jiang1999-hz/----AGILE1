@@ -1,4 +1,4 @@
-const { buildStudentOverview, sendJson } = require("../../../../server");
+const { buildStudentOverview, sendJson } = require("../../../server");
 
 module.exports = async (req, res) => {
   if (req.method !== "GET") {
