@@ -165,6 +165,7 @@ function normalizeQuestionRecord(record) {
     abilityIndex: record.abilityIndex,
     type: record.type,
     question: record.prompt,
+    blankLabels: record.blankLabels ? Array.from(record.blankLabels) : [],
     choices: (record.choices || [])
       .slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)

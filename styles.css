@@ -561,6 +561,58 @@ button { cursor: pointer; border: none; }
   background: rgba(248, 242, 234, 0.82);
 }
 
+.quiz-blank-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 96px));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.quiz-blank-field {
+  display: grid;
+  gap: 8px;
+}
+
+.quiz-blank-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.quiz-blank-input {
+  width: 100%;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.94);
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.math-boxed-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25em;
+  height: 1.25em;
+  padding: 0 0.12em;
+  border: 2px solid rgba(63, 49, 41, 0.72);
+  border-radius: 4px;
+  margin: 0 0.12em;
+  line-height: 1;
+  font-weight: 800;
+  vertical-align: baseline;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.math-boxed-letter-wide {
+  min-width: 1.8em;
+  padding: 0 0.22em;
+}
+
 .quiz-input, .search-input, .feedback-input, .prompt-input {
   width: 100%;
   padding: 12px 14px;

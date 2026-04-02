@@ -1,6 +1,58 @@
 (function mountStudentQuizExperience() {
-  function renderQuestionBody(questionHtml) {
-    return `<div class="quiz-question-copy">${questionHtml}</div>`;
+  function escapeAttr(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function splitAnswerParts(value) {
+    return String(value || "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length);
+  }
+
+  function blankLabels(count) {
+    const base = ["A", "B", "C", "D", "E", "F"];
+    return Array.from({ length: count }, (_, index) => base[index] || `空${index + 1}`);
+  }
+
+  function isMultiBlankQuestion(question) {
+    return question.type === "text" && splitAnswerParts(question.answer).length > 1;
+  }
+
+  function getBlankLabels(question) {
+    if (Array.isArray(question.blankLabels) && question.blankLabels.length) {
+      return question.blankLabels;
+    }
+    return extractPlaceholderTokens(question.question);
+  }
+
+  function extractPlaceholderTokens(questionHtml) {
+    const plain = String(questionHtml || "").replace(/<[^>]+>/g, " ");
+    const matches = plain.match(/\b[A-Z]{1,3}\b/g) || [];
+    return matches.filter((token, index) => matches.indexOf(token) === index);
+  }
+
+  function enhanceMultiBlankPrompt(questionHtml, question) {
+    const tokens = getBlankLabels(question).map((token) => ({
+      raw: token,
+      key: token.replace(/^[^A-Z]+/, "")
+    }));
+    let html = String(questionHtml || "");
+    tokens.forEach(({ raw, key }) => {
+      const wide = raw.length > 1 ? "math-boxed-letter-wide" : "";
+      html = html.replace(new RegExp(`>${key}<`, "g"), `><span class="math-boxed-letter ${wide}">${raw}</span><`);
+      html = html.replace(new RegExp(`(^|[^A-Z])${key}([^A-Z]|$)`), `$1<span class="math-boxed-letter ${wide}">${raw}</span>$2`);
+    });
+    return html;
+  }
+
+  function renderQuestionBody(questionHtml, question) {
+    const content = isMultiBlankQuestion(question) ? enhanceMultiBlankPrompt(questionHtml, question) : questionHtml;
+    return `<div class="quiz-question-copy">${content}</div>`;
   }
 
   function answerState(ctx, questionId) {
@@ -11,6 +63,40 @@
 
   function submittedAnswer(ctx, questionId) {
     return ctx.state.quizFlow.submittedAnswers?.[questionId] || "";
+  }
+
+  function renderAnswerInput(ctx, item) {
+    if (item.type === "choice") {
+      return `<div class="quiz-options">${item.choices.map((choice) => `<label class="quiz-option"><input type="radio" name="${item.id}" value="${escapeAttr(choice)}" ${submittedAnswer(ctx, item.id) === choice ? "checked" : ""}><span>${choice}</span></label>`).join("")}</div>`;
+    }
+
+    if (isMultiBlankQuestion(item)) {
+      const currentParts = splitAnswerParts(submittedAnswer(ctx, item.id));
+      const labels = getBlankLabels(item);
+      const fallbackLabels = blankLabels(splitAnswerParts(item.answer).length);
+      const finalLabels = labels.length === fallbackLabels.length ? labels : fallbackLabels;
+
+      return `
+        <div class="quiz-blank-row">
+          ${finalLabels.map((label, index) => `
+            <label class="quiz-blank-field">
+              <span class="quiz-blank-label">${label}</span>
+              <input
+                class="quiz-blank-input"
+                type="text"
+                inputmode="numeric"
+                data-blank-question="${item.id}"
+                data-blank-index="${index}"
+                value="${escapeAttr(currentParts[index] || "")}"
+                placeholder="${label}"
+              >
+            </label>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    return `<div style="margin-top:12px;"><input class="quiz-input" type="text" name="${item.id}" value="${escapeAttr(submittedAnswer(ctx, item.id))}" placeholder="请输入答案"></div>`;
   }
 
   function renderPracticeStage(ctx) {
@@ -24,9 +110,13 @@
           <span class="tag">5 题</span>
         </div>
         <form class="quiz-form" id="student-quiz-form">
-          ${ctx.state.quizFlow.questions.map((item, index) => item.type === "choice"
-            ? `<div class="quiz-card ${answerState(ctx, item.id)}" data-question-card="${item.id}"><div class="quiz-question-head">${index + 1}.</div>${renderQuestionBody(item.question)}<div class="quiz-options">${item.choices.map((choice) => `<label class="quiz-option"><input type="radio" name="${item.id}" value="${choice}" ${submittedAnswer(ctx, item.id) === choice ? "checked" : ""}><span>${choice}</span></label>`).join("")}</div></div>`
-            : `<div class="quiz-card ${answerState(ctx, item.id)}" data-question-card="${item.id}"><div class="quiz-question-head">${index + 1}.</div>${renderQuestionBody(item.question)}<div style="margin-top:12px;"><input class="quiz-input" type="text" name="${item.id}" value="${submittedAnswer(ctx, item.id)}" placeholder="请输入答案"></div></div>`).join("")}
+          ${ctx.state.quizFlow.questions.map((item, index) => `
+            <div class="quiz-card ${answerState(ctx, item.id)}" data-question-card="${item.id}">
+              <div class="quiz-question-head">${index + 1}.</div>
+              ${renderQuestionBody(item.question, item)}
+              ${renderAnswerInput(ctx, item)}
+            </div>
+          `).join("")}
         </form>
         <div class="quiz-actions">
           <button class="primary-btn" id="submit-student-quiz" type="button">${ctx.state.loading ? "提交中..." : "提交作答"}</button>
@@ -59,7 +149,7 @@
           <div class="quiz-side-section">
             <p class="eyebrow">Selected Wrong Question</p>
             <div class="todo-item active-review-item">
-              ${renderQuestionBody(selectedWrongQuestion.question)}
+              ${renderQuestionBody(selectedWrongQuestion.question, selectedWrongQuestion)}
               <p>你的答案：${selectedWrongQuestion.studentAnswer}</p>
               <p>正确答案：${selectedWrongQuestion.correctAnswer}</p>
             </div>
@@ -206,7 +296,7 @@
 
         const firstStep = selectedWrongQuestion.explanation?.steps?.[0];
         const reply = firstStep
-          ? `我先围绕老师讲解回答你。这道题可以先看「${firstStep.title || firstStep.line}」这一步：${firstStep.detail}`
+          ? `我先围绕老师讲解回答你。这道题可以先看“${firstStep.title || firstStep.line}”这一步：${firstStep.detail}`
           : "我会围绕这道题已有的老师标准讲解来回答你。你可以继续追问具体是哪一步没看懂。";
 
         ctx.state.quizFlow.explainMessages.push({ from: "student", title: "我", time: "刚刚", body: text });

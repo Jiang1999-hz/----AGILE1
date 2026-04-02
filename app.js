@@ -250,6 +250,14 @@ async function submitQuizSession() {
   if (!form || !state.quizFlow.questions.length) return;
   const formData = new FormData(form);
   state.quizFlow.questions.forEach((question) => {
+    if (question.type === "text" && String(question.answer || "").includes(",")) {
+      const parts = Array.from(form.querySelectorAll(`[data-blank-question="${question.id}"]`))
+        .sort((a, b) => Number(a.dataset.blankIndex) - Number(b.dataset.blankIndex))
+        .map((input) => input.value.trim());
+      answers[question.id] = parts.join(",");
+      return;
+    }
+
     answers[question.id] = (formData.get(question.id) || "").toString();
   });
 
