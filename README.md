@@ -1,5 +1,9 @@
 # Juku AI Cloud Demo
 
+当前项目已经进入“以学生做题主线为核心”的阶段。最近一轮也做了轻整理，目录说明见：
+
+- [PROJECT_STRUCTURE.md](/C:/Users/Jiang/Documents/New%20project/docs/PROJECT_STRUCTURE.md)
+
 一个面向日本小私塾的本地多角色演示版。
 
 ## 当前 Demo 已包含的核心模块
