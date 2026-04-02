@@ -307,31 +307,7 @@ function transformStudent(student) {
     risk: student.risk,
     summary: student.summary,
     parentNote: student.parentNote,
-    teacherFeedback: student.teacherFeedback,
-    quizHistory: student.quizSubmissions
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((item) => ({ date: item.dateLabel, name: item.name, score: item.score, note: item.note })),
-    homework: student.homeworks
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .map((item) => ({
-        id: item.id,
-        lessonId: item.lessonId,
-        date: item.dateLabel,
-        title: item.title,
-        status: item.status,
-        score: item.score,
-        content: item.content || "",
-        teacherNote: item.teacherNote || ""
-      })),
-    teacherMessages: student.messages
-      .filter((item) => item.channel === "teacher")
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((item) => ({ from: item.fromRole, title: item.title, body: item.body, time: item.timeLabel })),
-    aiMessages: student.messages
-      .filter((item) => item.channel === "ai")
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((item) => ({ from: item.fromRole, title: item.title, body: item.body, time: item.timeLabel })),
-    abilities: student.abilities.map((item) => ({ label: item.label, value: item.value }))
+    teacherFeedback: student.teacherFeedback
   };
 }
 
@@ -384,15 +360,32 @@ function transformLessons(lessons, studentId) {
   });
 }
 
+function transformLearningRecords(student) {
+  return {
+    quizHistory: student.quizSubmissions
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map((item) => ({ date: item.dateLabel, name: item.name, score: item.score, note: item.note })),
+    homework: student.homeworks
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .map((item) => ({
+        id: item.id,
+        lessonId: item.lessonId,
+        date: item.dateLabel,
+        title: item.title,
+        status: item.status,
+        score: item.score,
+        content: item.content || "",
+        teacherNote: item.teacherNote || ""
+      })),
+    progress: student.quizSubmissions.slice(-5).map((item) => item.score)
+  };
+}
+
 async function buildStudentOverview(studentId) {
-  const quizQuestions = await getQuizQuestionsFromDb();
   const student = await prisma.student.findUnique({
     where: { id: studentId },
     include: {
-      abilities: true,
       quizSubmissions: true,
-      homeworks: true,
-      messages: true,
       enrollments: {
         include: {
           course: {
@@ -422,8 +415,7 @@ async function buildStudentOverview(studentId) {
   return {
     student: transformStudent(student),
     courses: transformCourses(courses),
-    lessons: transformLessons(lessons, student.id),
-    quizTemplates: quizQuestions.map(enrichQuizTemplate)
+    lessons: transformLessons(lessons, student.id)
   };
 }
 
@@ -440,23 +432,56 @@ async function buildLearningRecords(studentId) {
     throw new Error("Student not found");
   }
 
+  return transformLearningRecords(student);
+}
+
+async function buildStudentBootstrap(studentId) {
+  const [student, quizCatalog] = await Promise.all([
+    prisma.student.findUnique({
+      where: { id: studentId },
+      include: {
+        quizSubmissions: true,
+        homeworks: true,
+        enrollments: {
+          include: {
+            course: {
+              include: {
+                lessons: {
+                  include: {
+                    homeworks: {
+                      where: { studentId }
+                    }
+                  }
+                },
+                enrollments: true
+              }
+            }
+          }
+        }
+      }
+    }),
+    getQuizCatalogFromDb()
+  ]);
+
+  if (!student) {
+    throw new Error("Student not found");
+  }
+
+  const courses = student.enrollments.map((item) => item.course);
+  const lessons = courses.flatMap((course) => course.lessons);
+
+  const overview = {
+    student: transformStudent(student),
+    courses: transformCourses(courses),
+    lessons: transformLessons(lessons, student.id)
+  };
+
+  const learningRecords = transformLearningRecords(student);
+
   return {
-    quizHistory: student.quizSubmissions
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((item) => ({ date: item.dateLabel, name: item.name, score: item.score, note: item.note })),
-    homework: student.homeworks
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .map((item) => ({
-        id: item.id,
-        lessonId: item.lessonId,
-        date: item.dateLabel,
-        title: item.title,
-        status: item.status,
-        score: item.score,
-        content: item.content || "",
-        teacherNote: item.teacherNote || ""
-      })),
-    progress: student.quizSubmissions.slice(-5).map((item) => item.score)
+    overview,
+    learningRecords,
+    quizCatalog
   };
 }
 
@@ -761,6 +786,11 @@ async function handleStudentApi(req, res) {
     return true;
   }
 
+  if (req.method === "GET" && pathname === "/api/student/1/bootstrap") {
+    sendJson(res, 200, await buildStudentBootstrap(1));
+    return true;
+  }
+
   if (req.method === "GET" && pathname === "/api/student/1/learning-records") {
     sendJson(res, 200, await buildLearningRecords(1));
     return true;
@@ -851,6 +881,7 @@ module.exports = {
   appHandler,
   sendJson,
   readBody,
+  buildStudentBootstrap,
   buildStudentOverview,
   buildLearningRecords,
   getQuizCatalogFromDb,

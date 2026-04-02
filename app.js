@@ -177,16 +177,12 @@ async function loadStudentData() {
   state.loading = true;
   renderApp();
   try {
-    const [overview, learningRecords, quizCatalog] = await Promise.all([
-      fetchJson("/api/student/1/overview"),
-      fetchJson("/api/student/1/learning-records"),
-      fetchJson("/api/quiz/catalog")
-    ]);
-    state.studentOverview = overview;
-    state.learningRecords = learningRecords;
-    state.quizCatalog = quizCatalog;
-    state.selectedCourseId = overview.courses?.[0]?.id || null;
-    state.selectedLessonId = overview.courses?.[0]?.lessonIds?.[0] || null;
+    const payload = await fetchJson("/api/student/1/bootstrap");
+    state.studentOverview = payload.overview;
+    state.learningRecords = payload.learningRecords;
+    state.quizCatalog = payload.quizCatalog;
+    state.selectedCourseId = payload.overview.courses?.[0]?.id || null;
+    state.selectedLessonId = payload.overview.courses?.[0]?.lessonIds?.[0] || null;
   } catch (error) {
     showToast("error", "学生数据加载失败");
   } finally {
