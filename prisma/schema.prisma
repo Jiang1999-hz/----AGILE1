@@ -66,6 +66,7 @@ model Lesson {
   completion     Int
   understanding  Int
   homeworkStatus String
+  requiresHomework Boolean @default(true)
   wrongCount     Int
   metrics        Json
   highlights     Json
@@ -105,6 +106,7 @@ model Homework {
   status    String
   score     Int?
   content   String?
+  teacherNote String?
   dateLabel String
   createdAt DateTime @default(now())
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)

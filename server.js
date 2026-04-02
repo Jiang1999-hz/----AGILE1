@@ -68,7 +68,16 @@ function transformStudent(student) {
       .map((item) => ({ date: item.dateLabel, name: item.name, score: item.score, note: item.note })),
     homework: student.homeworks
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .map((item) => ({ date: item.dateLabel, title: item.title, status: item.status, score: item.score })),
+      .map((item) => ({
+        id: item.id,
+        lessonId: item.lessonId,
+        date: item.dateLabel,
+        title: item.title,
+        status: item.status,
+        score: item.score,
+        content: item.content || "",
+        teacherNote: item.teacherNote || ""
+      })),
     teacherMessages: student.messages
       .filter((item) => item.channel === "teacher")
       .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
@@ -98,25 +107,36 @@ function transformCourses(courses) {
 }
 
 function transformLessons(lessons, studentId) {
-  return lessons.map((lesson) => ({
-    id: lesson.id,
-    date: lesson.dateLabel,
-    weekday: lesson.weekday,
-    time: lesson.timeLabel,
-    title: lesson.title,
-    studentIds: [studentId],
-    ppt: lesson.ppt,
-    notes: lesson.notes,
-    highlights: lesson.highlights,
-    mistakes: lesson.mistakes,
-    completion: lesson.completion,
-    understanding: lesson.understanding,
-    homeworkStatus: lesson.homeworks && lesson.homeworks[0] ? lesson.homeworks[0].status : lesson.homeworkStatus,
-    wrongCount: lesson.wrongCount,
-    metrics: lesson.metrics,
-    homeworkContent: lesson.homeworks && lesson.homeworks[0] ? (lesson.homeworks[0].content || "") : "",
-    homeworkId: lesson.homeworks && lesson.homeworks[0] ? lesson.homeworks[0].id : null
-  }));
+  return lessons.map((lesson) => {
+    const currentHomework = lesson.homeworks && lesson.homeworks[0] ? lesson.homeworks[0] : null;
+    const derivedHomeworkStatus = lesson.requiresHomework === false
+      ? "无作业"
+      : currentHomework
+      ? currentHomework.status === "已批改"
+        ? "已完成"
+        : "已提交"
+      : "待开始";
+    return {
+      id: lesson.id,
+      date: lesson.dateLabel,
+      weekday: lesson.weekday,
+      time: lesson.timeLabel,
+      title: lesson.title,
+      studentIds: [studentId],
+      ppt: lesson.ppt,
+      notes: lesson.notes,
+      highlights: lesson.highlights,
+      mistakes: lesson.mistakes,
+      completion: lesson.completion,
+      understanding: lesson.understanding,
+      requiresHomework: lesson.requiresHomework !== false,
+      homeworkStatus: derivedHomeworkStatus,
+      wrongCount: lesson.wrongCount,
+      metrics: lesson.metrics,
+      homeworkContent: currentHomework ? (currentHomework.content || "") : "",
+      homeworkId: currentHomework ? currentHomework.id : null
+    };
+  });
 }
 
 async function buildStudentOverview(studentId) {
@@ -180,7 +200,16 @@ async function buildLearningRecords(studentId) {
       .map((item) => ({ date: item.dateLabel, name: item.name, score: item.score, note: item.note })),
     homework: student.homeworks
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .map((item) => ({ date: item.dateLabel, title: item.title, status: item.status, score: item.score })),
+      .map((item) => ({
+        id: item.id,
+        lessonId: item.lessonId,
+        date: item.dateLabel,
+        title: item.title,
+        status: item.status,
+        score: item.score,
+        content: item.content || "",
+        teacherNote: item.teacherNote || ""
+      })),
     progress: student.quizSubmissions.slice(-5).map((item) => item.score)
   };
 }
@@ -325,10 +354,33 @@ async function submitLessonHomework(studentId, lessonId, content) {
     });
   }
 
-  await prisma.lesson.update({
-    where: { id: lessonId },
+  return {
+    ok: true,
+    overview: await buildStudentOverview(studentId),
+    learningRecords: await buildLearningRecords(studentId)
+  };
+}
+
+async function reviewHomework(studentId, homeworkId, score, teacherNote) {
+  const numericScore = Number(score);
+  if (!Number.isFinite(numericScore) || numericScore < 0 || numericScore > 100) {
+    throw new Error("Homework score must be between 0 and 100");
+  }
+
+  const homework = await prisma.homework.findFirst({
+    where: { id: homeworkId, studentId }
+  });
+
+  if (!homework) {
+    throw new Error("Homework not found");
+  }
+
+  await prisma.homework.update({
+    where: { id: homeworkId },
     data: {
-      homeworkStatus: "已提交"
+      score: Math.round(numericScore),
+      status: "已批改",
+      teacherNote: String(teacherNote || "").trim()
     }
   });
 
@@ -336,6 +388,29 @@ async function submitLessonHomework(studentId, lessonId, content) {
     ok: true,
     overview: await buildStudentOverview(studentId),
     learningRecords: await buildLearningRecords(studentId)
+  };
+}
+
+async function setLessonHomeworkPolicy(lessonId, requiresHomework) {
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId }
+  });
+
+  if (!lesson) {
+    throw new Error("Lesson not found");
+  }
+
+  await prisma.lesson.update({
+    where: { id: lessonId },
+    data: {
+      requiresHomework: Boolean(requiresHomework)
+    }
+  });
+
+  return {
+    ok: true,
+    overview: await buildStudentOverview(1),
+    learningRecords: await buildLearningRecords(1)
   };
 }
 
@@ -363,6 +438,23 @@ async function handleStudentApi(req, res) {
     const lessonId = pathname.split("/")[5];
     const payload = await readBody(req);
     sendJson(res, 200, await submitLessonHomework(1, lessonId, payload.content));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname.startsWith("/api/teacher/students/") && pathname.endsWith("/review")) {
+    const parts = pathname.split("/");
+    const studentId = Number(parts[4]);
+    const homeworkId = Number(parts[6]);
+    const payload = await readBody(req);
+    sendJson(res, 200, await reviewHomework(studentId, homeworkId, payload.score, payload.teacherNote));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname.startsWith("/api/teacher/lessons/") && pathname.endsWith("/homework-policy")) {
+    const parts = pathname.split("/");
+    const lessonId = parts[4];
+    const payload = await readBody(req);
+    sendJson(res, 200, await setLessonHomeworkPolicy(lessonId, payload.requiresHomework));
     return true;
   }
 

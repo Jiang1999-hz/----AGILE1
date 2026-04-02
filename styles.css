@@ -518,6 +518,11 @@ button { cursor: pointer; border: none; }
   color: var(--muted);
 }
 
+.lesson-status-nohomework {
+  background: rgba(63, 49, 41, 0.08);
+  color: #61544a;
+}
+
 .lesson-card strong {
   display: block;
   font-size: 22px;
@@ -563,6 +568,10 @@ button { cursor: pointer; border: none; }
   align-items: center;
 }
 
+.db-header-actions {
+  grid-template-columns: 1.5fr 0.8fr 0.8fr 1fr 1fr 0.9fr;
+}
+
 .db-header {
   padding: 0 14px 8px;
   color: var(--muted);
@@ -591,6 +600,18 @@ button { cursor: pointer; border: none; }
   position: relative;
 }
 
+.db-row-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.db-row-shell.active .db-row {
+  border-color: rgba(213, 107, 73, 0.35);
+  background: rgba(255, 246, 240, 0.9);
+}
+
 .db-row:hover {
   background: rgba(255, 250, 246, 0.95);
 }
@@ -604,6 +625,16 @@ button { cursor: pointer; border: none; }
   width: 4px;
   border-radius: 999px;
   background: linear-gradient(180deg, var(--accent), #f0b07a);
+}
+
+.db-row-actions {
+  display: flex;
+  align-items: center;
+}
+
+.db-row-actions .ghost-btn {
+  min-width: 78px;
+  justify-content: center;
 }
 
 .table-name {
@@ -679,6 +710,75 @@ button { cursor: pointer; border: none; }
 
 .feedback-input { min-height: 120px; resize: vertical; }
 .todo-item { border-left: 4px solid var(--teal); }
+.homework-entry {
+  display: grid;
+  gap: 10px;
+}
+
+.homework-content-card {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(63, 49, 41, 0.08);
+}
+
+.homework-content-card p {
+  margin: 8px 0 0;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.homework-review-card {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(247, 252, 251, 0.94);
+  border: 1px solid rgba(25, 143, 137, 0.12);
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.review-field {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+}
+
+.review-field span {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.review-status-text {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(63, 49, 41, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.unread-review-banner {
+  border-left: 5px solid var(--accent);
+  background: linear-gradient(180deg, rgba(255, 247, 239, 0.98), rgba(255, 255, 255, 0.95));
+}
+
+.inline-review-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(213, 107, 73, 0.12);
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 700;
+}
 
 .student-status-banner {
   border-left: 5px solid transparent;
@@ -736,6 +836,12 @@ button { cursor: pointer; border: none; }
 
 .student-toast-error {
   background: linear-gradient(135deg, #cf5f58, #d56b49);
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 @media (max-width: 1200px) {

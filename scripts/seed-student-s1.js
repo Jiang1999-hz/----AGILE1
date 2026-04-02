@@ -118,6 +118,7 @@ async function main() {
         completion: lesson.completion,
         understanding: lesson.understanding,
         homeworkStatus: lesson.homeworkStatus,
+        requiresHomework: lesson.requiresHomework !== false,
         wrongCount: lesson.wrongCount,
         metrics: lesson.metrics,
         highlights: lesson.highlights,
