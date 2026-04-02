@@ -1,19 +1,19 @@
 {
   "questions": [
     {
-      "id": "eju-sequence-001",
+      "id": "eju-sequence-pdf-001",
       "subjectId": "math2",
       "topicId": "sequence",
       "levelId": "basic",
       "abilityIndex": 0,
       "type": "text",
       "blankLabels": ["A", "B", "C", "D"],
-      "question": "<div class=\"math-rich-prompt\"><div class=\"math-jp-line\">数列 {a<sub>k</sub>} が</div><div class=\"math-formula\">a<sub>k</sub> = k<sup>2</sup> - 2k + 2　(k ≥ 1)</div><div class=\"math-jp-line\">で与えられているとき，初項から第 n 項までの和は</div><div class=\"math-fraction\"><span class=\"math-frac-top\">A n<sup>3</sup> - B n<sup>2</sup> + C n</span><span class=\"math-frac-bottom\">D</span></div><div class=\"math-jp-line\">である。</div></div>",
+      "question": "<div class=\"quiz-image-prompt\"><img class=\"quiz-question-image\" src=\"/assets/questions/pdf-sequence/q1.png\" alt=\"数列题 1\"></div>",
       "answer": "1,6,11,6",
       "explanation": {
         "assetType": "text",
         "assetLabel": "老师标准讲解",
-        "assetUrl": "demo://eju/math2/sequence/q1/text",
+        "assetUrl": null,
         "summary": "先把和写成 Σ(k^2 - 2k + 2)，再拆成 Σk^2、Σk、Σ1 三部分分别求和，最后整理成分式并读出 A、B、C、D。",
         "steps": [
           {
@@ -36,38 +36,73 @@
       }
     },
     {
-      "id": "eju-sequence-002",
+      "id": "eju-sequence-pdf-002",
       "subjectId": "math2",
       "topicId": "sequence",
       "levelId": "basic",
       "abilityIndex": 0,
       "type": "text",
-      "blankLabels": ["-AB", "C", "D", "E", "-FGH", "I"],
-      "question": "<div class=\"math-rich-prompt\"><div class=\"math-jp-line\">初項 (first term) 2，公比 (common ratio) −<span class=\"math-inline-frac\"><span class=\"math-frac-top\">2</span><span class=\"math-frac-bottom\">3</span></span> の等比数列 (geometric progression) {a<sub>n</sub>} を考える。このとき，b<sub>n</sub> = a<sub>n+1</sub>a<sub>n</sub> (n ≥ 1) とおくと，数列 {b<sub>n</sub>} は</div><div class=\"math-jp-line math-gap-top\">初項 = <span class=\"math-inline-frac\"><span class=\"math-frac-top\">AB</span><span class=\"math-frac-bottom\">C</span></span>，　公比 = <span class=\"math-inline-frac\"><span class=\"math-frac-top\">D</span><span class=\"math-frac-bottom\">E</span></span></div><div class=\"math-jp-line\">の等比数列になる。したがって，</div><div class=\"math-sum-line\"><span class=\"math-sigma\">∑</span><span class=\"math-sum-range\"><span>∞</span><span>n=1</span></span> b<sub>n</sub> = <span class=\"math-inline-frac\"><span class=\"math-frac-top\">FGH</span><span class=\"math-frac-bottom\">I</span></span></div><div class=\"math-jp-line\">である。</div></div>",
+      "blankLabels": ["AB", "C", "D", "E", "FGH", "I"],
+      "question": "<div class=\"quiz-image-prompt\"><img class=\"quiz-question-image\" src=\"/assets/questions/pdf-sequence/q2.png\" alt=\"数列题 2\"></div>",
       "answer": "-8,3,4,9,-24,5",
       "explanation": {
         "assetType": "text",
         "assetLabel": "老师标准讲解",
-        "assetUrl": "demo://eju/math2/sequence/q2/text",
-        "summary": "先写出 a_n 的一般项，再利用 b_n = a_{n+1}a_n 求出新等比数列的初项与公比，最后用无穷等比级数求和公式。",
+        "assetUrl": null,
+        "summary": "先写出 a_n 的一般项，再利用 b_n = a_(n+1)a_n 求出新等比数列的初项与公比，最后用无穷等比级数求和公式。",
         "steps": [
           {
             "line": "第1步",
             "title": "写出 a_n 的一般项",
-            "detail": "由初項 2、公比 −2/3，可得 a_n = 2(−2/3)^{n−1}。"
+            "detail": "由初项 2、公比 −2/3，可得 a_n = 2(−2/3)^(n−1)。"
           },
           {
             "line": "第2步",
             "title": "求 b_n 的初项和公比",
-            "detail": "b_n = a_{n+1}a_n = 2(−2/3)^n · 2(−2/3)^{n−1} = −8/3 · (4/9)^{n−1}，所以初项为 −8/3，公比为 4/9。"
+            "detail": "b_n = a_(n+1)a_n = 2(−2/3)^n · 2(−2/3)^(n−1) = −8/3 · (4/9)^(n−1)，所以初项为 −8/3，公比为 4/9。"
           },
           {
             "line": "第3步",
             "title": "求无穷和",
-            "detail": "因为 |4/9| < 1，故 ∑_{n=1}^{∞} b_n = (−8/3) / (1 − 4/9) = −24/5。"
+            "detail": "因为 |4/9| < 1，故 ∑b_n = (−8/3) / (1 − 4/9) = −24/5。"
           }
         ],
         "followUp": "如果你不明白为什么 b_n 仍然是等比数列，可以继续追问“第 2 步里指数是怎么合并的”。"
+      }
+    },
+    {
+      "id": "eju-sequence-pdf-003",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "abilityIndex": 0,
+      "type": "text",
+      "blankLabels": ["JK", "LMN"],
+      "question": "<div class=\"quiz-image-prompt\"><img class=\"quiz-question-image\" src=\"/assets/questions/pdf-sequence/q3.png\" alt=\"数列题 3\"></div>",
+      "answer": "41,492",
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "用二次式差分先求 p、q、r，再代入求 a_4 和前 8 项和。",
+        "steps": [
+          {
+            "line": "第1步",
+            "title": "列方程",
+            "detail": "由 a_1=2, a_2=9, a_3=22 建立关于 p、q、r 的三个方程。"
+          },
+          {
+            "line": "第2步",
+            "title": "求一般项",
+            "detail": "解得 p=3, q=-2, r=1，所以 a_n = 3n^2 - 2n + 1。"
+          },
+          {
+            "line": "第3步",
+            "title": "求两处填空",
+            "detail": "a_4 = 3×16 - 8 + 1 = 41；前 8 项和为 492。"
+          }
+        ],
+        "followUp": "如果你不确定为什么三个已知项足够求出 p、q、r，可以继续追问这个步骤。"
       }
     }
   ]

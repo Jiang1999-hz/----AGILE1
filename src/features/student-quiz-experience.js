@@ -107,7 +107,7 @@
             <p class="eyebrow">Practice Session</p>
             <h3>${ctx.quizSubject()?.label || ""} / ${ctx.quizTopic()?.label || ""} / ${ctx.quizLevel()?.label || ""}</h3>
           </div>
-          <span class="tag">5 题</span>
+          <span class="tag">${ctx.state.quizFlow.questions.length} 题</span>
         </div>
         <form class="quiz-form" id="student-quiz-form">
           ${ctx.state.quizFlow.questions.map((item, index) => `

@@ -295,6 +295,7 @@ async function main() {
         type: question.type,
         prompt: question.question,
         answer: question.answer,
+        blankLabels: question.blankLabels || undefined,
         choices: {
           create: (question.choices || []).map((choice, index) => ({
             label: choice,
