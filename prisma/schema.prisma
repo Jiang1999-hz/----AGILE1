@@ -98,6 +98,90 @@ model QuizSubmission {
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
+model Question {
+  id            String                    @id
+  subjectId     String
+  topicId       String
+  levelId       String
+  abilityIndex  Int
+  type          String
+  prompt        String
+  answer        String
+  active        Boolean                   @default(true)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  subject       QuestionSubject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topic         QuestionTopic             @relation(fields: [subjectId, topicId], references: [subjectId, id], onDelete: Cascade)
+  choices       QuestionChoice[]
+  explanation   QuestionExplanation?
+}
+
+model QuestionSubject {
+  id          String           @id
+  label       String
+  shortLabel  String
+  accent      String
+  description String
+  mapTitle    String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  topics      QuestionTopic[]
+  questions   Question[]
+}
+
+model QuestionTopic {
+  id          String
+  subjectId   String
+  label       String
+  summary     String
+  keywords    Json
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  subject     QuestionSubject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  questions   Question[]
+
+  @@id([subjectId, id])
+  @@unique([subjectId, label])
+}
+
+model QuestionChoice {
+  id          Int       @id @default(autoincrement())
+  questionId  String
+  label       String
+  sortOrder   Int
+  createdAt   DateTime  @default(now())
+  question    Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, sortOrder])
+}
+
+model QuestionExplanation {
+  id           Int                         @id @default(autoincrement())
+  questionId   String                      @unique
+  assetType    String
+  assetLabel   String
+  assetUrl     String?
+  summary      String
+  followUp     String?
+  createdAt    DateTime                    @default(now())
+  updatedAt    DateTime                    @updatedAt
+  question     Question                    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  steps        QuestionExplanationStep[]
+}
+
+model QuestionExplanationStep {
+  id              Int                  @id @default(autoincrement())
+  explanationId   Int
+  lineLabel       String
+  title           String
+  detail          String
+  sortOrder       Int
+  createdAt       DateTime             @default(now())
+  explanation     QuestionExplanation  @relation(fields: [explanationId], references: [id], onDelete: Cascade)
+
+  @@unique([explanationId, sortOrder])
+}
+
 model Homework {
   id        Int      @id @default(autoincrement())
   studentId Int

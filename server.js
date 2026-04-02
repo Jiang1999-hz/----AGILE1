@@ -23,6 +23,85 @@ const quizTemplates = [
   { id: "q4", abilityIndex: 4, type: "choice", question: "一道题做错后最好的下一步是什么？", choices: ["直接跳过", "只看答案", "找错因再做一遍", "等老师再讲"], answer: "找错因再做一遍" }
 ];
 
+const quizExplanations = {
+  q1: {
+    assetType: "video",
+    assetLabel: "老师讲解视频 03:20",
+    summary: "先把常数项移到右边，再把系数消掉，最后检查答案是否满足原式。",
+    steps: [
+      { line: "第 1 行", title: "移项", detail: "把等式左边的 +5 移到右边，变成 17 - 5，所以得到 3x = 12。" },
+      { line: "第 2 行", title: "化简", detail: "17 - 5 等于 12，这一步只是把右边算出来，方便下一步求 x。" },
+      { line: "第 3 行", title: "求未知数", detail: "两边同时除以 3，得到 x = 4。最后代回原式检查：3×4+5=17。" }
+    ],
+    followUp: "看懂后再做一题同类型的移项题，重点练“先移项再除系数”的顺序。"
+  },
+  q2: {
+    assetType: "text",
+    assetLabel: "老师图文讲解",
+    summary: "先把题意翻成式子，再按运算顺序倒推，避免一上来就乱列式。",
+    steps: [
+      { line: "第 1 行", title: "设未知数", detail: "设这个数是 x。" },
+      { line: "第 2 行", title: "翻译题意", detail: "“加上 8 后再乘 2 等于 26” 可以写成 2(x+8)=26。" },
+      { line: "第 3 行", title: "解方程", detail: "先两边除以 2 得到 x+8=13，再减去 8，得到 x=5。" }
+    ],
+    followUp: "如果总把“先加后乘”写反，可以先在纸上画一个运算顺序箭头再列式。"
+  },
+  q3: {
+    assetType: "image",
+    assetLabel: "主旨句判断示意图",
+    summary: "主旨句的作用是概括整段的中心意思，不是罗列细节。",
+    steps: [
+      { line: "第 1 行", title: "先看整段", detail: "先判断段落到底在围绕哪个核心意思展开。" },
+      { line: "第 2 行", title: "排除细节选项", detail: "如果某个选项只提到例子或单个信息点，它通常不是主旨。" },
+      { line: "第 3 行", title: "选最能概括全段的选项", detail: "能覆盖整段核心意思的那个选项，才更接近主旨句的作用。" }
+    ],
+    followUp: "下次做阅读时，先用一句自己的话概括段落中心，再去看选项。"
+  },
+  q4: {
+    assetType: "text",
+    assetLabel: "错题复盘模板",
+    summary: "做错后最有效的下一步不是跳过，而是找出错因并再做一题同类题。",
+    steps: [
+      { line: "第 1 行", title: "标记错因", detail: "先弄清楚是概念没懂、审题失误，还是步骤粗心。" },
+      { line: "第 2 行", title: "回看标准解法", detail: "对照老师给的解题步骤，找到自己从哪一步开始偏掉。" },
+      { line: "第 3 行", title: "立即再做一题", detail: "做一题同类题，确认你是真的理解了，而不是只看懂答案。" }
+    ],
+    followUp: "把这道题加入错题本时，最好同时写一句“我为什么会错”。"
+  }
+};
+
+function enrichQuizTemplate(question) {
+  return {
+    ...question,
+    explanation: question.explanation || quizExplanations[question.id] || null
+  };
+}
+
+function buildQuizReview(answers, sourceQuestions) {
+  const questions = sourceQuestions.map((question) => {
+    const rawAnswer = String(answers[question.id] || "").trim();
+    const normalizedRaw = rawAnswer.replace(/\s+/g, "").toLowerCase();
+    const normalizedAnswer = String(question.answer || "").trim().replace(/\s+/g, "").toLowerCase();
+    const correct = normalizedRaw === normalizedAnswer;
+    return {
+      id: question.id,
+      question: question.question,
+      type: question.type,
+      studentAnswer: rawAnswer || "未作答",
+      correctAnswer: question.answer,
+      correct,
+      explanation: question.explanation || quizExplanations[question.id] || null
+    };
+  });
+
+  return {
+    correctCount: questions.filter((item) => item.correct).length,
+    wrongCount: questions.filter((item) => !item.correct).length,
+    questions,
+    wrongQuestions: questions.filter((item) => !item.correct)
+  };
+}
+
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(payload));
@@ -49,6 +128,172 @@ function readBody(req) {
   });
 }
 
+let cachedQuestionBank = null;
+
+function loadQuestionBankFromFile() {
+  try {
+    const raw = fs.readFileSync(path.join(root, "data", "question-bank.json"), "utf8");
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed.questions) && parsed.questions.length) {
+      return parsed;
+    }
+  } catch (error) {
+  }
+
+  return {
+    questions: quizTemplates.map((question) => ({
+      ...question,
+      explanation: quizExplanations[question.id] || null
+    }))
+  };
+}
+
+function getQuestionBank() {
+  if (!cachedQuestionBank) {
+    cachedQuestionBank = loadQuestionBankFromFile();
+  }
+  return cachedQuestionBank;
+}
+
+function getQuizQuestions() {
+  return getQuestionBank().questions || [];
+}
+
+function normalizeQuestionRecord(record) {
+  return {
+    id: record.id,
+    abilityIndex: record.abilityIndex,
+    type: record.type,
+    question: record.prompt,
+    choices: (record.choices || [])
+      .slice()
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((choice) => choice.label),
+    answer: record.answer,
+    explanation: record.explanation ? {
+      assetType: record.explanation.assetType,
+      assetLabel: record.explanation.assetLabel,
+      assetUrl: record.explanation.assetUrl,
+      summary: record.explanation.summary,
+      followUp: record.explanation.followUp,
+      steps: (record.explanation.steps || [])
+        .slice()
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((step) => ({
+          line: step.lineLabel,
+          title: step.title,
+          detail: step.detail
+        }))
+    } : null
+  };
+}
+
+async function getQuizQuestionsFromDb() {
+  const questionRecords = await prisma.question.findMany({
+    where: { active: true },
+    include: {
+      choices: true,
+      explanation: {
+        include: {
+          steps: true
+        }
+      }
+    },
+    orderBy: { id: "asc" }
+  });
+
+  if (!questionRecords.length) {
+    return getQuizQuestions();
+  }
+
+  return questionRecords.map(normalizeQuestionRecord);
+}
+
+async function getQuizCatalogFromDb() {
+  const subjects = await prisma.questionSubject.findMany({
+    include: {
+      topics: true,
+      questions: {
+        where: { active: true },
+        select: { levelId: true }
+      }
+    },
+    orderBy: { id: "asc" }
+  });
+
+  if (!subjects.length) {
+    const fallbackCatalog = (() => {
+      const localCatalog = path.join(root, "data", "quiz-catalog.json");
+      try {
+        return JSON.parse(fs.readFileSync(localCatalog, "utf8"));
+      } catch (error) {
+        return { subjects: [], levels: [] };
+      }
+    })();
+    return fallbackCatalog;
+  }
+
+  const levelMeta = {
+    basic: { id: "basic", label: "初级", description: "先把基础概念和典型题型做稳。" },
+    intermediate: { id: "intermediate", label: "中级", description: "加入变化题和多一步判断。" },
+    advanced: { id: "advanced", label: "高级", description: "接近考试实战，强调综合与速度。" }
+  };
+
+  const usedLevels = new Set();
+
+  return {
+    levels: Object.values(levelMeta),
+    subjects: subjects.map((subject) => {
+      subject.questions.forEach((item) => usedLevels.add(item.levelId));
+      return {
+        id: subject.id,
+        label: subject.label,
+        shortLabel: subject.shortLabel,
+        accent: subject.accent,
+        description: subject.description,
+        mapTitle: subject.mapTitle,
+        topics: subject.topics
+          .sort((a, b) => a.id.localeCompare(b.id))
+          .map((topic) => ({
+            id: topic.id,
+            label: topic.label,
+            summary: topic.summary,
+            keywords: Array.isArray(topic.keywords) ? topic.keywords : topic.keywords
+          }))
+      };
+    })
+  };
+}
+
+async function getQuizSessionQuestionsFromDb(subjectId, topicId, levelId, count) {
+  const questionRecords = await prisma.question.findMany({
+    where: {
+      active: true,
+      subjectId,
+      topicId,
+      levelId
+    },
+    include: {
+      choices: true,
+      explanation: {
+        include: {
+          steps: true
+        }
+      }
+    }
+  });
+
+  const normalized = questionRecords.map(normalizeQuestionRecord);
+  const featured = normalized.filter((item) => item.id.startsWith("eju-"));
+  const others = normalized.filter((item) => !item.id.startsWith("eju-"));
+  const shuffled = others
+    .map((item) => ({ sortKey: Math.random(), item }))
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map((entry) => entry.item);
+
+  return [...featured, ...shuffled].slice(0, count || 5);
+}
+
 function transformStudent(student) {
   return {
     id: student.id,
@@ -62,31 +307,7 @@ function transformStudent(student) {
     risk: student.risk,
     summary: student.summary,
     parentNote: student.parentNote,
-    teacherFeedback: student.teacherFeedback,
-    quizHistory: student.quizSubmissions
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((item) => ({ date: item.dateLabel, name: item.name, score: item.score, note: item.note })),
-    homework: student.homeworks
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .map((item) => ({
-        id: item.id,
-        lessonId: item.lessonId,
-        date: item.dateLabel,
-        title: item.title,
-        status: item.status,
-        score: item.score,
-        content: item.content || "",
-        teacherNote: item.teacherNote || ""
-      })),
-    teacherMessages: student.messages
-      .filter((item) => item.channel === "teacher")
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((item) => ({ from: item.fromRole, title: item.title, body: item.body, time: item.timeLabel })),
-    aiMessages: student.messages
-      .filter((item) => item.channel === "ai")
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((item) => ({ from: item.fromRole, title: item.title, body: item.body, time: item.timeLabel })),
-    abilities: student.abilities.map((item) => ({ label: item.label, value: item.value }))
+    teacherFeedback: student.teacherFeedback
   };
 }
 
@@ -139,14 +360,32 @@ function transformLessons(lessons, studentId) {
   });
 }
 
+function transformLearningRecords(student) {
+  return {
+    quizHistory: student.quizSubmissions
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map((item) => ({ date: item.dateLabel, name: item.name, score: item.score, note: item.note })),
+    homework: student.homeworks
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .map((item) => ({
+        id: item.id,
+        lessonId: item.lessonId,
+        date: item.dateLabel,
+        title: item.title,
+        status: item.status,
+        score: item.score,
+        content: item.content || "",
+        teacherNote: item.teacherNote || ""
+      })),
+    progress: student.quizSubmissions.slice(-5).map((item) => item.score)
+  };
+}
+
 async function buildStudentOverview(studentId) {
   const student = await prisma.student.findUnique({
     where: { id: studentId },
     include: {
-      abilities: true,
       quizSubmissions: true,
-      homeworks: true,
-      messages: true,
       enrollments: {
         include: {
           course: {
@@ -176,8 +415,7 @@ async function buildStudentOverview(studentId) {
   return {
     student: transformStudent(student),
     courses: transformCourses(courses),
-    lessons: transformLessons(lessons, student.id),
-    quizTemplates
+    lessons: transformLessons(lessons, student.id)
   };
 }
 
@@ -194,27 +432,61 @@ async function buildLearningRecords(studentId) {
     throw new Error("Student not found");
   }
 
+  return transformLearningRecords(student);
+}
+
+async function buildStudentBootstrap(studentId) {
+  const [student, quizCatalog] = await Promise.all([
+    prisma.student.findUnique({
+      where: { id: studentId },
+      include: {
+        quizSubmissions: true,
+        homeworks: true,
+        enrollments: {
+          include: {
+            course: {
+              include: {
+                lessons: {
+                  include: {
+                    homeworks: {
+                      where: { studentId }
+                    }
+                  }
+                },
+                enrollments: true
+              }
+            }
+          }
+        }
+      }
+    }),
+    getQuizCatalogFromDb()
+  ]);
+
+  if (!student) {
+    throw new Error("Student not found");
+  }
+
+  const courses = student.enrollments.map((item) => item.course);
+  const lessons = courses.flatMap((course) => course.lessons);
+
+  const overview = {
+    student: transformStudent(student),
+    courses: transformCourses(courses),
+    lessons: transformLessons(lessons, student.id)
+  };
+
+  const learningRecords = transformLearningRecords(student);
+
   return {
-    quizHistory: student.quizSubmissions
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((item) => ({ date: item.dateLabel, name: item.name, score: item.score, note: item.note })),
-    homework: student.homeworks
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .map((item) => ({
-        id: item.id,
-        lessonId: item.lessonId,
-        date: item.dateLabel,
-        title: item.title,
-        status: item.status,
-        score: item.score,
-        content: item.content || "",
-        teacherNote: item.teacherNote || ""
-      })),
-    progress: student.quizSubmissions.slice(-5).map((item) => item.score)
+    overview,
+    learningRecords,
+    quizCatalog
   };
 }
 
 async function saveQuizSubmission(studentId, answers) {
+  const quizQuestions = await getQuizQuestionsFromDb();
   const student = await prisma.student.findUnique({
     where: { id: studentId },
     include: {
@@ -227,10 +499,12 @@ async function saveQuizSubmission(studentId, answers) {
     throw new Error("Student not found");
   }
 
+  const review = buildQuizReview(answers, quizQuestions);
+
   let correct = 0;
   const weakLabels = [];
 
-  for (const question of quizTemplates) {
+  for (const question of quizQuestions) {
     const raw = String(answers[question.id] || "").trim().replace(/\s+/g, "").toLowerCase();
     const answer = String(question.answer || "").trim().replace(/\s+/g, "").toLowerCase();
     if (raw === answer) {
@@ -247,7 +521,7 @@ async function saveQuizSubmission(studentId, answers) {
     }
   }
 
-  const score = Math.round((correct / quizTemplates.length) * 100);
+  const score = Math.round((correct / Math.max(1, quizQuestions.length)) * 100);
   const uniqueWeakLabels = [...new Set(weakLabels)];
   const note = uniqueWeakLabels.length ? `主要薄弱点: ${uniqueWeakLabels.join("、")}` : "整体稳定，可增加难度";
   const nextScore = Math.round(student.score * 0.75 + score * 0.25);
@@ -308,7 +582,96 @@ async function saveQuizSubmission(studentId, answers) {
     ok: true,
     score,
     note,
+    review,
     overview: await buildStudentOverview(studentId)
+  };
+}
+
+async function saveQuizSessionSubmission(studentId, questionIds, answers, sessionMeta) {
+  const quizQuestions = await prisma.question.findMany({
+    where: {
+      id: { in: questionIds || [] },
+      active: true
+    },
+    include: {
+      choices: true,
+      explanation: {
+        include: {
+          steps: true
+        }
+      }
+    }
+  });
+
+  const normalizedQuestions = quizQuestions.map(normalizeQuestionRecord);
+  const review = buildQuizReview(answers, normalizedQuestions);
+
+  const student = await prisma.student.findUnique({
+    where: { id: studentId },
+    include: {
+      abilities: true,
+      quizSubmissions: true
+    }
+  });
+
+  if (!student) {
+    throw new Error("Student not found");
+  }
+
+  let correct = 0;
+  const weakLabels = [];
+
+  for (const question of normalizedQuestions) {
+    const raw = String(answers[question.id] || "").trim().replace(/\s+/g, "").toLowerCase();
+    const answer = String(question.answer || "").trim().replace(/\s+/g, "").toLowerCase();
+    if (raw === answer) {
+      correct += 1;
+    } else {
+      const ability = student.abilities.find((item, index) => index === question.abilityIndex);
+      if (ability) {
+        weakLabels.push(ability.label);
+        await prisma.studentAbility.update({
+          where: { id: ability.id },
+          data: { value: Math.max(40, ability.value - 3) }
+        });
+      }
+    }
+  }
+
+  const score = Math.round((correct / Math.max(1, normalizedQuestions.length)) * 100);
+  const uniqueWeakLabels = [...new Set(weakLabels)];
+  const label = [sessionMeta?.subjectLabel, sessionMeta?.topicLabel, sessionMeta?.levelLabel].filter(Boolean).join(" · ") || "在线练习";
+  const note = uniqueWeakLabels.length ? `主要薄弱点 ${uniqueWeakLabels.join(" / ")}` : `${label} 表现稳定`;
+  const nextScore = Math.round(student.score * 0.75 + score * 0.25);
+  const nextRisk = nextScore < 75 || student.attendance < 80 ? "楂橀闄?" : nextScore < 85 ? "涓闄?" : "浣庨闄?";
+
+  await prisma.quizSubmission.create({
+    data: {
+      studentId,
+      name: label,
+      score,
+      note,
+      dateLabel: "2026-04-02"
+    }
+  });
+
+  await prisma.student.update({
+    where: { id: studentId },
+    data: {
+      score: nextScore,
+      risk: nextRisk,
+      summary: uniqueWeakLabels.length ? `刚完成 ${label} 练习，当前主要卡点集中在 ${uniqueWeakLabels.join(" / ")}。` : `刚完成 ${label} 练习，整体表现稳定。`,
+      teacherFeedback: uniqueWeakLabels.length ? `建议下次课优先复盘 ${label} 的错题步骤。` : `可以继续推进到更高难度的 ${label} 题型。`,
+      parentNote: uniqueWeakLabels.length ? `本轮 ${label} 练习中出现了 ${review.wrongCount} 道错题，建议先看老师标准讲解再追问。` : `本轮 ${label} 练习表现较稳，可以继续挑战下一组题。`
+    }
+  });
+
+  return {
+    ok: true,
+    score,
+    review,
+    overview: await buildStudentOverview(studentId),
+    learningRecords: await buildLearningRecords(studentId)
   };
 }
 
@@ -423,14 +786,38 @@ async function handleStudentApi(req, res) {
     return true;
   }
 
+  if (req.method === "GET" && pathname === "/api/student/1/bootstrap") {
+    sendJson(res, 200, await buildStudentBootstrap(1));
+    return true;
+  }
+
   if (req.method === "GET" && pathname === "/api/student/1/learning-records") {
     sendJson(res, 200, await buildLearningRecords(1));
+    return true;
+  }
+
+  if (req.method === "GET" && pathname === "/api/quiz/catalog") {
+    sendJson(res, 200, await getQuizCatalogFromDb());
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/quiz/session") {
+    const payload = await readBody(req);
+    sendJson(res, 200, {
+      questions: await getQuizSessionQuestionsFromDb(payload.subjectId, payload.topicId, payload.levelId, payload.count || 5)
+    });
     return true;
   }
 
   if (req.method === "POST" && pathname === "/api/student/1/quiz-submissions") {
     const payload = await readBody(req);
     sendJson(res, 200, await saveQuizSubmission(1, payload.answers || {}));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/student/1/quiz-session-submissions") {
+    const payload = await readBody(req);
+    sendJson(res, 200, await saveQuizSessionSubmission(1, payload.questionIds || [], payload.answers || {}, payload.sessionMeta || {}));
     return true;
   }
 
@@ -461,7 +848,7 @@ async function handleStudentApi(req, res) {
   return false;
 }
 
-const server = http.createServer(async (req, res) => {
+async function appHandler(req, res) {
   try {
     if (req.url.startsWith("/api/")) {
       const handled = await handleStudentApi(req, res);
@@ -488,8 +875,23 @@ const server = http.createServer(async (req, res) => {
   } catch (error) {
     sendJson(res, 500, { error: error.message || "Internal server error" });
   }
-});
+}
 
-server.listen(port, () => {
-  console.log(`Juku AI S1 running at http://localhost:${port}`);
-});
+module.exports = {
+  appHandler,
+  sendJson,
+  readBody,
+  buildStudentBootstrap,
+  buildStudentOverview,
+  buildLearningRecords,
+  getQuizCatalogFromDb,
+  getQuizSessionQuestionsFromDb,
+  saveQuizSessionSubmission
+};
+
+if (require.main === module) {
+  const server = http.createServer(appHandler);
+  server.listen(port, () => {
+    console.log(`Juku AI S1 running at http://localhost:${port}`);
+  });
+}

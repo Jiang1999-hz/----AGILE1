@@ -1,0 +1,38 @@
+{
+  "questions": [
+    {
+      "id": "eju-sequence-001",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "abilityIndex": 0,
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><div class=\"math-jp-line\"><strong>問1</strong>　数列 {a<sub>k</sub>} が</div><div class=\"math-formula\">a<sub>k</sub> = k<sup>2</sup> - 2k + 2　(k ≧ 1)</div><div class=\"math-jp-line\">で与えられているとき，初項から第 n 項までの和は</div><div class=\"math-fraction\"><span class=\"math-frac-top\">A n<sup>3</sup> - B n<sup>2</sup> + C n</span><span class=\"math-frac-bottom\">D</span></div><div class=\"math-jp-line\">である。A, B, C, D をこの順にカンマ区切りで入力せよ。</div></div>",
+      "answer": "1,6,11,6",
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": "demo://eju/math2/sequence/q1/text",
+        "summary": "先把和写成 Σ(k^2 - 2k + 2)，再拆成 Σk^2、Σk、Σ1 三部分分别求和，最后整理成分式并读出 A、B、C、D。",
+        "steps": [
+          {
+            "line": "第1步",
+            "title": "把总和拆开",
+            "detail": "初项到第 n 项的和可写成 Σ(k^2 - 2k + 2) = Σk^2 - 2Σk + 2Σ1。"
+          },
+          {
+            "line": "第2步",
+            "title": "套用求和公式",
+            "detail": "利用 Σk^2 = n(n+1)(2n+1)/6，Σk = n(n+1)/2，Σ1 = n。"
+          },
+          {
+            "line": "第3步",
+            "title": "统一整理",
+            "detail": "代入后通分整理，得到 (n^3 - 6n^2 + 11n) / 6，因此 A=1，B=6，C=11，D=6。"
+          }
+        ],
+        "followUp": "如果你对某一步看不懂，可以继续追问“第 2 步为什么可以直接套公式”或“为什么最后要通分”。"
+      }
+    }
+  ]
+}
