@@ -818,7 +818,7 @@ async function handleStudentApi(req, res) {
   return false;
 }
 
-const server = http.createServer(async (req, res) => {
+async function appHandler(req, res) {
   try {
     if (req.url.startsWith("/api/")) {
       const handled = await handleStudentApi(req, res);
@@ -845,8 +845,22 @@ const server = http.createServer(async (req, res) => {
   } catch (error) {
     sendJson(res, 500, { error: error.message || "Internal server error" });
   }
-});
+}
 
-server.listen(port, () => {
-  console.log(`Juku AI S1 running at http://localhost:${port}`);
-});
+module.exports = {
+  appHandler,
+  sendJson,
+  readBody,
+  buildStudentOverview,
+  buildLearningRecords,
+  getQuizCatalogFromDb,
+  getQuizSessionQuestionsFromDb,
+  saveQuizSessionSubmission
+};
+
+if (require.main === module) {
+  const server = http.createServer(appHandler);
+  server.listen(port, () => {
+    console.log(`Juku AI S1 running at http://localhost:${port}`);
+  });
+}
