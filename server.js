@@ -1188,7 +1188,11 @@ async function getQuizSessionQuestionsFromDb(subjectId, topicId, levelId, count)
     }
     const imported = normalized.filter((item) => item.id.startsWith("eju-sequence-pdf-") || item.id.startsWith("sequence-"));
     if (imported.length) {
-      return imported.slice(0, count || imported.length);
+      const shuffledImported = imported
+        .map((item) => ({ sortKey: Math.random(), item }))
+        .sort((a, b) => a.sortKey - b.sortKey)
+        .map((entry) => entry.item);
+      return shuffledImported.slice(0, count || imported.length);
     }
     const featured = normalized.filter((item) => item.id.startsWith("eju-"));
     const others = normalized.filter((item) => !item.id.startsWith("eju-"));
