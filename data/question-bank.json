@@ -135,7 +135,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>(1) ?? 7??? 2 ????? {a<sub>n</sub>} (n = 1,2,3, ?) ?????</strong></p><p class=\"math-jp-line\">?? 1000 ?????????? L ????????????????? MNO ????</p><p class=\"math-jp-line\"><strong>(2) ?? 13??? 15 ????? {b<sub>n</sub>} (n = 1,2,3, ?) ?????</strong></p><div class=\"math-answer-line\"><span>b<sub>n</sub> = </span><span class=\"math-boxed-letter-wide\">PQ</span><span>n - </span><span class=\"math-boxed-letter\">R</span></div><p class=\"math-jp-line\">????</p><div class=\"math-answer-line\"><span>b<sub>66</sub> = </span><span class=\"math-boxed-letter-wide\">STU</span></div><p class=\"math-jp-line\">????</p><p class=\"math-jp-line\"><strong>(3)</strong> (1) ??? {a<sub>n</sub>} ?? (2) ??? {b<sub>n</sub>} ??????????????? VW ????1000 ?????????? XYZ ????</p></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>(1) 初項 7，公比 2 の等比数列 {a<sub>n</sub>} (n = 1,2,3, …) を考える。</strong></p><p class=\"math-jp-line\">値が 1000 より小さい項は全部で L 個あり，それらの項の中で最大の値は MNO である。</p><p class=\"math-jp-line\"><strong>(2) 初項 13，公差 15 の等差数列 {b<sub>n</sub>} (n = 1,2,3, …) を考える。</strong></p><div class=\"math-answer-line\"><span>b<sub>n</sub> = </span><span class=\"math-boxed-letter-wide\">PQ</span><span>n - </span><span class=\"math-boxed-letter\">R</span></div><p class=\"math-jp-line\">であり，</p><div class=\"math-answer-line\"><span>b<sub>66</sub> = </span><span class=\"math-boxed-letter-wide\">STU</span></div><p class=\"math-jp-line\">である。</p><p class=\"math-jp-line\"><strong>(3)</strong> (1) の数列 {a<sub>n</sub>} にも (2) の数列 {b<sub>n</sub>} にも現れる数の中で，最小の値は VW であり，1000 より小さい最大の値は XYZ である。</p></div>",
       "answer": "8,896,15,2,988,28,28",
       "blankLabels": [
         "L",
@@ -150,14 +150,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "????? 7, 14, 28, ? ?????? 1000 ????????????????????? b_66 ???????????????? 28 ??????",
+        "summary": "等比数列は 7, 14, 28, … と増えるので 1000 未満を順に数える。等差数列は一般項を作って b_66 を出し，共通する値は両方に現れる 28 を確認する。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-06.png",
-      "rewrittenPrompt": "???????????????????????????????????",
-      "notes": "7 ? 13 ????????display_html ? 3 ???????"
+      "rewrittenPrompt": "等比数列と等差数列の情報を使い，個数・一般項・共通項を整理して求める。",
+      "notes": "7 と 13 を使う複合問題。display_html に 3 段構成を保存。"
     },
     {
       "id": "sequence-007",
@@ -165,7 +165,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>p?q ????????</strong></p><p class=\"math-jp-line\">3 ??? 4?p?q ?????????????3 ??? p?q?18 ?????????????????</p><div class=\"math-answer-line\"><span>p = </span><span class=\"math-boxed-letter\">J</span><span>? q = </span><span class=\"math-boxed-letter-wide\">KL</span></div><p class=\"math-jp-line\">????????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">M</span></div><p class=\"math-jp-line\">??????????</p><div class=\"math-fraction\"><div class=\"math-fraction-top\">N</div><div class=\"math-fraction-bottom\">O</div></div><p class=\"math-jp-line\">????</p></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>p，q を正の数とする。</strong></p><p class=\"math-jp-line\">3 つの数 4，p，q はこの順に等差数列をなし，3 つの数 p，q，18 はこの順に等比数列をなす。このとき</p><div class=\"math-answer-line\"><span>p = </span><span class=\"math-boxed-letter\">J</span><span>， q = </span><span class=\"math-boxed-letter-wide\">KL</span></div><p class=\"math-jp-line\">であり，等差数列の公差は</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">M</span></div><p class=\"math-jp-line\">で，等比数列の公比は</p><div class=\"math-fraction\"><div class=\"math-fraction-top\">N</div><div class=\"math-fraction-bottom\">O</div></div><p class=\"math-jp-line\">である。</p></div>",
       "answer": "8,12,4,3,2",
       "blankLabels": [
         "J",
@@ -178,14 +178,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "?????? q = 2p - 4??????? q^2 = 18p ???????????? p = 8?q = 12 ????????? 4???? 3/2 ?????",
+        "summary": "等差条件から q = 2p - 4，等比条件から q^2 = 18p とおける。これを連立して p = 8，q = 12 を求めれば，公差は 4，公比は 3/2 とわかる。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-07.png",
-      "rewrittenPrompt": "4, p, q ?????? p, q, 18 ???????????p?q???????????",
-      "notes": "??????????????????"
+      "rewrittenPrompt": "4, p, q の等差条件と p, q, 18 の等比条件を連立して，p・q・公差・公比を求める。",
+      "notes": "等差と等比を同時に使う条件整理問題。"
     },
     {
       "id": "sequence-008",
@@ -193,7 +193,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>?? {a<sub>n</sub>} ?????? n ?????? S<sub>n</sub> ????</strong></p><p class=\"math-jp-line\">??</p><div class=\"math-answer-line\"><span>a<sub>1</sub> = 1??S<sub>n</sub> = n a<sub>n</sub> - 2n<sup>3</sup> + 2n?(n = 1,2,3, ?)</span></div><p class=\"math-jp-line\">?????? {a<sub>n</sub>} ?????????</p><div class=\"math-answer-line\"><span>S<sub>n-1</sub> = (n - 1)a<sub>n-1</sub> - </span><span class=\"math-boxed-letter\">G</span><span>n<sup>3</sup> + </span><span class=\"math-boxed-letter\">H</span><span>n<sup>2</sup> - </span><span class=\"math-boxed-letter\">I</span><span>n</span></div><p class=\"math-jp-line\">?????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> - a<sub>n-1</sub> = </span><span class=\"math-boxed-letter\">J</span><span>n?(n = 2,3,4, ?)</span></div><p class=\"math-jp-line\">???????????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"math-boxed-letter\">K</span><span>n<sup>2</sup> + </span><span class=\"math-boxed-letter\">L</span><span>n - </span><span class=\"math-boxed-letter\">M</span><span>?(n = 1,2,3, ?)</span></div><p class=\"math-jp-line\">??????</p><div class=\"math-answer-line\"><span>lim<sub>n??</sub> </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">S<sub>n</sub></span><span class=\"inline-fraction-bottom\">n a<sub>n</sub></span></span><span> = </span><span class=\"math-fraction\"><span class=\"math-fraction-top\">N</span><span class=\"math-fraction-bottom\">O</span></span></div><p class=\"math-jp-line\">????</p></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>数列 {a<sub>n</sub>} の初項から第 n 項までの和を S<sub>n</sub> とする。</strong></p><p class=\"math-jp-line\">条件</p><div class=\"math-answer-line\"><span>a<sub>1</sub> = 1，　S<sub>n</sub> = n a<sub>n</sub> - 2n<sup>3</sup> + 2n　(n = 1,2,3, …)</span></div><p class=\"math-jp-line\">を満たす数列 {a<sub>n</sub>} を考える。このとき</p><div class=\"math-answer-line\"><span>S<sub>n-1</sub> = (n - 1)a<sub>n-1</sub> - </span><span class=\"math-boxed-letter\">G</span><span>n<sup>3</sup> + </span><span class=\"math-boxed-letter\">H</span><span>n<sup>2</sup> - </span><span class=\"math-boxed-letter\">I</span><span>n</span></div><p class=\"math-jp-line\">であるから</p><div class=\"math-answer-line\"><span>a<sub>n</sub> - a<sub>n-1</sub> = </span><span class=\"math-boxed-letter\">J</span><span>n　(n = 2,3,4, …)</span></div><p class=\"math-jp-line\">が成り立つ。したがって</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"math-boxed-letter\">K</span><span>n<sup>2</sup> + </span><span class=\"math-boxed-letter\">L</span><span>n - </span><span class=\"math-boxed-letter\">M</span><span>　(n = 1,2,3, …)</span></div><p class=\"math-jp-line\">である。また</p><div class=\"math-answer-line\"><span>lim<sub>n→∞</sub> </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">S<sub>n</sub></span><span class=\"inline-fraction-bottom\">n a<sub>n</sub></span></span><span> = </span><span class=\"math-fraction\"><span class=\"math-fraction-top\">N</span><span class=\"math-fraction-bottom\">O</span></span></div><p class=\"math-jp-line\">である。</p></div>",
       "answer": "2,6,4,6,3,3,5,1,3",
       "blankLabels": [
         "G",
@@ -210,14 +210,472 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "S_n - S_(n-1) = a_n ????????? a_n - a_(n-1) = 6n ??????????? a_n = 3n^2 + 3n - 5 ??????? S_n/(n a_n) ?????????? 1/3?",
+        "summary": "S_n - S_(n-1) = a_n を使って差をとると a_n - a_(n-1) = 6n が出る。そこから一般項 a_n = 3n^2 + 3n - 5 を求め，最後に S_n/(n a_n) の最高次項比を見れば 1/3。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-08.png",
-      "rewrittenPrompt": "? S_n ???????? a_n - a_(n-1) ?????????????????",
-      "notes": "???????????????????????????"
+      "rewrittenPrompt": "和 S_n の条件式から差分 a_n - a_(n-1) を作り，一般項と極限を順に求める。",
+      "notes": "和から一般項を復元する典型問題。極限までまとめて扱う。"
+    },
+    {
+      "id": "sequence-009",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>等差数列 {a<sub>n</sub>} において，a<sub>1</sub> = 2，a<sub>p</sub> = 30，a<sub>q</sub> = 51 とする。</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> 公差を d とすると</p><div class=\"math-answer-line\"><span>(p - 1)d = </span><span class=\"math-boxed-letter-wide\">FG</span><span>，　(q - 1)d = </span><span class=\"math-boxed-letter-wide\">HI</span></div><p class=\"math-jp-line\">が成り立つ。</p><p class=\"math-jp-line\"><strong>(2)</strong> 公差 d が 1 より大きい整数になるのは，d = </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">J</span></div><p class=\"math-jp-line\">のときで，そのとき初項から第 q 項までの和は</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">KLM</span></div><p class=\"math-jp-line\">である。</p><p class=\"math-jp-line\"><strong>(3)</strong> 一般に，p と q の間には</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">N</span><span>q = </span><span class=\"math-boxed-letter\">O</span><span>p - 3</span></div><p class=\"math-jp-line\">が成り立つ。</p></div>",
+      "answer": "28,49,7,212,4,7",
+      "blankLabels": [
+        "FG",
+        "HI",
+        "J",
+        "KLM",
+        "N",
+        "O"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "a_p = 2 + (p-1)d = 30，a_q = 2 + (q-1)d = 51 だから (p-1)d = 28，(q-1)d = 49。d は 28 と 49 の公約数で 1 より大きいので 7。そこから q = 8，和は 212，さらに 49/28 = (q-1)/(p-1) より 4q = 7p - 3。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-09.png",
+      "rewrittenPrompt": "等差数列の一般項と和を用いて，p と q の関係まで整理して求める。",
+      "notes": "等差数列の基本式から公差・和・添字関係まで一気に求める。"
+    },
+    {
+      "id": "sequence-010",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>数列 {a<sub>n</sub>} は次の条件を満たしている。</strong></p><div class=\"math-answer-line\"><span>a<sub>n</sub> &gt; 0，　4√S<sub>n</sub> = a<sub>n</sub> + 4　(n = 1,2,3, …)</span></div><p class=\"math-jp-line\">ただし，S<sub>n</sub> = <span class=\"math-sigma\">∑<sub>k=1</sub><sup>n</sup></span> a<sub>k</sub> とする。</p><p class=\"math-jp-line\"><strong>(1)</strong> a<sub>1</sub> = </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">K</span></div><p class=\"math-jp-line\"><strong>(2)</strong> a<sub>n</sub> と a<sub>n+1</sub> は</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">LM</span><span>a<sub>n+1</sub> = (a<sub>n+1</sub> + </span><span class=\"math-boxed-letter\">N</span><span>)<sup>2</sup> - (a<sub>n</sub> + </span><span class=\"math-boxed-letter\">O</span><span>)<sup>2</sup></span></div><p class=\"math-jp-line\">を満たすから</p><div class=\"math-answer-line\"><span>a<sub>n+1</sub> - a<sub>n</sub> = </span><span class=\"math-boxed-letter\">P</span></div><p class=\"math-jp-line\">である。</p><p class=\"math-jp-line\"><strong>(3)</strong> a<sub>n</sub> = 68 ならば，n = </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">Q</span></div><p class=\"math-jp-line\">である。</p></div>",
+      "answer": "4,16,4,4,8,9",
+      "blankLabels": [
+        "K",
+        "LM",
+        "N",
+        "O",
+        "P",
+        "Q"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "n=1 で 4√a_1 = a_1 + 4 より a_1 = 4。さらに 16S_n = (a_n+4)^2 を使って 16a_(n+1) = (a_(n+1)+4)^2 - (a_n+4)^2 を作ると，a_(n+1)-a_n = 8 とわかる。よって a_n = 8n - 4，a_n = 68 から n = 9。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-10.png",
+      "rewrittenPrompt": "S_n の条件式を差し引いて，数列 {a_n} の漸化的な性質を見抜く。",
+      "notes": "条件式の差を取って等差数列化するタイプ。"
+    },
+    {
+      "id": "sequence-011",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>{a<sub>n</sub>} (n = 1,2,3, …) は，初項 a<sub>1</sub> = x，公差 −1 の等差数列とする。</strong></p><p class=\"math-jp-line\">このとき，すべての自然数 k に対して</p><div class=\"math-answer-line\"><span>a<sub>2k-1</sub> - a<sub>2k+1</sub> = </span><span class=\"math-boxed-letter\">J</span></div><div class=\"math-answer-line\"><span>a<sub>2k</sub><sup>2</sup> = (x + 1)<sup>2</sup> − </span><span class=\"math-boxed-letter\">K</span><span>k(x + 1) + </span><span class=\"math-boxed-letter\">L</span><span>k<sup>2</sup></span></div><p class=\"math-jp-line\">となる。</p><p class=\"math-jp-line\"><strong>(1)</strong> T<sub>n</sub> = <span class=\"math-sigma\">∑<sub>k=1</sub><sup>n</sup></span> (a<sub>2k-1</sub> − a<sub>2k+1</sub>)a<sub>2k</sub><sup>2</sup> とおくと</p><div class=\"math-answer-line\"><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">T<sub>n</sub></span><span class=\"inline-fraction-bottom\">2n</span></span><span> = (x + 1)<sup>2</sup> − </span><span class=\"math-boxed-letter\">M</span><span>(n + </span><span class=\"math-boxed-letter\">N</span><span>)(x + 1)</span></div><div class=\"math-answer-line\"><span> + </span><span class=\"math-fraction\"><span class=\"math-fraction-top\">O</span><span class=\"math-fraction-bottom\">P</span></span><span>(n + </span><span class=\"math-boxed-letter\">Q</span><span>)(</span><span class=\"math-boxed-letter\">R</span><span>n + 1)</span></div><p class=\"math-jp-line\">である。</p><p class=\"math-jp-line\"><strong>(2)</strong> T<sub>8</sub> &lt; 352 であれば，</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">S</span><span> &lt; x &lt; </span><span class=\"math-boxed-letter\">T</span></div><p class=\"math-jp-line\">であり，特に x が整数であれば，a<sub>8</sub> = </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">U</span></div></div>",
+      "answer": "2,4,4,2,1,2,3,1,2,7,9,1",
+      "blankLabels": [
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "a_(2k-1)-a_(2k+1)=2，a_(2k)=x-2k+1 だから a_(2k)^2 = (x+1)^2 - 4k(x+1) + 4k^2。これを T_n に代入して和を整理すると式が得られる。n=8 を代入すると (x-7)(x-9)<0 より 7<x<9，x が整数なら 8 なので a_8 = 1。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-11.png",
+      "rewrittenPrompt": "公差 -1 の等差数列を偶数番目で評価し，和を整理して x の範囲を求める。",
+      "notes": "偶数項と総和を組み合わせる整理問題。"
+    },
+    {
+      "id": "sequence-012",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>等差数列 {a<sub>n</sub>} (n = 1,2,3, …) において a<sub>5</sub> = −27，a<sub>16</sub> = 28 とする。</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> 公差を d とすると，与えられた 2 つの条件より</p><div class=\"math-answer-line\"><span>a<sub>1</sub> + </span><span class=\"math-boxed-letter\">A</span><span>d = −</span><span class=\"math-boxed-letter-wide\">BCD</span><span>，　a<sub>1</sub> + </span><span class=\"math-boxed-letter-wide\">EF</span><span>d = </span><span class=\"math-boxed-letter-wide\">GH</span></div><p class=\"math-jp-line\">を得る。これより，a<sub>1</sub> = −</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">IJK</span><span>，　d = </span><span class=\"math-boxed-letter\">L</span></div><p class=\"math-jp-line\"><strong>(2)</strong> 初項から第 n 項までの和 S<sub>n</sub> を n の式で表すと</p><div class=\"math-answer-line\"><span>S<sub>n</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">n</span><span class=\"inline-fraction-bottom\">2</span></span><span>(</span><span class=\"math-boxed-letter\">M</span><span>n − </span><span class=\"math-boxed-letter-wide\">NO</span><span>)</span></div><p class=\"math-jp-line\">となる。</p><p class=\"math-jp-line\"><strong>(3)</strong> T<sub>n</sub> = 2<sup>a<sub>1</sub></sup> + 2<sup>a<sub>2</sub></sup> + … + 2<sup>a<sub>n</sub></sup> を n の式で表すと</p><div class=\"math-answer-line\"><span>T<sub>n</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">1</span><span class=\"inline-fraction-bottom\">2<sup class=\"math-inline-sup\">PQ</sup></span></span><span>(</span><span class=\"math-boxed-letter-wide\">RS</span><span>)<sup>n</sup> − </span><span class=\"math-fraction\"><span class=\"math-fraction-top\">T</span><span class=\"math-fraction-bottom\">UV</span></span></div><p class=\"math-jp-line\">となる。</p></div>",
+      "answer": "4,27,15,28,47,5,5,99,-1,32,2,31",
+      "blankLabels": [
+        "A",
+        "BCD",
+        "EF",
+        "GH",
+        "IJK",
+        "L",
+        "M",
+        "NO",
+        "PQ",
+        "RS",
+        "T",
+        "UV"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "a_5=a_1+4d=-27，a_16=a_1+15d=28 だから d=5，a_1=-47。よって S_n = n(5n-99)/2。さらに 2^{a_n} は公比 2^5 = 32 の等比数列なので，和は 2(32^n - 1)/31 と表せる。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-12.png",
+      "rewrittenPrompt": "等差数列の 2 条件から初項と公差を出し，和の公式と等比和へつなげる。",
+      "notes": "等差数列から和と指数和へ展開する問題。"
+    },
+    {
+      "id": "sequence-013",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>等比数列 {a<sub>n</sub>} (n = 1,2,3, …) は，初項から第 10 項までの和が 93 であり</strong></p><div class=\"math-answer-line\"><span>a<sub>1</sub> − a<sub>2</sub> + a<sub>3</sub> − a<sub>4</sub> + a<sub>5</sub> − a<sub>6</sub> + a<sub>7</sub> − a<sub>8</sub> + a<sub>9</sub> − a<sub>10</sub> = 31</span></div><p class=\"math-jp-line\">を満たす。このとき</p><p class=\"math-jp-line\"><strong>(1)</strong> {a<sub>n</sub>} の公比は</p><div class=\"math-fraction\"><div class=\"math-fraction-top\">A</div><div class=\"math-fraction-bottom\">B</div></div><p class=\"math-jp-line\">，初項は</p><div class=\"math-fraction\"><div class=\"math-fraction-top\">CDE</div><div class=\"math-fraction-bottom\">FG</div></div><p class=\"math-jp-line\">である。</p><p class=\"math-jp-line\"><strong>(2)</strong> また</p><div class=\"math-answer-line\"><span>1 − </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">a<sub>1</sub></span><span class=\"inline-fraction-bottom\">a<sub>2</sub></span></span><span> + </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">a<sub>1</sub></span><span class=\"inline-fraction-bottom\">a<sub>3</sub></span></span><span> − </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">a<sub>1</sub></span><span class=\"inline-fraction-bottom\">a<sub>4</sub></span></span><span> + </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">a<sub>1</sub></span><span class=\"inline-fraction-bottom\">a<sub>5</sub></span></span><span> − </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">a<sub>1</sub></span><span class=\"inline-fraction-bottom\">a<sub>6</sub></span></span><span> + </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">a<sub>1</sub></span><span class=\"inline-fraction-bottom\">a<sub>7</sub></span></span><span> − </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">a<sub>1</sub></span><span class=\"inline-fraction-bottom\">a<sub>8</sub></span></span><span> + </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">a<sub>1</sub></span><span class=\"inline-fraction-bottom\">a<sub>9</sub></span></span><span> − </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">a<sub>1</sub></span><span class=\"inline-fraction-bottom\">a<sub>10</sub></span></span><span> = −</span><span class=\"math-boxed-letter-wide\">HIJ</span></div><p class=\"math-jp-line\">である。</p></div>",
+      "answer": "1,2,512,11,341",
+      "blankLabels": [
+        "A",
+        "B",
+        "CDE",
+        "FG",
+        "HIJ"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "奇数番目の和と偶数番目の和を O, E とおくと O+E=93，O-E=31 だから O=62，E=31。よって公比 r=E/O=1/2。和の公式から初項は 512/11，さらに a_1/a_n = 2^{n-1} を使えば交代和は -341 とわかる。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-13.png",
+      "rewrittenPrompt": "和と交代和を連立して公比・初項を決め，分数和を求める。",
+      "notes": "和と交代和を同時に使う等比数列の良問。"
+    },
+    {
+      "id": "sequence-014",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>3 ??????? 2?4 ??????? 3 ????????????????? {a<sub>n</sub>} ?????</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> ????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"math-boxed-letter-wide\">A</span><span>n ? </span><span class=\"math-boxed-letter\">B</span></div><p class=\"math-jp-line\"><strong>(2)</strong> ????? n ??????</p><div class=\"math-answer-line\"><span>a<sub>1</sub> + ? + a<sub>n</sub> = n(</span><span class=\"math-boxed-letter\">C</span><span>n + </span><span class=\"math-boxed-letter\">D</span><span>)</span></div><p class=\"math-jp-line\">??????? 2 ????</p><div class=\"math-answer-line\"><span>a<sub>1</sub><sup>2</sup> + ? + a<sub>n</sub><sup>2</sup> = n(</span><span class=\"math-boxed-letter-wide\">E</span><span>n<sup>2</sup> + </span><span class=\"math-boxed-letter-wide\">F</span><span>n + </span><span class=\"math-boxed-letter-wide\">G</span><span>)</span></div><p class=\"math-jp-line\"><strong>(3)</strong> ??? 2 ??????? S ????</p><div class=\"math-answer-line\"><span>S = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">n</span><span class=\"inline-fraction-bottom\">2</span></span><span>(36n<sup>3</sup> + </span><span class=\"math-boxed-letter-wide\">H</span><span>n<sup>2</sup> ? 35n ? </span><span class=\"math-boxed-letter-wide\">I</span><span>)</span></div></div>",
+      "answer": "12,1,6,5,48,60,13,12,13",
+      "blankLabels": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "?????????????? 11???? 12 ??? a_n=12n-1??? 2 ?????????(?)^2 = 2S + 2?? ?????????????",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-14.png",
+      "rewrittenPrompt": "?????????????????????????????",
+      "notes": "????????????????????"
+    },
+    {
+      "id": "sequence-015",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>???? {a<sub>n</sub>} ????? {b<sub>n</sub>} ????????? c?????????? d ????</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> a<sub>5</sub> = b<sub>3</sub>, a<sub>7</sub> = b<sub>5</sub> ????</p><div class=\"math-answer-line\"><span>c + </span><span class=\"math-boxed-letter\">A</span><span>d = cd<sup><span class=\"math-boxed-letter\">B</span></sup>? c + </span><span class=\"math-boxed-letter\">C</span><span>d = cd<sup><span class=\"math-boxed-letter\">D</span></sup></span></div><p class=\"math-jp-line\">??</p><div class=\"math-answer-line\"><span>d = ?</span><span class=\"math-boxed-letter\">E</span><span> / </span><span class=\"math-boxed-letter\">F</span><span>? c = </span><span class=\"math-boxed-letter\">G</span><span>?</span><span class=\"math-boxed-letter\">H</span></div><p class=\"math-jp-line\"><strong>(2)</strong> {b<sub>n</sub>} ?????? 2m ?????????????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">I</span><span>{(</span><span class=\"math-fraction\"><span class=\"math-fraction-top\">J</span><span class=\"math-fraction-bottom\">K</span></span><span>)<sup>m</sup> ? </span><span class=\"math-boxed-letter\">L</span><span>}</span></div></div>",
+      "answer": "4,2,6,4,6,2,4,6,24,3,2,1",
+      "blankLabels": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "a_5=c+4d?a_7=c+6d?b_3=cd^2?b_5=cd^4 ?? d^2=3/2?d=?6/2?c=4?6?????? b_n ?????????????? 24((3/2)^m?1)?",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-15.png",
+      "rewrittenPrompt": "???????????????????c ? d ??????????????????",
+      "notes": "???????????????????"
+    },
+    {
+      "id": "sequence-016",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>?? {a<sub>n</sub>} ? a<sub>1</sub> = 1?a<sub>n+1</sub> = 2a<sub>n</sub><sup>2</sup> ?????????</strong></p><p class=\"math-jp-line\">?????????????</p><div class=\"math-answer-line\"><span>log<sub>10</sub>a<sub>n+1</sub> = log<sub>10</sub></span><span class=\"math-boxed-letter\">A</span><span> + </span><span class=\"math-boxed-letter\">B</span><span>log<sub>10</sub>a<sub>n</sub></span></div><p class=\"math-jp-line\">??? b<sub>n</sub> = log<sub>10</sub>a<sub>n</sub> + log<sub>10</sub>2 ???????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">C</span></div><p class=\"math-jp-line\">????????</p><div class=\"math-answer-line\"><span>log<sub>10</sub>a<sub>n</sub> = (</span><span class=\"math-boxed-letter\">D</span><span><sup>n?1</sup> ? </span><span class=\"math-boxed-letter\">E</span><span>)log<sub>10</sub>2</span></div><p class=\"math-jp-line\">??????????a<sub>n</sub> &lt; 10<sup>60</sup> ???? n ????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">F</span></div></div>",
+      "answer": "2,2,2,2,1,8",
+      "blankLabels": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "?????? log a_(n+1)=log2+2log a_n?b_n=log a_n+log2 ???? b_(n+1)=2b_n????? log a_n=(2^(n-1)-1)log2?????????? n ? 8 ??",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-16.png",
+      "rewrittenPrompt": "???????????????????????? n ????????",
+      "notes": "???????????????"
+    },
+    {
+      "id": "sequence-017",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>????? n ?????? <span class=\"math-sigma\">?<sub>k=1</sub><sup>n</sup></span>a<sub>k</sub> = n<sup>2</sup> + 3n ????? {a<sub>n</sub>} ?????</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> ????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"math-boxed-letter\">A</span><span>n + </span><span class=\"math-boxed-letter\">B</span></div><p class=\"math-jp-line\"><strong>(2)</strong> b<sub>n</sub> = n<sup>2</sup> ? 5n ? 6 ?????b<sub>n</sub> &lt; 0 ????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">C</span><span>??????? ?</span><span class=\"math-boxed-letter-wide\">D</span></div><p class=\"math-jp-line\"><strong>(3)</strong></p><div class=\"math-answer-line\"><span><span class=\"math-sigma\">?<sub>k=1</sub><sup>n</sup></span></span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">k<sup>2</sup>b<sub>k</sub></span><span class=\"inline-fraction-bottom\">a<sub>k</sub></span></span><span> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">1</span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">E</span></span></span><span>n(n + </span><span class=\"math-boxed-letter\">F</span><span>)(n<sup>2</sup> ? </span><span class=\"math-boxed-letter\">G</span><span>n ? </span><span class=\"math-boxed-letter\">H</span><span>)</span></div></div>",
+      "answer": "2,2,5,50,8,1,7,4",
+      "blankLabels": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "??????? a_n = 2n + 2?b_n = (n-6)(n+1) ????????? n=1 ?? 5 ?????? -50???? k^2b_k/a_k = (k^3 - 6k^2)/2 ?????????????",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-17.png",
+      "rewrittenPrompt": "??????????????? b_n ??????????????",
+      "notes": "???????????????????????"
+    },
+    {
+      "id": "sequence-018",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>????????? a<sub>1</sub>, a<sub>2</sub>, ? ? a<sub>1</sub> = 1?a<sub>2</sub> = 10?(a<sub>n</sub>)<sup>2</sup>a<sub>n-2</sub> = (a<sub>n-1</sub>)<sup>3</sup> (n = 3,4, ?) ????????</strong></p><p class=\"math-jp-line\">b<sub>n</sub> = log<sub>10</sub>a<sub>n</sub> ????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">A</span><span>b<sub>n</sub> + b<sub>n-2</sub> = </span><span class=\"math-boxed-letter\">B</span><span>b<sub>n-1</sub></span></div><p class=\"math-jp-line\">?????</p><div class=\"math-answer-line\"><span>b<sub>n</sub> ? b<sub>n-1</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">1</span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">C</span></span></span><span>(b<sub>n-1</sub> ? b<sub>n-2</sub>)</span></div><p class=\"math-jp-line\">????</p><div class=\"math-answer-line\"><span>b<sub>n</sub> = </span><span class=\"math-boxed-letter\">D</span><span> ? (</span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">1</span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">C</span></span></span><span>)<sup>n ? </span><span class=\"math-boxed-letter\">E</span><span></span></div><p class=\"math-jp-line\">??? lim a<sub>n</sub> = </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">F</span></div></div>",
+      "answer": "2,3,2,2,2,100",
+      "blankLabels": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "?????? 2b_n + b_(n-2) = 3b_(n-1)??? d_n=b_n-b_(n-1) ???? d_n=(1/2)d_(n-1)?b_1=0,b_2=1 ?? b_n=2-(1/2)^(n-2)???? a_n?100?",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-18.png",
+      "rewrittenPrompt": "??????????????????????????",
+      "notes": "???????????????????"
+    },
+    {
+      "id": "sequence-019",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>1</sub> = 18?a<sub>n+1</sub> ? 12a<sub>n</sub> + 3<sup>n+2</sup> = 0?(n = 1,2,3, ?) ?????? {a<sub>n</sub>} ?????????</strong></p><p class=\"math-jp-line\">b<sub>n</sub> = a<sub>n</sub> / </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">A</span><span><sup>n</sup></span></div><p class=\"math-jp-line\">?????b<sub>1</sub> = </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">B</span></div><p class=\"math-jp-line\">????b<sub>n+1</sub> ? </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">C</span><span>b<sub>n</sub> + </span><span class=\"math-boxed-letter\">D</span><span> = 0</span></div><p class=\"math-jp-line\">????????????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"math-boxed-letter\">E</span><span><sup>n</sup>(</span><span class=\"math-boxed-letter\">F</span><span>?</span><span class=\"math-boxed-letter\">G</span><span><sup>n?1</sup> + </span><span class=\"math-boxed-letter\">H</span><span>)</span></div></div>",
+      "answer": "3,6,4,3,3,5,4,1",
+      "blankLabels": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "3^n ???? b_(n+1)-4b_n+3=0?b_(n+1)-1=4(b_n-1) ?????c_n=b_n-1 ??? 5??? 4 ????????? a_n=3^n(5?4^(n-1)+1)?",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-19.png",
+      "rewrittenPrompt": "???????????????????????????????",
+      "notes": "???? 3^n ????????????"
+    },
+    {
+      "id": "sequence-020",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>1</sub> = 2/9?a<sub>n</sub> = ((n + 1)(2n ? 3))/(3n(2n + 1)) a<sub>n?1</sub>?(n = 2,3,4, ?) ????</strong></p><p class=\"math-jp-line\">????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">n + </span><span class=\"math-boxed-letter\">A</span><span></span><span class=\"inline-fraction-bottom\">3<sup>n + </sup><span class=\"math-boxed-letter\">B</span><span>(</span><span class=\"math-boxed-letter\">C</span><span>n ? </span><span class=\"math-boxed-letter\">D</span><span>)(2n + 1)</span></span></span></div><p class=\"math-jp-line\">???????????</p><div class=\"math-answer-line\"><span><span class=\"math-sigma\">?<sub>n=1</sub><sup>?</sup></span> a<sub>n</sub> = </span><span class=\"math-fraction\"><span class=\"math-fraction-top\">E</span><span class=\"math-fraction-bottom\"><span class=\"math-boxed-letter-wide\">F</span></span></span></div></div>",
+      "answer": "1,1,2,1,1,12",
+      "blankLabels": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "b_n=(n+1)/(3^n a_n) ???? b_n=3(2n?1)(2n+1)?????? a_n=(n+1)/(3^(n+1)(2n?1)(2n+1))???? a_n=(c_(n?1)-c_n)/12 ????????? 1/12?",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-20.png",
+      "rewrittenPrompt": "????????????????????????????",
+      "notes": "????? telescoping ??????????"
+    },
+    {
+      "id": "sequence-021",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>????? n ????? S<sub>n</sub> ? S<sub>n</sub> = (n<sup>2</sup> ? 17n)/4 ??????? {a<sub>n</sub>} ?????b<sub>n</sub> = a<sub>n</sub>a<sub>n+5</sub> ?????</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> ????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">n ? </span><span class=\"math-boxed-letter\">B</span><span></span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">A</span></span></span></div><p class=\"math-jp-line\">???</p><div class=\"math-answer-line\"><span>b<sub>n</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">n<sup>2</sup> ? </span><span class=\"math-boxed-letter-wide\">CD</span><span>n + </span><span class=\"math-boxed-letter-wide\">EF</span><span></span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">G</span></span></span></div><p class=\"math-jp-line\">??????? T<sub>n</sub> = b<sub>1</sub> + ? + b<sub>n</sub> ????????</p><div class=\"math-answer-line\"><span>n = </span><span class=\"math-boxed-letter\">H</span><span> ??? </span><span class=\"math-boxed-letter\">I</span></div><p class=\"math-jp-line\">????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">J</span></div></div>",
+      "answer": "2,9,13,36,4,8,9,6",
+      "blankLabels": [
+        "A",
+        "B",
+        "CD",
+        "EF",
+        "G",
+        "H",
+        "I",
+        "J"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "a_n=(n?9)/2?b_n=(n?9)(n?4)/4=(n^2?13n+36)/4?b_n ? 5?8 ????? T_n ? 8 ? 9 ????????? 6?",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-21.png",
+      "rewrittenPrompt": "??? a_n ????? b_n ????? T_n ?????????",
+      "notes": "??????????????????????"
+    },
+    {
+      "id": "sequence-022",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>? n ?? a<sub>n</sub> = 4n<sup>2</sup> + 5n ? 6 ???????? {a<sub>n</sub>} ?????</strong></p><p class=\"math-jp-line\">??</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = (n + </span><span class=\"math-boxed-letter\">A</span><span>)(</span><span class=\"math-boxed-letter\">B</span><span>n ? </span><span class=\"math-boxed-letter\">C</span><span>)</span></div><p class=\"math-jp-line\">???????????????a<sub>n</sub> ? 5 ????????</p><div class=\"math-answer-line\"><span>n = 5k ? </span><span class=\"math-boxed-letter\">D</span><span> ??? n = 5k ? </span><span class=\"math-boxed-letter\">E</span></div><p class=\"math-jp-line\">?????????? 20 ???? 5 ???????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">F</span></div><p class=\"math-jp-line\">?????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">G</span></div></div>",
+      "answer": "2,4,3,2,3,8,4048",
+      "blankLabels": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "a_n=(n+2)(4n?3) ???????????? n+2 ? 4n?3 ?????? 5 ?????n?3,2 (mod 5)?1?20 ?? 8 ???? 4048?",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-22.png",
+      "rewrittenPrompt": "??????????????5 ?????????????",
+      "notes": "???????????????????????"
+    },
+    {
+      "id": "sequence-023",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>n</sub> = 4n<sup>2</sup> + 5n ? 6 ???? 20 ??????</strong></p><p class=\"math-jp-line\">5 ???????? 2 ????????????????</p><div class=\"math-answer-line\"><span>S = </span><span class=\"math-boxed-letter-wide\">A</span></div><p class=\"math-jp-line\">??????????? 22 ????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">B</span></div><p class=\"math-jp-line\">????</p></div>",
+      "answer": "4048,4048",
+      "blankLabels": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "n=5k?2 ? n=5k?3 ? 2 ?????? a_n ???????????? 4 ????????? 4048 ??????",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-23.png",
+      "rewrittenPrompt": "5 ?????? 2 ???????????????????????",
+      "notes": "? 22 ???????????????????????"
     }
   ]
 }
