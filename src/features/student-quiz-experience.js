@@ -7,6 +7,106 @@
       .replace(/>/g, "&gt;");
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function formatInlineText(value) {
+    let html = escapeHtml(value);
+    html = html.replace(/&lt;br\s*\/?&gt;/gi, "<br>");
+    html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+    html = html.replace(/\$\$([^$]+)\$\$/g, '<span class="math-display-inline">$1</span>');
+    html = html.replace(/\$([^$\n]+)\$/g, '<span class="math-inline">$1</span>');
+    return html;
+  }
+
+  function renderRichMessageBody(value) {
+    const lines = String(value || "").replace(/\r\n/g, "\n").split("\n");
+    const blocks = [];
+    let paragraph = [];
+    let listItems = [];
+    let listType = null;
+
+    function flushParagraph() {
+      if (!paragraph.length) return;
+      blocks.push(`<p>${formatInlineText(paragraph.join("<br>"))}</p>`);
+      paragraph = [];
+    }
+
+    function flushList() {
+      if (!listItems.length || !listType) return;
+      blocks.push(`<${listType}>${listItems.map((item) => `<li>${formatInlineText(item)}</li>`).join("")}</${listType}>`);
+      listItems = [];
+      listType = null;
+    }
+
+    lines.forEach((rawLine) => {
+      const line = rawLine.trim();
+      if (!line) {
+        flushParagraph();
+        flushList();
+        return;
+      }
+
+      const headingMatch = line.match(/^#{1,4}\s+(.+)$/);
+      if (headingMatch) {
+        flushParagraph();
+        flushList();
+        blocks.push(`<h4>${formatInlineText(headingMatch[1])}</h4>`);
+        return;
+      }
+
+      const stepHeadingMatch = line.match(/^(Step\s*\d+)\s*[:：]?\s*(.*)$/i);
+      if (stepHeadingMatch) {
+        flushParagraph();
+        flushList();
+        const title = stepHeadingMatch[2]
+          ? `${stepHeadingMatch[1]}｜${stepHeadingMatch[2]}`
+          : stepHeadingMatch[1];
+        blocks.push(`<h4>${formatInlineText(title)}</h4>`);
+        return;
+      }
+
+      const labeledLineMatch = line.match(/^(对应步骤|为什么成立|容易错在哪里|最终答案|结论)\s*[:：]\s*(.*)$/);
+      if (labeledLineMatch) {
+        flushParagraph();
+        flushList();
+        blocks.push(`<p><strong>${formatInlineText(labeledLineMatch[1])}：</strong>${formatInlineText(labeledLineMatch[2])}</p>`);
+        return;
+      }
+
+      const orderedMatch = line.match(/^\d+\.\s+(.+)$/);
+      if (orderedMatch) {
+        flushParagraph();
+        if (listType && listType !== "ol") flushList();
+        listType = "ol";
+        listItems.push(orderedMatch[1]);
+        return;
+      }
+
+      const bulletMatch = line.match(/^[-*]\s+(.+)$/);
+      if (bulletMatch) {
+        flushParagraph();
+        if (listType && listType !== "ul") flushList();
+        listType = "ul";
+        listItems.push(bulletMatch[1]);
+        return;
+      }
+
+      if (listType) flushList();
+      paragraph.push(line);
+    });
+
+    flushParagraph();
+    flushList();
+
+    return blocks.join("") || `<p>${formatInlineText(value)}</p>`;
+  }
+
   function splitAnswerParts(value) {
     return String(value || "")
       .split(",")
@@ -176,22 +276,39 @@
 
   function renderAiFollowUp(ctx, selectedWrongQuestion) {
     return `
-      <div class="message-list chat-thread">
-        <div class="message-card ai">
-          <div class="message-meta"><strong>AI 助手</strong><span class="small-note">提示</span></div>
-          <p class="message-body">你可以围绕老师讲解继续问，比如“Step 2 为什么能这样整理？”、“这里为什么要通分？”</p>
-        </div>
-        ${ctx.state.quizFlow.explainMessages.map((item) => `
-          <div class="message-card ${item.from}">
-            <div class="message-meta"><strong>${item.title}</strong><span class="small-note">${item.time}</span></div>
-            <p class="message-body">${item.body}</p>
+      <div class="quiz-chat-shell">
+        <div class="quiz-chat-header">
+          <div>
+            <strong>AI 助手</strong>
+            <p class="small-note">围绕当前题目和老师标准讲解回答</p>
           </div>
-        `).join("")}
-      </div>
-      <div class="chat-input-shell">
-        <textarea class="prompt-input" id="quiz-explain-input" rows="4" placeholder="例如：Step 2 为什么可以直接套公式？">${ctx.state.quizFlow.explainDraft}</textarea>
-        <div class="prompt-actions">
-          <button class="primary-btn" id="send-quiz-explain-btn" type="button">发送追问</button>
+          <span class="tag">${ctx.state.quizFlow.explainPending ? "思考中" : "已连接"}</span>
+        </div>
+        <div class="message-list chat-thread quiz-chat-thread">
+          <div class="message-card ai system">
+            <div class="message-meta"><strong>AI 助手</strong><span class="small-note">提示</span></div>
+            <p class="message-body">你可以自由提问，但 AI 只会围绕当前题目和老师标准讲解来回答。比如：“Step 2 为什么可以这样整理？”、“这里为什么要通分？”</p>
+          </div>
+          ${ctx.state.quizFlow.explainMessages.map((item) => `
+            <div class="quiz-bubble-row ${item.from === "student" ? "student" : "ai"}">
+              <div class="message-card ${item.from} ${item.pending ? "pending" : ""}">
+                <div class="message-meta"><strong>${item.title}</strong><span class="small-note">${item.time}</span></div>
+                ${
+                  item.pending
+                    ? `<p class="message-body"><span class="thinking-dots"><i></i><i></i><i></i></span></p>`
+                    : item.from === "ai"
+                      ? `<div class="message-body rich">${renderRichMessageBody(item.body)}</div>`
+                      : `<p class="message-body">${escapeHtml(item.body)}</p>`
+                }
+              </div>
+            </div>
+          `).join("")}
+        </div>
+        <div class="chat-input-shell quiz-chat-input-dock">
+          <textarea class="prompt-input quiz-chat-input" id="quiz-explain-input" rows="3" placeholder="例如：Step 2 为什么可以直接套公式？Shift+Enter 换行，Enter 发送">${ctx.state.quizFlow.explainDraft}</textarea>
+          <div class="prompt-actions quiz-chat-actions">
+            <button class="primary-btn" id="send-quiz-explain-btn" type="button">${ctx.state.quizFlow.explainPending ? "思考中..." : "发送追问"}</button>
+          </div>
         </div>
       </div>
       ${selectedWrongQuestion?.explanation?.followUp ? `<p class="profile-meta">${selectedWrongQuestion.explanation.followUp}</p>` : ""}
@@ -384,26 +501,36 @@
       explainInput.addEventListener("input", () => {
         ctx.state.quizFlow.explainDraft = explainInput.value;
       });
+      explainInput.addEventListener("keydown", async (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          const text = (ctx.state.quizFlow.explainDraft || "").trim();
+          const selectedWrongQuestion =
+            ctx.state.quizFlow.review?.wrongQuestions?.find((item) => item.id === ctx.state.quizFlow.selectedQuestionId) ||
+            ctx.state.quizFlow.review?.wrongQuestions?.[0];
+          if (!text || !selectedWrongQuestion || ctx.state.quizFlow.explainPending) return;
+          await ctx.sendQuizExplainMessage(selectedWrongQuestion.id, text);
+        }
+      });
     }
 
     const sendExplainButton = document.getElementById("send-quiz-explain-btn");
     if (sendExplainButton) {
-      sendExplainButton.addEventListener("click", () => {
+      sendExplainButton.addEventListener("click", async () => {
         const text = (ctx.state.quizFlow.explainDraft || "").trim();
         const selectedWrongQuestion =
           ctx.state.quizFlow.review?.wrongQuestions?.find((item) => item.id === ctx.state.quizFlow.selectedQuestionId) ||
           ctx.state.quizFlow.review?.wrongQuestions?.[0];
-        if (!text || !selectedWrongQuestion) return;
 
-        const firstStep = selectedWrongQuestion.explanation?.steps?.[0];
-        const reply = firstStep
-          ? `我先围绕老师讲解来回答你。可以先看「${firstStep.title || firstStep.line}」这一步：${firstStep.detail}`
-          : "我会围绕这道题已有的老师标准讲解来回答你。你可以继续追问具体是哪一步没看懂。";
+        if (!text || !selectedWrongQuestion || ctx.state.quizFlow.explainPending) return;
+        await ctx.sendQuizExplainMessage(selectedWrongQuestion.id, text);
+      });
+    }
 
-        ctx.state.quizFlow.explainMessages.push({ from: "student", title: "我", time: "刚刚", body: text });
-        ctx.state.quizFlow.explainMessages.push({ from: "ai", title: "AI 助手", time: "刚刚", body: reply });
-        ctx.state.quizFlow.explainDraft = "";
-        ctx.renderApp();
+    const chatThread = ctx.contentEl.querySelector(".quiz-chat-thread");
+    if (chatThread) {
+      requestAnimationFrame(() => {
+        chatThread.scrollTop = chatThread.scrollHeight;
       });
     }
   }

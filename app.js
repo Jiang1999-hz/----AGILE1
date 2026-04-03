@@ -15,7 +15,8 @@
     submittedAnswers: {},
     selectedQuestionId: null,
     explainDraft: "",
-    explainMessages: []
+    explainMessages: [],
+    explainPending: false
   },
   loading: false,
   toast: null,
@@ -213,6 +214,7 @@ function resetQuizFlow(from = "subject") {
   state.quizFlow.selectedQuestionId = null;
   state.quizFlow.explainDraft = "";
   state.quizFlow.explainMessages = [];
+  state.quizFlow.explainPending = false;
 }
 
 async function startQuizSession() {
@@ -236,6 +238,7 @@ async function startQuizSession() {
     state.quizFlow.selectedQuestionId = null;
     state.quizFlow.explainDraft = "";
     state.quizFlow.explainMessages = [];
+    state.quizFlow.explainPending = false;
   } catch (error) {
     showToast("error", "题目加载失败");
   } finally {
@@ -284,11 +287,81 @@ async function submitQuizSession() {
     state.quizFlow.selectedQuestionId = payload.review?.wrongQuestions?.[0]?.id || null;
     state.quizFlow.explainDraft = "";
     state.quizFlow.explainMessages = [];
+    state.quizFlow.explainPending = false;
     showToast("success", "练习结果已保存");
   } catch (error) {
     showToast("error", "练习结果提交失败");
   } finally {
     state.loading = false;
+    renderApp();
+  }
+}
+
+async function sendQuizExplainMessage(questionId, text) {
+  const selectedWrongQuestion =
+    state.quizFlow.review?.wrongQuestions?.find((item) => item.id === questionId) ||
+    state.quizFlow.review?.wrongQuestions?.[0] ||
+    null;
+
+  if (!selectedWrongQuestion || !text.trim()) return;
+
+  const trimmed = text.trim();
+  const historyBeforeRequest = state.quizFlow.explainMessages
+    .filter((item) => !item.pending)
+    .map((item) => ({ ...item }));
+  const pendingId = `pending-${Date.now()}`;
+  state.quizFlow.explainMessages.push({ from: "student", title: "我", time: "刚刚", body: trimmed });
+  state.quizFlow.explainMessages.push({ from: "ai", title: "AI 助手", time: "思考中", body: "", pending: true, id: pendingId });
+  state.quizFlow.explainDraft = "";
+  state.quizFlow.explainPending = true;
+  renderApp();
+
+  try {
+    const response = await fetch("/api/student/1/quiz-followup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: selectedWrongQuestion,
+        conversation: historyBeforeRequest,
+        userMessage: trimmed
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "AI request failed");
+    }
+
+    const payload = await response.json();
+    const target = state.quizFlow.explainMessages.find((item) => item.id === pendingId);
+    const fullReply = String(payload.reply || "").trim();
+
+    if (target) {
+      target.pending = false;
+      target.time = "刚刚";
+      target.body = "";
+
+      if (!fullReply) {
+        target.body = "我这次没有生成有效回复，请你换一种问法试试。";
+      } else {
+        const chunks = fullReply.match(/.{1,20}(\s+|$)|.{1,20}/g) || [fullReply];
+        for (const chunk of chunks) {
+          target.body += chunk;
+          renderApp();
+          await new Promise((resolve) => setTimeout(resolve, 24));
+        }
+      }
+    }
+  } catch (error) {
+    const target = state.quizFlow.explainMessages.find((item) => item.id === pendingId);
+    if (target) {
+      target.time = "失败";
+      target.body = error.message.includes("GEMINI") ? "还没有配置 Gemini API key，或者 key 不可用。" : "这一轮没有成功回答，你可以换个问法再试一次。";
+      target.pending = false;
+    }
+    showToast("error", error.message.includes("GEMINI") ? "请先配置 GEMINI_API_KEY" : "AI 讲解暂时不可用");
+  } finally {
+    state.quizFlow.explainPending = false;
     renderApp();
   }
 }
@@ -466,6 +539,7 @@ function bindEvents() {
     resetQuizFlow,
     startQuizSession,
     submitQuizSession,
+    sendQuizExplainMessage,
     renderApp
   });
   studentShellExperience().bind?.({

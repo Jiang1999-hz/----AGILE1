@@ -9,6 +9,8 @@ const { query, withTransaction } = require("./lib/pg");
 const prisma = new PrismaClient();
 const root = __dirname;
 const port = process.env.PORT || 4173;
+const geminiApiKey = process.env.GEMINI_API_KEY || "";
+const geminiModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -192,6 +194,182 @@ function buildLearningRecordsFromLocalData(localData) {
     })),
     progress: student.progress || []
   };
+}
+
+function extractGeminiText(payload) {
+  const texts = [];
+  for (const candidate of payload?.candidates || []) {
+    for (const part of candidate?.content?.parts || []) {
+      if (typeof part?.text === "string" && part.text.trim()) {
+        texts.push(part.text);
+      }
+    }
+  }
+  return texts.join("\n").trim();
+}
+
+function buildExplainConversationInput(question, conversation, userMessage) {
+  const explanationSteps = (question?.explanation?.steps || [])
+    .map((step, index) => `${step.line || `Step ${index + 1}`}｜${step.title || "解题步骤"}：${step.detail || ""}`)
+    .join("\n");
+
+  const contents = [
+    {
+      role: "user",
+      parts: [
+        {
+          text: [
+            "当前题目：",
+            String(question?.question || ""),
+            "",
+            `学生刚才的答案：${question?.studentAnswer || "未作答"}`,
+            `标准答案：${question?.correctAnswer || ""}`,
+            "",
+            `老师标准讲解摘要：${question?.explanation?.summary || "暂无摘要"}`,
+            explanationSteps ? `老师标准讲解步骤：\n${explanationSteps}` : "老师标准讲解步骤：暂无"
+          ].join("\n")
+        }
+      ]
+    }
+  ];
+
+  for (const item of (conversation || []).slice(-8)) {
+    contents.push({
+      role: item.from === "student" ? "user" : "model",
+      parts: [{ text: item.body || "" }]
+    });
+  }
+
+  contents.push({
+    role: "user",
+    parts: [{ text: userMessage }]
+  });
+
+  return contents;
+}
+
+async function createQuizFollowUpReply(question, conversation, userMessage) {
+  if (!geminiApiKey) {
+    throw new Error("GEMINI_API_KEY is missing");
+  }
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:generateContent?key=${encodeURIComponent(geminiApiKey)}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      systemInstruction: {
+        parts: [
+          {
+            text:
+              "你是日本私塾的题目讲解助手。你只能基于当前这道题、学生答案、标准答案和老师标准讲解来回答。请用简体中文回答，但保留必要的数学符号、公式和少量日文原词。不要编造题目条件，不要离开当前题目。学生如果要求整题细讲，就完整讲完整道题；学生如果只问某一步，就专门解释那一步。回答自然一点，像真人老师一对一讲解，不要为了套格式而生硬分段。"
+          }
+        ]
+      },
+      contents: buildExplainConversationInput(question, conversation, userMessage),
+      generationConfig: {
+        temperature: 0.35,
+        topP: 0.9,
+        maxOutputTokens: 2200
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini request failed: ${response.status} ${errorText}`);
+  }
+
+  const payload = await response.json();
+  const reply = extractGeminiText(payload);
+  if (!reply) {
+    throw new Error("Gemini returned an empty reply");
+  }
+  return reply;
+}
+
+async function streamQuizFollowUpReply(res, question, conversation, userMessage) {
+  if (!geminiApiKey) {
+    throw new Error("GEMINI_API_KEY is missing");
+  }
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(geminiApiKey)}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      systemInstruction: {
+        parts: [
+          {
+            text:
+              "你是日本私塾的题目讲解助手。你只能基于当前这道题、学生答案、标准答案和老师标准讲解来回答。请用简体中文回答，但保留必要的数学符号、公式和少量日文原词。不要编造题目条件，不要离开当前题目。学生如果要求整题细讲，就完整讲完整道题；学生如果只问某一步，就专门解释那一步。回答自然一点，像真人老师一对一讲解，不要为了套格式而生硬分段。"
+          }
+        ]
+      },
+      contents: buildExplainConversationInput(question, conversation, userMessage),
+      generationConfig: {
+        temperature: 0.35,
+        topP: 0.9,
+        maxOutputTokens: 2200
+      }
+    })
+  });
+
+  if (!response.ok || !response.body) {
+    const errorText = await response.text();
+    throw new Error(`Gemini stream failed: ${response.status} ${errorText}`);
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive"
+  });
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let emitted = false;
+
+  for await (const chunk of response.body) {
+    buffer += decoder.decode(chunk, { stream: true });
+
+    while (buffer.includes("\n\n")) {
+      const boundary = buffer.indexOf("\n\n");
+      const rawEvent = buffer.slice(0, boundary);
+      buffer = buffer.slice(boundary + 2);
+
+      const dataLines = rawEvent
+        .split("\n")
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.replace(/^data:\s?/, "").trim())
+        .filter(Boolean);
+
+      for (const line of dataLines) {
+        try {
+          const payload = JSON.parse(line);
+          const delta = extractGeminiText(payload);
+          if (delta) {
+            emitted = true;
+            res.write(`data: ${JSON.stringify({ delta })}\n\n`);
+          }
+        } catch (error) {
+        }
+      }
+    }
+  }
+
+  if (!emitted) {
+    const fallbackReply = await createQuizFollowUpReply(question, conversation, userMessage);
+    if (fallbackReply) {
+      res.write(`data: ${JSON.stringify({ delta: fallbackReply })}\n\n`);
+      emitted = true;
+    }
+  }
+
+  res.write(`event: done\ndata: {}\n\n`);
+  res.end();
 }
 
 function buildStudentBootstrapFromLocalData() {
@@ -1381,6 +1559,19 @@ async function handleStudentApi(req, res) {
     return true;
   }
 
+  if (req.method === "POST" && pathname === "/api/student/1/quiz-followup") {
+    const payload = await readBody(req);
+    const reply = await createQuizFollowUpReply(payload.question || {}, payload.conversation || [], payload.userMessage || "");
+    sendJson(res, 200, { reply });
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/student/1/quiz-followup-stream") {
+    const payload = await readBody(req);
+    await streamQuizFollowUpReply(res, payload.question || {}, payload.conversation || [], payload.userMessage || "");
+    return true;
+  }
+
   if (req.method === "POST" && pathname.startsWith("/api/student/1/lessons/") && pathname.endsWith("/homework")) {
     const lessonId = pathname.split("/")[5];
     const payload = await readBody(req);
@@ -1446,7 +1637,9 @@ module.exports = {
   buildLearningRecords,
   getQuizCatalogFromDb,
   getQuizSessionQuestionsFromDb,
-  saveQuizSessionSubmission
+  saveQuizSessionSubmission,
+  createQuizFollowUpReply,
+  streamQuizFollowUpReply
 };
 
 if (require.main === module) {
