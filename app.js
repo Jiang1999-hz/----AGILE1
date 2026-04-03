@@ -413,11 +413,11 @@ function cancelSchedule(scheduleId, by, reason) {
 }
 
 function renderCurrentView() {
-  switch (state.view) {
-    case "student-inbox": return studentShellExperience().renderChecklist?.({ state }) || `<section class="panel"><h3>Student shell module not loaded</h3></section>`;
-    case "student-calendar": return studentLearningExperience().renderCalendar?.({ state, courses, lessons, selectedCourse, selectedLesson, getLessonHomework, courseProgress }) || `<section class="panel"><h3>Student learning module not loaded</h3></section>`;
-    case "student-quiz": return studentQuizExperience().render?.({ state, quizSubject, quizTopic, quizLevel }) || `<section class="panel"><h3>Student quiz module not loaded</h3></section>`;
-    case "student-progress": return studentLearningExperience().renderProgress?.({ state, selectedStudent }) || `<section class="panel"><h3>Student learning module not loaded</h3></section>`;
+    switch (state.view) {
+      case "student-inbox": return studentShellExperience().renderChecklist?.({ state }) || `<section class="panel"><h3>Student shell module not loaded</h3></section>`;
+      case "student-calendar": return studentLearningExperience().renderCalendar?.({ state, courses, lessons, selectedCourse, selectedLesson, getLessonHomework, courseProgress }) || `<section class="panel"><h3>Student learning module not loaded</h3></section>`;
+      case "student-quiz": return studentQuizExperience().render?.({ state, quizSubject, quizTopic, quizLevel }) || `<section class="panel"><h3>Student quiz module not loaded</h3></section>`;
+      case "student-progress": return studentLearningExperience().renderProgress?.({ state, selectedStudent }) || `<section class="panel"><h3>Student learning module not loaded</h3></section>`;
     case "student-teacher": return studentShellExperience().renderMessagePanel?.("Teacher Chat", studentChatMessages, "输入想问老师的话", "teacher") || `<section class="panel"><h3>Student shell module not loaded</h3></section>`;
     case "student-ai": return studentShellExperience().renderMessagePanel?.("AI Chat", aiChatMessages.concat(state.quizFlow.explainMessages), "例如：第 2 步为什么这样做？", "ai") || `<section class="panel"><h3>Student shell module not loaded</h3></section>`;
     case "teacher-db": return teacherExperience().renderTeacherDb?.({ state, selectedStudent, scheduleItems }) || `<section class="panel"><h3>Teacher module not loaded</h3></section>`;

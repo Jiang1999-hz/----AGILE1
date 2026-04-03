@@ -11,7 +11,15 @@ def parse_blank_labels(raw: str) -> list[str]:
     return [label for label in labels if label]
 
 
-def build_record(row: dict[str, str]) -> dict[str, object]:
+def load_answer_key(input_csv: Path) -> dict[str, dict[str, object]]:
+    answer_key_path = input_csv.with_name("sequence-answer-key.json")
+    if not answer_key_path.exists():
+        return {}
+    return json.loads(answer_key_path.read_text(encoding="utf-8"))
+
+
+def build_record(row: dict[str, str], answer_key: dict[str, dict[str, object]]) -> dict[str, object]:
+    explanation_meta = answer_key.get(row["question_id"], {})
     return {
         "id": row["question_id"],
         "subjectId": row["subject_id"],
@@ -25,14 +33,14 @@ def build_record(row: dict[str, str]) -> dict[str, object]:
             "assetType": "text",
             "assetLabel": "老师标准讲解",
             "assetUrl": None,
-            "summary": row["teacher_explanation"],
-            "steps": [],
-            "followUp": ""
+            "summary": explanation_meta.get("summary") or row["teacher_explanation"],
+            "steps": explanation_meta.get("steps") or [],
+            "followUp": explanation_meta.get("followUp") or ""
         },
         "sourcePdf": row["source_pdf"],
         "sourceImage": row["page_image"],
         "rewrittenPrompt": row["rewritten_prompt"],
-        "notes": row["notes"],
+        "notes": row["notes"]
     }
 
 
@@ -48,6 +56,7 @@ def main() -> int:
         print(f"Manifest not found: {input_csv}")
         return 1
 
+    answer_key = load_answer_key(input_csv)
     questions = []
     with input_csv.open("r", encoding="utf-8-sig", newline="") as fh:
         reader = csv.DictReader(fh)
@@ -56,7 +65,7 @@ def main() -> int:
                 continue
             if not row.get("rewritten_prompt") or not row.get("answer"):
                 continue
-            questions.append(build_record(row))
+            questions.append(build_record(row, answer_key))
 
     output_json.parent.mkdir(parents=True, exist_ok=True)
     output_json.write_text(

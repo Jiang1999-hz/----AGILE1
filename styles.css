@@ -492,6 +492,71 @@ button { cursor: pointer; border: none; }
   box-shadow: 0 14px 28px rgba(193, 74, 74, 0.12);
 }
 
+.answer-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+}
+
+.answer-strip-label {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.answer-strip strong {
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.answer-strip-student {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+}
+
+.answer-strip-correct {
+  background: rgba(25, 143, 137, 0.1);
+  border: 1px solid rgba(25, 143, 137, 0.18);
+}
+
+.explanation-stack {
+  gap: 12px;
+}
+
+.explanation-summary {
+  border-left-color: var(--accent);
+  background: rgba(255, 248, 242, 0.92);
+}
+
+.explanation-step {
+  border-left-color: rgba(25, 143, 137, 0.5);
+}
+
+.explanation-step-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 74px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(25, 143, 137, 0.12);
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .lesson-card {
   padding: 16px;
   border-radius: 18px;

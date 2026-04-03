@@ -1,0 +1,204 @@
+{
+  "sequence-001": {
+    "summary": "标准答案：A=1，B=6，C=11，D=6。先把总和拆成二次项、一次项、常数项三部分，再分别套用求和公式，最后通分整理。",
+    "steps": [
+      { "line": "Step 1", "title": "写出总和", "detail": "设 S_n = Σ(k^2 - 2k + 2) = Σk^2 - 2Σk + 2Σ1。" },
+      { "line": "Step 2", "title": "分别求和", "detail": "利用 Σk^2 = n(n+1)(2n+1)/6，Σk = n(n+1)/2，Σ1 = n。" },
+      { "line": "Step 3", "title": "代入整理", "detail": "S_n = n(n+1)(2n+1)/6 - n(n+1) + 2n，展开后得 (2n^3 - 3n^2 + 13n)/6。" },
+      { "line": "Step 4", "title": "读出空格", "detail": "把分子写成 A n^3 - B n^2 + C n，可得 A=1，B=6，C=11，D=6。" }
+    ]
+  },
+  "sequence-002": {
+    "summary": "标准答案：AB=-8，C=3，D=4，E=9，FGH=-24，I=5。先求 u_n，再由 v_n=u_(n+1)u_n 判断新数列的首项和公比，最后求无穷和。",
+    "steps": [
+      { "line": "Step 1", "title": "写出通项", "detail": "u_n = 2(-2/3)^(n-1)，所以 u_(n+1) = 2(-2/3)^n。" },
+      { "line": "Step 2", "title": "求 v_n 首项", "detail": "v_1 = u_2u_1 = (−4/3)×2 = −8/3，所以初项是 −8/3。" },
+      { "line": "Step 3", "title": "求公比", "detail": "v_n = 4(-2/3)^(2n-1) = -(8/3)(4/9)^(n-1)，因此公比是 4/9。" },
+      { "line": "Step 4", "title": "求无穷和", "detail": "首项 a = −8/3，公比 r = 4/9，故和为 a/(1-r)=(-8/3)/(5/9)=-24/5。" }
+    ]
+  },
+  "sequence-003": {
+    "summary": "标准答案：JK=41，LMN=492。先用 u_1,u_2,u_3 建立三元一次方程组求出 p,q,r，再代回计算 u_4 与前 8 项和。",
+    "steps": [
+      { "line": "Step 1", "title": "列方程", "detail": "由 u_n = pn^2 + qn + r 和 u_1=2,u_2=9,u_3=22，可得 p+q+r=2，4p+2q+r=9，9p+3q+r=22。" },
+      { "line": "Step 2", "title": "求系数", "detail": "两式相减得 3p+q=7，5p+q=13，所以 p=3，q=-2，再代回得 r=1。" },
+      { "line": "Step 3", "title": "求第 4 项", "detail": "u_4 = 3×16 - 2×4 + 1 = 41。" },
+      { "line": "Step 4", "title": "求前 8 项和", "detail": "S_8 = Σ(3n^2 - 2n + 1) = 3Σn^2 - 2Σn + Σ1 = 3×204 - 2×36 + 8 = 492。" }
+    ]
+  },
+  "sequence-004": {
+    "summary": "标准答案：A=23。已知前三项可直接看出公差是 4，再用等差数列通项求第 6 项。",
+    "steps": [
+      { "line": "Step 1", "title": "求公差", "detail": "7−3=4，11−7=4，所以公差 d=4。" },
+      { "line": "Step 2", "title": "代入通项", "detail": "u_6 = u_1 + 5d = 3 + 5×4 = 23。" }
+    ]
+  },
+  "sequence-005": {
+    "summary": "标准答案：AB=17。把 n=8 直接代入一般项即可。",
+    "steps": [
+      { "line": "Step 1", "title": "直接代入", "detail": "v_8 = 2×8 + 1 = 17。" }
+    ]
+  },
+  "sequence-006": {
+    "summary": "标准答案：L=8，MNO=896，PQ=15，R=2，STU=988，VW=28，XYZ=28。先分别处理等比、等差两列，再找共同出现的值。",
+    "steps": [
+      { "line": "Step 1", "title": "处理等比数列", "detail": "a_n = 7·2^(n-1)。满足 a_n<1000 时，7·2^(n-1)<1000，可得 n=8 时 a_8=896，n=9 时超过 1000。" },
+      { "line": "Step 2", "title": "处理等差数列", "detail": "b_n = 13 + 15(n-1) = 15n - 2，所以 PQ=15，R=2。代入 n=66 得 b_66 = 988。" },
+      { "line": "Step 3", "title": "找共同项", "detail": "等比列前几项是 7,14,28,56,112,...；等差列是 13,28,43,58,...，最小共同项就是 28。" },
+      { "line": "Step 4", "title": "判断最大共同项", "detail": "继续比对后可发现 1000 以下没有新的共同项，因此最大共同项也还是 28。" }
+    ]
+  },
+  "sequence-007": {
+    "summary": "标准答案：J=8，KL=12，M=4，N=3，O=2。把等差条件与等比条件分别写成方程，再联立求解。",
+    "steps": [
+      { "line": "Step 1", "title": "等差条件", "detail": "4,p,q 成等差，所以 p−4=q−p，即 q=2p−4。" },
+      { "line": "Step 2", "title": "等比条件", "detail": "p,q,18 成等比，所以 q^2 = 18p。" },
+      { "line": "Step 3", "title": "联立求解", "detail": "把 q=2p−4 代入 q^2=18p，得 (2p−4)^2=18p，解得 p=8，q=12。" },
+      { "line": "Step 4", "title": "求公差与公比", "detail": "等差公差 d = 8−4=4；等比公比 r = 12/8 = 3/2。" }
+    ]
+  },
+  "sequence-008": {
+    "summary": "标准答案：G=2，H=6，I=4，J=6，K=3，L=5，M=1。核心是把 S_n 与 S_(n-1) 相减，先求差分，再恢复 a_n。",
+    "steps": [
+      { "line": "Step 1", "title": "写出 S_(n-1)", "detail": "由 S_n = na_n - 2n^3 + 2n，把 n 换成 n−1 并展开，可得 S_(n-1) = (n−1)a_(n-1) - 2n^3 + 6n^2 - 4n。" },
+      { "line": "Step 2", "title": "作差求递推", "detail": "S_n - S_(n-1) = a_n，整理后得到 a_n - a_(n-1) = 6n。" },
+      { "line": "Step 3", "title": "恢复通项", "detail": "a_1=1，差分是 6n，所以 a_n 是二次式。验证可得 a_n = 3n^2 + 5n - 7。" },
+      { "line": "Step 4", "title": "求极限", "detail": "S_n 与 n a_n 都是三次量级，只比较最高次项即可得到极限。" }
+    ]
+  },
+  "sequence-009": {
+    "summary": "标准答案：FG=28，HI=49，J=7，KLM=212，N=4，O=7。先用 a_1=2 把等差通项写出来，再利用已知项反推 d、p、q。",
+    "steps": [
+      { "line": "Step 1", "title": "列式", "detail": "a_p = 2 + (p−1)d = 30，所以 (p−1)d=28；a_q = 2 + (q−1)d = 51，所以 (q−1)d=49。" },
+      { "line": "Step 2", "title": "求 d", "detail": "d 同时整除 28 和 49，且 d>1，所以 d=7。" },
+      { "line": "Step 3", "title": "求 p,q", "detail": "由 (p−1)×7=28 得 p=5；由 (q−1)×7=49 得 q=8。" },
+      { "line": "Step 4", "title": "求前 q 项和", "detail": "a_8=51，所以 S_8 = 8(2+51)/2 = 212。" },
+      { "line": "Step 5", "title": "整理关系式", "detail": "消去 d 后得 49(p−1)=28(q−1)，整理得 4q = 7p - 3。" }
+    ]
+  },
+  "sequence-010": {
+    "summary": "标准答案：K=4，LM=16，N=4，O=4，P=8，Q=9。关键是把 4√S_n = a_n + 4 两边平方，再与 n+1 的式子相减。",
+    "steps": [
+      { "line": "Step 1", "title": "求首项", "detail": "n=1 时 4√a_1 = a_1 + 4。平方后得 16a_1=(a_1+4)^2，解得 a_1=4。" },
+      { "line": "Step 2", "title": "平方改写", "detail": "由 16S_n=(a_n+4)^2，对 n 与 n+1 分别写出并相减。" },
+      { "line": "Step 3", "title": "求公差", "detail": "利用 S_(n+1)-S_n=a_(n+1)，得 16a_(n+1)=(a_(n+1)+4)^2-(a_n+4)^2，整理可得 a_(n+1)-a_n=8。" },
+      { "line": "Step 4", "title": "求对应项号", "detail": "a_n = 4 + 8(n−1) = 8n−4。令 a_n=68，解得 n=9。" }
+    ]
+  },
+  "sequence-011": {
+    "summary": "标准答案：J=2，K=4，L=4，M=2，N=1，O=2，P=3，Q=1，R=2，S=7，T=9，U=1。先把等差数列偶数项写成关于 k 的式子，再逐项求和整理成关于 x 的不等式。",
+    "steps": [
+      { "line": "Step 1", "title": "写出偶数项", "detail": "a_n = x-(n-1)，所以 a_(2k-1)-a_(2k+1)=2，a_(2k)=x-2k+1。" },
+      { "line": "Step 2", "title": "展开平方", "detail": "a_(2k)^2 = (x-2k+1)^2 = (x+1)^2 - 4k(x+1) + 4k^2。" },
+      { "line": "Step 3", "title": "代入 T_n", "detail": "T_n = Σ(a_(2k-1)-a_(2k+1))a_(2k)^2 = 2Σ[(x+1)^2 - 4k(x+1) + 4k^2]。" },
+      { "line": "Step 4", "title": "整理求和", "detail": "使用 Σk、Σk^2 公式，把结果整理成题面所给形式。" },
+      { "line": "Step 5", "title": "代入 n=8", "detail": "代入 n=8 后得到 7<x<9，x 为整数时只能取 8，因此 a_8=1。" }
+    ]
+  },
+  "sequence-012": {
+    "summary": "标准答案：A=4，BCD=27，EF=15，GH=28，IJK=47，L=5，M=5，NO=99，P=-1，Q=32，R=2，S=31。先由两项确定等差数列，再分别求和与指数型等比和。",
+    "steps": [
+      { "line": "Step 1", "title": "求 a_1,d", "detail": "a_5=a_1+4d=-27，a_16=a_1+15d=28。相减得 11d=55，所以 d=5，再代回得 a_1=-47。" },
+      { "line": "Step 2", "title": "求 S_n", "detail": "S_n = n/2[2a_1+(n-1)d] = n/2[-94+5n-5] = n(5n-99)/2。" },
+      { "line": "Step 3", "title": "把指数项改写成等比", "detail": "a_n = 5n-52，所以 2^{a_n} = 2^{-47}·(2^5)^{n-1}，公比是 32。" },
+      { "line": "Step 4", "title": "求 T_n", "detail": "T_n = 2^{-47}(32^n-1)/(32-1)。按题面方框拆开即可读出各个答案。" }
+    ]
+  },
+  "sequence-013": {
+    "summary": "标准答案：A=1，B=2，CDE=512，FG=11，HIJ=341。把普通和与交代和分别写成等比和公式，联立先求公比，再求初项与分数和。",
+    "steps": [
+      { "line": "Step 1", "title": "写出两个和", "detail": "普通和是 a_1(1-r^{10})/(1-r)=93；交代和是 a_1(1-(-r)^{10})/(1+r)=31。" },
+      { "line": "Step 2", "title": "联立求 r", "detail": "因为 10 为偶数，所以两式中 1-r^{10} 相同，比较得到 (1+r)/(1-r)=3，因此 r=1/2。" },
+      { "line": "Step 3", "title": "求 a_1", "detail": "代入 r=1/2 到 93 = a_1(1-2^{-10})/(1/2)，解得 a_1=512/11。" },
+      { "line": "Step 4", "title": "求分数和", "detail": "1-a_1/a_2+a_1/a_3-... 转成 1-1/r+1/r^2-...-1/r^9，代入 r=1/2 得题面对应结果。" }
+    ]
+  },
+  "sequence-014": {
+    "summary": "标准答案：A=12，B=1，C=6，D=5，E=48，F=60，G=13，H=12，I=13。先用同余条件写出通项，再求和与平方和，最后用恒等式求两两乘积和。",
+    "steps": [
+      { "line": "Step 1", "title": "求通项", "detail": "满足 x≡2(mod3)、x≡3(mod4) 的最小自然数是 11，公差是 12，所以 a_n=12n-1。" },
+      { "line": "Step 2", "title": "求前 n 项和", "detail": "S_n = n/2[(11)+(12n-1)] = n(6n+5)。" },
+      { "line": "Step 3", "title": "求平方和", "detail": "Σ(12k-1)^2 = 144Σk^2 - 24Σk + Σ1，整理得 n(48n^2 + 60n + 13)。" },
+      { "line": "Step 4", "title": "求两两乘积和", "detail": "由 (Σa_k)^2 = Σa_k^2 + 2P，代入已得结果，解出 P = n/2(36n^3 + 12n^2 - 35n - 13)。" }
+    ]
+  },
+  "sequence-015": {
+    "summary": "标准答案：A=4，B=2，C=6，D=4，E=6，F=2，G=4，H=6，I=24，J=3，K=2，L=1。由 a_5=b_3 与 a_7=b_5 建立关于 c,d 的方程，再分析哪些项会是有理数。",
+    "steps": [
+      { "line": "Step 1", "title": "写出两条条件", "detail": "a_n = c+(n-1)d，b_n = cd^{n-1}。因此 a_5=b_3 给出 c+4d=cd^2，a_7=b_5 给出 c+6d=cd^4。" },
+      { "line": "Step 2", "title": "联立求 c,d", "detail": "由两式整理可得 d=√6/2，再代回求得 c=4√6。" },
+      { "line": "Step 3", "title": "找有理项", "detail": "b_n = 4√6·(√6/2)^{n-1}。当指数使根号抵消时，该项为有理数。" },
+      { "line": "Step 4", "title": "求这些项的和", "detail": "把有理项单独抽出后形成新的等比数列，求和可写成 24{(3/2)^m - 1}。" }
+    ]
+  },
+  "sequence-016": {
+    "summary": "标准答案：A=2，B=2，C=2，D=2，E=1，F=8。把递推式取常用对数后转成等比数列问题。",
+    "steps": [
+      { "line": "Step 1", "title": "取对数", "detail": "a_(n+1)=2a_n^2，所以 log a_(n+1)=log2 + 2log a_n。" },
+      { "line": "Step 2", "title": "构造 b_n", "detail": "令 b_n=log a_n + log2，则 b_(n+1)=2b_n，因此它是公比为 2 的等比数列。" },
+      { "line": "Step 3", "title": "求通项", "detail": "a_1=1，所以 b_1=log2，故 b_n=2^{n-1}log2，进一步得 log a_n=(2^{n-1}-1)log2。" },
+      { "line": "Step 4", "title": "数满足条件的 n", "detail": "a_n<10^60 等价于 (2^{n-1}-1)log2<60。检查后可得 n=1 到 8 满足。" }
+    ]
+  },
+  "sequence-017": {
+    "summary": "标准答案：A=2，B=2，C=5，D=50，E=8，F=1，G=7，H=4。先由部分和求一般项，再处理 b_n 的负值区间与带权求和。",
+    "steps": [
+      { "line": "Step 1", "title": "求 a_n", "detail": "a_n = S_n-S_(n-1) = (n^2+3n)-[(n-1)^2+3(n-1)] = 2n+2。" },
+      { "line": "Step 2", "title": "判定 b_n<0", "detail": "b_n = n^2 - 5n - 6 = (n-6)(n+1)，对自然数 n 只有 1 到 5 为负，共 5 项。" },
+      { "line": "Step 3", "title": "求负项和", "detail": "逐项计算可得和为 -50。" },
+      { "line": "Step 4", "title": "整理带权求和", "detail": "代入 a_k=2k+2 后化简为多项式求和，最终整理成题面给出的因式分解形式。" }
+    ]
+  },
+  "sequence-018": {
+    "summary": "标准答案：A=2，B=3，C=2，D=2，E=2，F=100。把乘法递推取 log_10 后就变成二阶线性递推，再转成等比递减的差分。",
+    "steps": [
+      { "line": "Step 1", "title": "取对数", "detail": "a_n^2 a_(n-2)=a_(n-1)^3，令 b_n=log_10 a_n，则 2b_n + b_(n-2) = 3b_(n-1)。" },
+      { "line": "Step 2", "title": "改写差分", "detail": "移项得 2(b_n-b_(n-1)) = b_(n-1)-b_(n-2)，所以差分公比是 1/2。" },
+      { "line": "Step 3", "title": "求 b_n", "detail": "由 b_1=0,b_2=1，得 b_n = 2 - (1/2)^{n-2}。" },
+      { "line": "Step 4", "title": "求极限", "detail": "n→∞ 时 b_n→2，因此 a_n→10^2=100。" }
+    ]
+  },
+  "sequence-019": {
+    "summary": "标准答案：A=3，B=6，C=4，D=3，E=3，F=5，G=4，H=1。先用 3^n 去归一化递推式，把问题降成简单等比。",
+    "steps": [
+      { "line": "Step 1", "title": "归一化", "detail": "设 b_n=a_n/3^n。原式除以 3^{n+1} 后得 b_(n+1)-4b_n+3=0。" },
+      { "line": "Step 2", "title": "平移成等比", "detail": "令 c_n=b_n-1，则 c_(n+1)=4c_n。又 a_1=18，所以 b_1=6，c_1=5。" },
+      { "line": "Step 3", "title": "恢复 a_n", "detail": "c_n=5·4^{n-1}，所以 b_n=5·4^{n-1}+1，故 a_n=3^n(5·4^{n-1}+1)。" }
+    ]
+  },
+  "sequence-020": {
+    "summary": "标准答案：A=1，B=1，C=2，D=1，E=1，F=12。把递推比写成连乘，先猜通项再归纳验证，最后做裂项求和。",
+    "steps": [
+      { "line": "Step 1", "title": "观察连乘", "detail": "a_n/a_(n-1) = (n+1)(2n-3) / [3n(2n+1)]，可期待大量约分。" },
+      { "line": "Step 2", "title": "写出通项", "detail": "展开连乘后得到 a_n = (n+1)/[3^{n+1}(2n-1)(2n+1)]。" },
+      { "line": "Step 3", "title": "裂项", "detail": "将 1/[(2n-1)(2n+1)] 写成 1/2·[1/(2n-1)-1/(2n+1)]。" },
+      { "line": "Step 4", "title": "求无穷和", "detail": "裂项后再与 1/3^{n+1} 组合求和，可得总和为 1/12。" }
+    ]
+  },
+  "sequence-021": {
+    "summary": "标准答案：A=2，B=9，CD=13，EF=36，G=4，H=8，I=9，J=6。先由部分和恢复 a_n，再求 b_n 和 T_n 的最小值。",
+    "steps": [
+      { "line": "Step 1", "title": "恢复 a_n", "detail": "a_n = S_n-S_(n-1) = [(n^2-17n)-((n-1)^2-17(n-1))]/4 = (n-9)/2。" },
+      { "line": "Step 2", "title": "求 b_n", "detail": "a_(n+5)=(n-4)/2，所以 b_n=(n-9)(n-4)/4=(n^2-13n+36)/4。" },
+      { "line": "Step 3", "title": "判断最小位置", "detail": "b_n 在 n=5,6,7,8 为负，n=4,9 为 0，因此 T_n 递减到 n=8，并有 T_8=T_9。" },
+      { "line": "Step 4", "title": "求最小值", "detail": "直接把 b_1 到 b_8 相加，可得最小值 6。" }
+    ]
+  },
+  "sequence-022": {
+    "summary": "标准答案：A=2，B=4，C=3，D=2，E=3，F=8，G=4048。先因式分解，再分别讨论两因子何时是 5 的倍数。",
+    "steps": [
+      { "line": "Step 1", "title": "因式分解", "detail": "a_n = 4n^2 + 5n - 6 = (n+2)(4n-3)。" },
+      { "line": "Step 2", "title": "判断模 5", "detail": "a_n 为 5 的倍数，当 n+2 ≡ 0(mod5) 或 4n-3 ≡ 0(mod5)。整理得 n=5k-2 或 5k-3。" },
+      { "line": "Step 3", "title": "统计项数", "detail": "1 到 20 中符合条件的 n 一共有 8 个。" },
+      { "line": "Step 4", "title": "求和", "detail": "把对应 8 个 n 代入 a_n 相加，得到总和 4048。" }
+    ]
+  },
+  "sequence-023": {
+    "summary": "标准答案：A=4048，B=4048。把第 22 题的两类 n 分别求和，再合并验证即可。",
+    "steps": [
+      { "line": "Step 1", "title": "分类", "detail": "按 n=5k-2 与 n=5k-3 两类分别代入 a_n=4n^2+5n-6。" },
+      { "line": "Step 2", "title": "分别求和", "detail": "每一类都化成关于 k 的二次多项式并求和。" },
+      { "line": "Step 3", "title": "合并验证", "detail": "两类结果相加得到 4048，因此与第 22 题的总和一致。" }
+    ]
+  }
+}

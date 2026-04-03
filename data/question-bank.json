@@ -381,7 +381,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>3 ??????? 2?4 ??????? 3 ????????????????? {a<sub>n</sub>} ?????</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> ????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"math-boxed-letter-wide\">A</span><span>n ? </span><span class=\"math-boxed-letter\">B</span></div><p class=\"math-jp-line\"><strong>(2)</strong> ????? n ??????</p><div class=\"math-answer-line\"><span>a<sub>1</sub> + ? + a<sub>n</sub> = n(</span><span class=\"math-boxed-letter\">C</span><span>n + </span><span class=\"math-boxed-letter\">D</span><span>)</span></div><p class=\"math-jp-line\">??????? 2 ????</p><div class=\"math-answer-line\"><span>a<sub>1</sub><sup>2</sup> + ? + a<sub>n</sub><sup>2</sup> = n(</span><span class=\"math-boxed-letter-wide\">E</span><span>n<sup>2</sup> + </span><span class=\"math-boxed-letter-wide\">F</span><span>n + </span><span class=\"math-boxed-letter-wide\">G</span><span>)</span></div><p class=\"math-jp-line\"><strong>(3)</strong> ??? 2 ??????? S ????</p><div class=\"math-answer-line\"><span>S = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">n</span><span class=\"inline-fraction-bottom\">2</span></span><span>(36n<sup>3</sup> + </span><span class=\"math-boxed-letter-wide\">H</span><span>n<sup>2</sup> ? 35n ? </span><span class=\"math-boxed-letter-wide\">I</span><span>)</span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>3で割ると余りが2，4で割ると余りが3となる自然数を小さい順に並べた数列 {a<sub>n</sub>} を考える。</strong></p><p class=\"math-jp-line\">一般項は a<sub>n</sub> = <span class=\"math-boxed-letter-wide\">A</span>n − <span class=\"math-boxed-letter\">B</span> である。</p><p class=\"math-jp-line\">また，初項から第n項までの和は n(<span class=\"math-boxed-letter\">C</span>n + <span class=\"math-boxed-letter\">D</span>)，各項の2乗の和は n(<span class=\"math-boxed-letter-wide\">E</span>n<sup>2</sup> + <span class=\"math-boxed-letter-wide\">F</span>n + <span class=\"math-boxed-letter-wide\">G</span>) である。</p><p class=\"math-jp-line\">異なる2項の積の総和をSとすると，S = n/2(36n<sup>3</sup> + <span class=\"math-boxed-letter-wide\">H</span>n<sup>2</sup> − 35n − <span class=\"math-boxed-letter-wide\">I</span>) である。</p></div>",
       "answer": "12,1,6,5,48,60,13,12,13",
       "blankLabels": [
         "A",
@@ -398,14 +398,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "?????????????? 11???? 12 ??? a_n=12n-1??? 2 ?????????(?)^2 = 2S + 2?? ?????????????",
+        "summary": "最小の項は11，公差は12なので a_n = 12n - 1。和と2乗和を公式で出し，(和)^2 = 2S + 2乗和 を使えば積の総和が求まる。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-14.png",
-      "rewrittenPrompt": "?????????????????????????????",
-      "notes": "????????????????????"
+      "rewrittenPrompt": "合同条件を満たす自然数列の一般項・和・積の和を求める。",
+      "notes": "合同条件から始まる数列整理問題。"
     },
     {
       "id": "sequence-015",
@@ -413,7 +413,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>???? {a<sub>n</sub>} ????? {b<sub>n</sub>} ????????? c?????????? d ????</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> a<sub>5</sub> = b<sub>3</sub>, a<sub>7</sub> = b<sub>5</sub> ????</p><div class=\"math-answer-line\"><span>c + </span><span class=\"math-boxed-letter\">A</span><span>d = cd<sup><span class=\"math-boxed-letter\">B</span></sup>? c + </span><span class=\"math-boxed-letter\">C</span><span>d = cd<sup><span class=\"math-boxed-letter\">D</span></sup></span></div><p class=\"math-jp-line\">??</p><div class=\"math-answer-line\"><span>d = ?</span><span class=\"math-boxed-letter\">E</span><span> / </span><span class=\"math-boxed-letter\">F</span><span>? c = </span><span class=\"math-boxed-letter\">G</span><span>?</span><span class=\"math-boxed-letter\">H</span></div><p class=\"math-jp-line\"><strong>(2)</strong> {b<sub>n</sub>} ?????? 2m ?????????????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">I</span><span>{(</span><span class=\"math-fraction\"><span class=\"math-fraction-top\">J</span><span class=\"math-fraction-bottom\">K</span></span><span>)<sup>m</sup> ? </span><span class=\"math-boxed-letter\">L</span><span>}</span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>等差数列 {a<sub>n</sub>} と等比数列 {b<sub>n</sub>} は，どちらも初項がcで，共通差と公比が同じdである。</strong></p><p class=\"math-jp-line\">a<sub>5</sub> = b<sub>3</sub>, a<sub>7</sub> = b<sub>5</sub> のとき，c + <span class=\"math-boxed-letter\">A</span>d = cd<sup><span class=\"math-boxed-letter\">B</span></sup>，c + <span class=\"math-boxed-letter\">C</span>d = cd<sup><span class=\"math-boxed-letter\">D</span></sup>。</p><p class=\"math-jp-line\">これより d = √<span class=\"math-boxed-letter\">E</span> / <span class=\"math-boxed-letter\">F</span>，c = <span class=\"math-boxed-letter\">G</span>√<span class=\"math-boxed-letter\">H</span> である。</p><p class=\"math-jp-line\">さらに，有理数となる項の和は <span class=\"math-boxed-letter-wide\">I</span>{(<span class=\"math-fraction\"><span class=\"math-fraction-top\">J</span><span class=\"math-fraction-bottom\">K</span></span>)<sup>m</sup> − <span class=\"math-boxed-letter\">L</span>} となる。</p></div>",
       "answer": "4,2,6,4,6,2,4,6,24,3,2,1",
       "blankLabels": [
         "A",
@@ -433,14 +433,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "a_5=c+4d?a_7=c+6d?b_3=cd^2?b_5=cd^4 ?? d^2=3/2?d=?6/2?c=4?6?????? b_n ?????????????? 24((3/2)^m?1)?",
+        "summary": "a_5=c+4d，a_7=c+6d，b_3=cd^2，b_5=cd^4 から d^2=3/2，d=√6/2，c=4√6。偶数番目の b_n だけが有理数となり，その和は 24((3/2)^m−1)。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-15.png",
-      "rewrittenPrompt": "???????????????????c ? d ??????????????????",
-      "notes": "???????????????????"
+      "rewrittenPrompt": "等差条件と等比条件から c と d を決め，有理数となる項の和を求める。",
+      "notes": "等差と等比を同時に扱う問題。"
     },
     {
       "id": "sequence-016",
@@ -448,7 +448,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>?? {a<sub>n</sub>} ? a<sub>1</sub> = 1?a<sub>n+1</sub> = 2a<sub>n</sub><sup>2</sup> ?????????</strong></p><p class=\"math-jp-line\">?????????????</p><div class=\"math-answer-line\"><span>log<sub>10</sub>a<sub>n+1</sub> = log<sub>10</sub></span><span class=\"math-boxed-letter\">A</span><span> + </span><span class=\"math-boxed-letter\">B</span><span>log<sub>10</sub>a<sub>n</sub></span></div><p class=\"math-jp-line\">??? b<sub>n</sub> = log<sub>10</sub>a<sub>n</sub> + log<sub>10</sub>2 ???????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">C</span></div><p class=\"math-jp-line\">????????</p><div class=\"math-answer-line\"><span>log<sub>10</sub>a<sub>n</sub> = (</span><span class=\"math-boxed-letter\">D</span><span><sup>n?1</sup> ? </span><span class=\"math-boxed-letter\">E</span><span>)log<sub>10</sub>2</span></div><p class=\"math-jp-line\">??????????a<sub>n</sub> &lt; 10<sup>60</sup> ???? n ????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">F</span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>1</sub> = 1，a<sub>n+1</sub> = 2a<sub>n</sub><sup>2</sup> で定まる数列 {a<sub>n</sub>} を考える。</strong></p><p class=\"math-jp-line\">log<sub>10</sub>a<sub>n+1</sub> = log<sub>10</sub><span class=\"math-boxed-letter\">A</span> + <span class=\"math-boxed-letter\">B</span>log<sub>10</sub>a<sub>n</sub> であり，b<sub>n</sub> = log<sub>10</sub>a<sub>n</sub> + log<sub>10</sub>2 とおくと公比 <span class=\"math-boxed-letter\">C</span> の等比数列になる。</p><p class=\"math-jp-line\">したがって log<sub>10</sub>a<sub>n</sub> = (<span class=\"math-boxed-letter\">D</span><sup>n−1</sup> − <span class=\"math-boxed-letter\">E</span>)log<sub>10</sub>2 であり，a<sub>n</sub> &lt; 10<sup>60</sup> を満たす n の個数は <span class=\"math-boxed-letter-wide\">F</span> 個である。</p></div>",
       "answer": "2,2,2,2,1,8",
       "blankLabels": [
         "A",
@@ -462,14 +462,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "?????? log a_(n+1)=log2+2log a_n?b_n=log a_n+log2 ???? b_(n+1)=2b_n????? log a_n=(2^(n-1)-1)log2?????????? n ? 8 ??",
+        "summary": "対数をとると log a_(n+1)=log2+2log a_n。b_n=log a_n+log2 とおけば b_(n+1)=2b_n。よって log a_n=(2^(n-1)-1)log2 となり，条件を満たす n は8個。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-16.png",
-      "rewrittenPrompt": "???????????????????????? n ????????",
-      "notes": "???????????????"
+      "rewrittenPrompt": "常用対数をとって等比型に直し，条件を満たす n の個数を数える。",
+      "notes": "対数で漸化式を一次化する問題。"
     },
     {
       "id": "sequence-017",
@@ -477,7 +477,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>????? n ?????? <span class=\"math-sigma\">?<sub>k=1</sub><sup>n</sup></span>a<sub>k</sub> = n<sup>2</sup> + 3n ????? {a<sub>n</sub>} ?????</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> ????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"math-boxed-letter\">A</span><span>n + </span><span class=\"math-boxed-letter\">B</span></div><p class=\"math-jp-line\"><strong>(2)</strong> b<sub>n</sub> = n<sup>2</sup> ? 5n ? 6 ?????b<sub>n</sub> &lt; 0 ????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">C</span><span>??????? ?</span><span class=\"math-boxed-letter-wide\">D</span></div><p class=\"math-jp-line\"><strong>(3)</strong></p><div class=\"math-answer-line\"><span><span class=\"math-sigma\">?<sub>k=1</sub><sup>n</sup></span></span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">k<sup>2</sup>b<sub>k</sub></span><span class=\"inline-fraction-bottom\">a<sub>k</sub></span></span><span> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">1</span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">E</span></span></span><span>n(n + </span><span class=\"math-boxed-letter\">F</span><span>)(n<sup>2</sup> ? </span><span class=\"math-boxed-letter\">G</span><span>n ? </span><span class=\"math-boxed-letter\">H</span><span>)</span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>初項から第n項までの和が Σa<sub>k</sub> = n<sup>2</sup> + 3n である数列 {a<sub>n</sub>} を考える。</strong></p><p class=\"math-jp-line\">一般項は a<sub>n</sub> = <span class=\"math-boxed-letter\">A</span>n + <span class=\"math-boxed-letter\">B</span>。</p><p class=\"math-jp-line\">b<sub>n</sub> = n<sup>2</sup> − 5n − 6 とすると，b<sub>n</sub> &lt; 0 となる項は <span class=\"math-boxed-letter\">C</span> 個で，その和は −<span class=\"math-boxed-letter-wide\">D</span>。</p><p class=\"math-jp-line\">さらに Σ(k<sup>2</sup>b<sub>k</sub>/a<sub>k</sub>) = (1/<span class=\"math-boxed-letter\">E</span>)n(n + <span class=\"math-boxed-letter\">F</span>)(n<sup>2</sup> − <span class=\"math-boxed-letter\">G</span>n − <span class=\"math-boxed-letter\">H</span>) である。</p></div>",
       "answer": "2,2,5,50,8,1,7,4",
       "blankLabels": [
         "A",
@@ -493,14 +493,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "??????? a_n = 2n + 2?b_n = (n-6)(n+1) ????????? n=1 ?? 5 ?????? -50???? k^2b_k/a_k = (k^3 - 6k^2)/2 ?????????????",
+        "summary": "和の差をとれば a_n = 2n + 2。b_n = (n-6)(n+1) だから負になるのは n=1 から5までで和は -50。さらに k^2b_k/a_k を整理して総和公式を使う。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-17.png",
-      "rewrittenPrompt": "??????????????? b_n ??????????????",
-      "notes": "???????????????????????"
+      "rewrittenPrompt": "和から一般項を出し，別の二次式 b_n と組み合わせた総和を求める。",
+      "notes": "和から一般項を作る問題。"
     },
     {
       "id": "sequence-018",
@@ -508,7 +508,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>????????? a<sub>1</sub>, a<sub>2</sub>, ? ? a<sub>1</sub> = 1?a<sub>2</sub> = 10?(a<sub>n</sub>)<sup>2</sup>a<sub>n-2</sub> = (a<sub>n-1</sub>)<sup>3</sup> (n = 3,4, ?) ????????</strong></p><p class=\"math-jp-line\">b<sub>n</sub> = log<sub>10</sub>a<sub>n</sub> ????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">A</span><span>b<sub>n</sub> + b<sub>n-2</sub> = </span><span class=\"math-boxed-letter\">B</span><span>b<sub>n-1</sub></span></div><p class=\"math-jp-line\">?????</p><div class=\"math-answer-line\"><span>b<sub>n</sub> ? b<sub>n-1</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">1</span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">C</span></span></span><span>(b<sub>n-1</sub> ? b<sub>n-2</sub>)</span></div><p class=\"math-jp-line\">????</p><div class=\"math-answer-line\"><span>b<sub>n</sub> = </span><span class=\"math-boxed-letter\">D</span><span> ? (</span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">1</span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">C</span></span></span><span>)<sup>n ? </span><span class=\"math-boxed-letter\">E</span><span></span></div><p class=\"math-jp-line\">??? lim a<sub>n</sub> = </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">F</span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>1</sub> = 1，a<sub>2</sub> = 10，(a<sub>n</sub>)<sup>2</sup>a<sub>n-2</sub> = (a<sub>n-1</sub>)<sup>3</sup> を満たす正の数列を考える。</strong></p><p class=\"math-jp-line\">b<sub>n</sub> = log<sub>10</sub>a<sub>n</sub> とおくと <span class=\"math-boxed-letter\">A</span>b<sub>n</sub> + b<sub>n-2</sub> = <span class=\"math-boxed-letter\">B</span>b<sub>n-1</sub>，したがって b<sub>n</sub> − b<sub>n-1</sub> = (1/<span class=\"math-boxed-letter\">C</span>)(b<sub>n-1</sub> − b<sub>n-2</sub>)。</p><p class=\"math-jp-line\">これより b<sub>n</sub> = <span class=\"math-boxed-letter\">D</span> − (1/<span class=\"math-boxed-letter\">C</span>)<sup>n−<span class=\"math-boxed-letter\">E</span></sup>，よって lim a<sub>n</sub> = <span class=\"math-boxed-letter-wide\">F</span> である。</p></div>",
       "answer": "2,3,2,2,2,100",
       "blankLabels": [
         "A",
@@ -522,14 +522,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "?????? 2b_n + b_(n-2) = 3b_(n-1)??? d_n=b_n-b_(n-1) ???? d_n=(1/2)d_(n-1)?b_1=0,b_2=1 ?? b_n=2-(1/2)^(n-2)???? a_n?100?",
+        "summary": "対数をとると 2b_n + b_(n-2) = 3b_(n-1)。差分 d_n=b_n-b_(n-1) とおけば d_n=(1/2)d_(n-1)。b_1=0,b_2=1 より b_n=2-(1/2)^(n-2)，極限は100。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-18.png",
-      "rewrittenPrompt": "??????????????????????????",
-      "notes": "???????????????????"
+      "rewrittenPrompt": "両辺の対数をとって階差数列を作り，極限値を復元する。",
+      "notes": "対数と階差を使う極限問題。"
     },
     {
       "id": "sequence-019",
@@ -537,7 +537,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>1</sub> = 18?a<sub>n+1</sub> ? 12a<sub>n</sub> + 3<sup>n+2</sup> = 0?(n = 1,2,3, ?) ?????? {a<sub>n</sub>} ?????????</strong></p><p class=\"math-jp-line\">b<sub>n</sub> = a<sub>n</sub> / </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">A</span><span><sup>n</sup></span></div><p class=\"math-jp-line\">?????b<sub>1</sub> = </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">B</span></div><p class=\"math-jp-line\">????b<sub>n+1</sub> ? </p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">C</span><span>b<sub>n</sub> + </span><span class=\"math-boxed-letter\">D</span><span> = 0</span></div><p class=\"math-jp-line\">????????????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"math-boxed-letter\">E</span><span><sup>n</sup>(</span><span class=\"math-boxed-letter\">F</span><span>?</span><span class=\"math-boxed-letter\">G</span><span><sup>n?1</sup> + </span><span class=\"math-boxed-letter\">H</span><span>)</span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>1</sub> = 18，a<sub>n+1</sub> − 12a<sub>n</sub> + 3<sup>n+2</sup> = 0 で定まる数列 {a<sub>n</sub>} を考える。</strong></p><p class=\"math-jp-line\">b<sub>n</sub> = a<sub>n</sub> / <span class=\"math-boxed-letter\">A</span><sup>n</sup> とおくと，b<sub>1</sub> = <span class=\"math-boxed-letter\">B</span>，b<sub>n+1</sub> − <span class=\"math-boxed-letter\">C</span>b<sub>n</sub> + <span class=\"math-boxed-letter\">D</span> = 0。</p><p class=\"math-jp-line\">したがって a<sub>n</sub> = <span class=\"math-boxed-letter\">E</span><sup>n</sup>(<span class=\"math-boxed-letter\">F</span>·<span class=\"math-boxed-letter\">G</span><sup>n−1</sup> + <span class=\"math-boxed-letter\">H</span>)。</p></div>",
       "answer": "3,6,4,3,3,5,4,1",
       "blankLabels": [
         "A",
@@ -553,14 +553,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "3^n ???? b_(n+1)-4b_n+3=0?b_(n+1)-1=4(b_n-1) ?????c_n=b_n-1 ??? 5??? 4 ????????? a_n=3^n(5?4^(n-1)+1)?",
+        "summary": "3^n で割ると b_(n+1)-4b_n+3=0。b_(n+1)-1=4(b_n-1) と直すと等比数列になり，a_n=3^n(5·4^(n-1)+1)。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-19.png",
-      "rewrittenPrompt": "???????????????????????????????",
-      "notes": "???? 3^n ????????????"
+      "rewrittenPrompt": "指数で割って一次漸化式に変え，等比数列へ落として一般項を作る。",
+      "notes": "指数で割る漸化式の定番。"
     },
     {
       "id": "sequence-020",
@@ -568,7 +568,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>1</sub> = 2/9?a<sub>n</sub> = ((n + 1)(2n ? 3))/(3n(2n + 1)) a<sub>n?1</sub>?(n = 2,3,4, ?) ????</strong></p><p class=\"math-jp-line\">????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">n + </span><span class=\"math-boxed-letter\">A</span><span></span><span class=\"inline-fraction-bottom\">3<sup>n + </sup><span class=\"math-boxed-letter\">B</span><span>(</span><span class=\"math-boxed-letter\">C</span><span>n ? </span><span class=\"math-boxed-letter\">D</span><span>)(2n + 1)</span></span></span></div><p class=\"math-jp-line\">???????????</p><div class=\"math-answer-line\"><span><span class=\"math-sigma\">?<sub>n=1</sub><sup>?</sup></span> a<sub>n</sub> = </span><span class=\"math-fraction\"><span class=\"math-fraction-top\">E</span><span class=\"math-fraction-bottom\"><span class=\"math-boxed-letter-wide\">F</span></span></span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>1</sub> = 2/9，a<sub>n</sub> = ((n+1)(2n−3))/(3n(2n+1)) a<sub>n−1</sub> とする。</strong></p><p class=\"math-jp-line\">一般項は a<sub>n</sub> = (n + <span class=\"math-boxed-letter\">A</span>) / [3<sup>n + <span class=\"math-boxed-letter\">B</span></sup>(<span class=\"math-boxed-letter\">C</span>n − <span class=\"math-boxed-letter\">D</span>)(2n + 1)] と表せる。</p><p class=\"math-jp-line\">また，無限級数の和は <span class=\"math-fraction\"><span class=\"math-fraction-top\">E</span><span class=\"math-fraction-bottom\"><span class=\"math-boxed-letter-wide\">F</span></span></span> である。</p></div>",
       "answer": "1,1,2,1,1,12",
       "blankLabels": [
         "A",
@@ -582,14 +582,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "b_n=(n+1)/(3^n a_n) ???? b_n=3(2n?1)(2n+1)?????? a_n=(n+1)/(3^(n+1)(2n?1)(2n+1))???? a_n=(c_(n?1)-c_n)/12 ????????? 1/12?",
+        "summary": "b_n=(n+1)/(3^n a_n) とおくと比が簡単になり，一般項が出る。さらに c_n を導入すると差分和になり，無限和は 1/12。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-20.png",
-      "rewrittenPrompt": "????????????????????????????",
-      "notes": "????? telescoping ??????????"
+      "rewrittenPrompt": "補助数列を導入して一般項を作り，差分表示で無限和を出す。",
+      "notes": "補助数列と telescoping。"
     },
     {
       "id": "sequence-021",
@@ -597,7 +597,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>????? n ????? S<sub>n</sub> ? S<sub>n</sub> = (n<sup>2</sup> ? 17n)/4 ??????? {a<sub>n</sub>} ?????b<sub>n</sub> = a<sub>n</sub>a<sub>n+5</sub> ?????</strong></p><p class=\"math-jp-line\"><strong>(1)</strong> ????</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">n ? </span><span class=\"math-boxed-letter\">B</span><span></span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">A</span></span></span></div><p class=\"math-jp-line\">???</p><div class=\"math-answer-line\"><span>b<sub>n</sub> = </span><span class=\"inline-fraction\"><span class=\"inline-fraction-top\">n<sup>2</sup> ? </span><span class=\"math-boxed-letter-wide\">CD</span><span>n + </span><span class=\"math-boxed-letter-wide\">EF</span><span></span><span class=\"inline-fraction-bottom\"><span class=\"math-boxed-letter\">G</span></span></span></div><p class=\"math-jp-line\">??????? T<sub>n</sub> = b<sub>1</sub> + ? + b<sub>n</sub> ????????</p><div class=\"math-answer-line\"><span>n = </span><span class=\"math-boxed-letter\">H</span><span> ??? </span><span class=\"math-boxed-letter\">I</span></div><p class=\"math-jp-line\">????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">J</span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>初項から第n項までの和 S<sub>n</sub> が S<sub>n</sub> = (n<sup>2</sup> − 17n)/4 で表される数列 {a<sub>n</sub>} に対して，b<sub>n</sub> = a<sub>n</sub>a<sub>n+5</sub> と定める。</strong></p><p class=\"math-jp-line\">一般項は a<sub>n</sub> = (n − <span class=\"math-boxed-letter\">B</span>) / <span class=\"math-boxed-letter\">A</span>，したがって b<sub>n</sub> = (n<sup>2</sup> − <span class=\"math-boxed-letter-wide\">CD</span>n + <span class=\"math-boxed-letter-wide\">EF</span>) / <span class=\"math-boxed-letter\">G</span>。</p><p class=\"math-jp-line\">T<sub>n</sub> = b<sub>1</sub> + … + b<sub>n</sub> が最小になるのは n = <span class=\"math-boxed-letter\">H</span> または <span class=\"math-boxed-letter\">I</span> で，その最小値は <span class=\"math-boxed-letter\">J</span> である。</p></div>",
       "answer": "2,9,13,36,4,8,9,6",
       "blankLabels": [
         "A",
@@ -613,14 +613,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "a_n=(n?9)/2?b_n=(n?9)(n?4)/4=(n^2?13n+36)/4?b_n ? 5?8 ????? T_n ? 8 ? 9 ????????? 6?",
+        "summary": "S_n−S_(n−1) から a_n=(n−9)/2。よって b_n=(n−9)(n−4)/4=(n^2−13n+36)/4。b_n は 5〜8 で負なので T_n は 8 と 9 で最小になり，値は 6。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-21.png",
-      "rewrittenPrompt": "??? a_n ????? b_n ????? T_n ?????????",
-      "notes": "??????????????????????"
+      "rewrittenPrompt": "和から a_n を出し，積 b_n とその総和 T_n の最小値を調べる。",
+      "notes": "和→一般項→最小値。"
     },
     {
       "id": "sequence-022",
@@ -628,7 +628,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>? n ?? a<sub>n</sub> = 4n<sup>2</sup> + 5n ? 6 ???????? {a<sub>n</sub>} ?????</strong></p><p class=\"math-jp-line\">??</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = (n + </span><span class=\"math-boxed-letter\">A</span><span>)(</span><span class=\"math-boxed-letter\">B</span><span>n ? </span><span class=\"math-boxed-letter\">C</span><span>)</span></div><p class=\"math-jp-line\">???????????????a<sub>n</sub> ? 5 ????????</p><div class=\"math-answer-line\"><span>n = 5k ? </span><span class=\"math-boxed-letter\">D</span><span> ??? n = 5k ? </span><span class=\"math-boxed-letter\">E</span></div><p class=\"math-jp-line\">?????????? 20 ???? 5 ???????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">F</span></div><p class=\"math-jp-line\">?????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">G</span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>第n項が a<sub>n</sub> = 4n<sup>2</sup> + 5n − 6 で与えられる数列 {a<sub>n</sub>} を考える。</strong></p><p class=\"math-jp-line\">a<sub>n</sub> = (n + <span class=\"math-boxed-letter\">A</span>)(<span class=\"math-boxed-letter\">B</span>n − <span class=\"math-boxed-letter\">C</span>) と因数分解できる。したがって a<sub>n</sub> が 5 の倍数になるのは n = 5k − <span class=\"math-boxed-letter\">D</span> または n = 5k − <span class=\"math-boxed-letter\">E</span> のときである。</p><p class=\"math-jp-line\">最初の20項でそのような項の個数は <span class=\"math-boxed-letter\">F</span> 個，和は <span class=\"math-boxed-letter-wide\">G</span> である。</p></div>",
       "answer": "2,4,3,2,3,8,4048",
       "blankLabels": [
         "A",
@@ -643,14 +643,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "a_n=(n+2)(4n?3) ???????????? n+2 ? 4n?3 ?????? 5 ?????n?3,2 (mod 5)?1?20 ?? 8 ???? 4048?",
+        "summary": "a_n=(n+2)(4n−3) と因数分解できるので，n+2 または 4n−3 が 5 の倍数。1〜20 では 8 個あり，和は 4048。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-22.png",
-      "rewrittenPrompt": "??????????????5 ?????????????",
-      "notes": "???????????????????????"
+      "rewrittenPrompt": "因数分解と合同条件を使って，5の倍数になる項を分類する。",
+      "notes": "合同条件で分類する問題。"
     },
     {
       "id": "sequence-023",
@@ -658,7 +658,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>n</sub> = 4n<sup>2</sup> + 5n ? 6 ???? 20 ??????</strong></p><p class=\"math-jp-line\">5 ???????? 2 ????????????????</p><div class=\"math-answer-line\"><span>S = </span><span class=\"math-boxed-letter-wide\">A</span></div><p class=\"math-jp-line\">??????????? 22 ????????</p><div class=\"math-answer-line\"><span class=\"math-boxed-letter-wide\">B</span></div><p class=\"math-jp-line\">????</p></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>a<sub>n</sub> = 4n<sup>2</sup> + 5n − 6 の最初の20項を考える。</strong></p><p class=\"math-jp-line\">5の倍数となる項を2つのケースに分けて足し合わせると S = <span class=\"math-boxed-letter-wide\">A</span> となる。したがって，第22題で求めた総和も <span class=\"math-boxed-letter-wide\">B</span> である。</p></div>",
       "answer": "4048,4048",
       "blankLabels": [
         "A",
@@ -668,14 +668,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "n=5k?2 ? n=5k?3 ? 2 ?????? a_n ???????????? 4 ????????? 4048 ??????",
+        "summary": "n=5k−2 と n=5k−3 の2系列に分けて a_n を足し上げると，どちらも4項ずつ現れ，合計は 4048 で一致する。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-23.png",
-      "rewrittenPrompt": "5 ?????? 2 ???????????????????????",
-      "notes": "? 22 ???????????????????????"
+      "rewrittenPrompt": "5の倍数となる2つのケースを分けて，合計を別表現でも確認する。",
+      "notes": "第22題の結果確認。"
     }
   ]
 }
