@@ -18,7 +18,7 @@ def build_record(row: dict[str, str]) -> dict[str, object]:
         "topicId": row["topic_id"],
         "levelId": row["level_id"],
         "type": "text",
-        "question": row["rewritten_prompt"],
+        "question": row.get("display_html") or row["rewritten_prompt"],
         "answer": row["answer"],
         "blankLabels": parse_blank_labels(row["blank_labels"]),
         "explanation": {
@@ -31,6 +31,7 @@ def build_record(row: dict[str, str]) -> dict[str, object]:
         },
         "sourcePdf": row["source_pdf"],
         "sourceImage": row["page_image"],
+        "rewrittenPrompt": row["rewritten_prompt"],
         "notes": row["notes"],
     }
 

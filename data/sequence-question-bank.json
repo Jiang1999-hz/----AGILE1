@@ -6,7 +6,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "数列 {u_k} を u_k = k^2 - 2k + 2 (k ≧ 1) で定める。初項から第 n 項までの和を整理すると (A n^3 - B n^2 + C n) / D の形になる。A, B, C, D を順に求めよ。",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>数列 {u<sub>k</sub>} が</strong></p><div class=\"math-formula\">u<sub>k</sub> = k<sup>2</sup> - 2k + 2 <span class=\"math-condition\">(k ≧ 1)</span></div><p class=\"math-jp-line\">で定められているとき，初項から第 n 項までの和は</p><div class=\"math-fraction\"><div class=\"math-fraction-top\">A n<sup>3</sup> - B n<sup>2</sup> + C n</div><div class=\"math-fraction-bottom\">D</div></div><p class=\"math-jp-line\">である。</p></div>",
       "answer": "1,6,11,6",
       "blankLabels": [
         "A",
@@ -18,13 +18,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "Σ(k^2 - 2k + 2) を Σk^2, Σk, Σ1 に分けて計算し，通分して係数を読み取る。",
+        "summary": "先把总和写成 Σ(k^2 - 2k + 2)，再拆成 Σk^2、Σk、Σ1 三部分分别求和，最后通分读出 A、B、C、D。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-01.png",
-      "notes": "原题表述微调；变量名 a_k 改为 u_k。"
+      "rewrittenPrompt": "数列 {u_k} を u_k = k^2 - 2k + 2 (k ≧ 1) で定める。初項から第 n 項までの和を整理すると分数の形で表される。",
+      "notes": "EJU 风格题面 HTML 已固化到 display_html。"
     },
     {
       "id": "sequence-002",
@@ -32,7 +33,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "初項が 2，公比が -2/3 である等比数列 {u_n} を考える。v_n = u_{n+1}u_n (n ≧ 1) と定めると，{v_n} も等比数列になる。その初項を -AB/C，公比を D/E とするとき，無限和 Σ[v_n] を -FGH/I の形で表せ。",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>初項 2，公比 <span class=\"inline-fraction\"><span class=\"inline-fraction-top\">-2</span><span class=\"inline-fraction-bottom\">3</span></span> の等比数列 {u<sub>n</sub>} を考える。</strong></p><p class=\"math-jp-line\">このとき，v<sub>n</sub> = u<sub>n+1</sub>u<sub>n</sub> (n ≧ 1) とおくと，数列 {v<sub>n</sub>} は</p><div class=\"math-answer-line\"><span>初項 = </span><span class=\"math-fraction\"><span class=\"math-fraction-top\">AB</span><span class=\"math-fraction-bottom\">C</span></span><span>，公比 = </span><span class=\"math-fraction math-fraction-compact\"><span class=\"math-fraction-top\">D</span><span class=\"math-fraction-bottom\">E</span></span></div><p class=\"math-jp-line\">の等比数列になる。したがって，</p><div class=\"math-answer-line\"><span class=\"math-sigma\">∑<sub>n=1</sub><sup>∞</sup> v<sub>n</sub> = </span><span class=\"math-fraction\"><span class=\"math-fraction-top\">FGH</span><span class=\"math-fraction-bottom\">I</span></span></div><p class=\"math-jp-line\">である。</p></div>",
       "answer": "-8,3,4,9,-24,5",
       "blankLabels": [
         "AB",
@@ -46,13 +47,14 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "u_n の一般項を求めてから v_n = u_{n+1}u_n を整理すると，初項 -8/3，公比 4/9 の等比数列になる。無限和公式で -24/5 を得る。",
+        "summary": "先写出 u_n 的一般项，再用 v_n = u_(n+1)u_n 求出新的等比数列的初项和公比，最后求无穷和。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-02.png",
-      "notes": "原题表述微调；a_n,b_n 改为 u_n,v_n。"
+      "rewrittenPrompt": "初項 2，公比 -2/3 の等比数列 {u_n} を考える。v_n = u_(n+1)u_n とおくと，初項・公比・無限和が求められる。",
+      "notes": "多框填空格式已保存在 display_html。"
     },
     {
       "id": "sequence-003",
@@ -60,7 +62,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "一般項を u_n = pn^2 + qn + r (n ≧ 1) とする数列 {u_n} がある。u_1 = 2，u_2 = 9，u_3 = 22 のとき，u_4 を JK，最初の 8 項の和を LMN として求めよ。",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>一般項 {u<sub>n</sub>} が</strong></p><div class=\"math-formula\">u<sub>n</sub> = pn<sup>2</sup> + qn + r</div><p class=\"math-jp-line\">で与えられる数列 {u<sub>n</sub>} がある。</p><p class=\"math-jp-line\">u<sub>1</sub> = 2，u<sub>2</sub> = 9，u<sub>3</sub> = 22，u<sub>4</sub> = JK である。{u<sub>n</sub>} のはじめの 8 項の和は LMN である。</p></div>",
       "answer": "41,492",
       "blankLabels": [
         "JK",
@@ -70,13 +72,62 @@
         "assetType": "text",
         "assetLabel": "老师标准讲解",
         "assetUrl": null,
-        "summary": "u_1,u_2,u_3 から p,q,r の连立方程式を作って一般項を決める。そこから u_4 と最初の 8 項の和を計算する。",
+        "summary": "先由 u_1、u_2、u_3 建立方程求出 p、q、r，再代入计算 u_4 和前 8 項和。",
         "steps": [],
         "followUp": ""
       },
       "sourcePdf": "13、数列22.pdf",
       "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-03.png",
-      "notes": "原题表述微调；a_n 改为 u_n。"
+      "rewrittenPrompt": "一般項 u_n = pn^2 + qn + r で与えられる数列について，u_4 と最初の 8 項の和を求める。",
+      "notes": "双框结果格式已保存在 display_html。"
+    },
+    {
+      "id": "sequence-004",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>等差数列 {u<sub>n</sub>} がある。</strong></p><p class=\"math-jp-line\">u<sub>1</sub> = 3，u<sub>2</sub> = 7，u<sub>3</sub> = 11 のとき，u<sub>6</sub> = A である。</p></div>",
+      "answer": "23",
+      "blankLabels": [
+        "A"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "相邻两项都增加 4，所以先求公差，再代入等差数列公式即可。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-04.png",
+      "rewrittenPrompt": "等差数列 {u_n} の第 6 項を求める基礎問題。",
+      "notes": "测试题，保持与正式题同样的 display_html 结构。"
+    },
+    {
+      "id": "sequence-005",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>数列 {v<sub>n</sub>} が v<sub>n</sub> = 2n + 1 で与えられている。</strong></p><p class=\"math-jp-line\">このとき，v<sub>8</sub> = AB である。</p></div>",
+      "answer": "17",
+      "blankLabels": [
+        "AB"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "n = 8 を直接代入すれば求められる。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-05.png",
+      "rewrittenPrompt": "一般項 v_n = 2n + 1 のとき，v_8 を求める基礎問題。",
+      "notes": "测试题，双字符填空也走同一条管道。"
     }
   ]
 }

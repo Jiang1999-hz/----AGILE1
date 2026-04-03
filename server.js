@@ -4,6 +4,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { PrismaClient } = require("@prisma/client");
+const { query, withTransaction } = require("./lib/pg");
 
 const prisma = new PrismaClient();
 const root = __dirname;
@@ -243,6 +244,257 @@ function normalizeQuestionRecord(record) {
           detail: step.detail
         }))
     } : null
+  };
+}
+
+function mapQuestionRows(questionRows, choiceRows, explanationRows, stepRows) {
+  const choicesByQuestion = new Map();
+  const explanationByQuestion = new Map();
+  const stepsByExplanation = new Map();
+
+  for (const row of choiceRows) {
+    if (!choicesByQuestion.has(row.questionId)) {
+      choicesByQuestion.set(row.questionId, []);
+    }
+    choicesByQuestion.get(row.questionId).push(row);
+  }
+
+  for (const row of stepRows) {
+    if (!stepsByExplanation.has(row.explanationId)) {
+      stepsByExplanation.set(row.explanationId, []);
+    }
+    stepsByExplanation.get(row.explanationId).push(row);
+  }
+
+  for (const row of explanationRows) {
+    explanationByQuestion.set(row.questionId, row);
+  }
+
+  return questionRows.map((row) => ({
+    id: row.id,
+    subjectId: row.subjectId,
+    topicId: row.topicId,
+    levelId: row.levelId,
+    abilityIndex: row.abilityIndex,
+    type: row.type,
+    question: row.prompt,
+    blankLabels: Array.isArray(row.blankLabels) ? row.blankLabels : [],
+    choices: (choicesByQuestion.get(row.id) || [])
+      .slice()
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((choice) => choice.label),
+    answer: row.answer,
+    explanation: (() => {
+      const explanation = explanationByQuestion.get(row.id);
+      if (!explanation) return null;
+      return {
+        assetType: explanation.assetType,
+        assetLabel: explanation.assetLabel,
+        assetUrl: explanation.assetUrl,
+        summary: explanation.summary,
+        followUp: explanation.followUp,
+        steps: (stepsByExplanation.get(explanation.id) || [])
+          .slice()
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map((step) => ({
+            line: step.lineLabel,
+            title: step.title,
+            detail: step.detail
+          }))
+      };
+    })()
+  }));
+}
+
+async function getQuestionRecordsViaPg(filters = {}) {
+  const clauses = [`"active" = true`];
+  const params = [];
+
+  if (filters.subjectId) {
+    params.push(filters.subjectId);
+    clauses.push(`"subjectId" = $${params.length}`);
+  }
+  if (filters.topicId) {
+    params.push(filters.topicId);
+    clauses.push(`"topicId" = $${params.length}`);
+  }
+  if (filters.levelId) {
+    params.push(filters.levelId);
+    clauses.push(`"levelId" = $${params.length}`);
+  }
+  if (Array.isArray(filters.ids) && filters.ids.length) {
+    params.push(filters.ids);
+    clauses.push(`"id" = ANY($${params.length})`);
+  }
+
+  const whereClause = clauses.length ? `where ${clauses.join(" and ")}` : "";
+  const questionResult = await query(
+    `select * from "Question" ${whereClause} order by "id" asc`,
+    params
+  );
+  const questionRows = questionResult.rows;
+  if (!questionRows.length) {
+    return [];
+  }
+
+  const questionIds = questionRows.map((row) => row.id);
+  const [choiceResult, explanationResult] = await Promise.all([
+    query(
+      `select * from "QuestionChoice" where "questionId" = ANY($1) order by "questionId", "sortOrder"`,
+      [questionIds]
+    ),
+    query(
+      `select * from "QuestionExplanation" where "questionId" = ANY($1)`,
+      [questionIds]
+    )
+  ]);
+
+  const explanationIds = explanationResult.rows.map((row) => row.id);
+  const stepResult = explanationIds.length
+    ? await query(
+        `select * from "QuestionExplanationStep" where "explanationId" = ANY($1) order by "explanationId", "sortOrder"`,
+        [explanationIds]
+      )
+    : { rows: [] };
+
+  return mapQuestionRows(questionRows, choiceResult.rows, explanationResult.rows, stepResult.rows);
+}
+
+async function getStudentGraphViaPg(studentId) {
+  const [studentResult, abilitiesResult, quizResult, homeworkResult, coursesResult, lessonsResult] = await Promise.all([
+    query(`select * from "Student" where "id" = $1`, [studentId]),
+    query(`select * from "StudentAbility" where "studentId" = $1 order by "id" asc`, [studentId]),
+    query(`select * from "QuizSubmission" where "studentId" = $1 order by "createdAt" asc`, [studentId]),
+    query(`select * from "Homework" where "studentId" = $1 order by "createdAt" desc`, [studentId]),
+    query(
+      `select c.*, sc."studentId"
+       from "StudentCourse" sc
+       join "Course" c on c."id" = sc."courseId"
+       where sc."studentId" = $1
+       order by c."id" asc`,
+      [studentId]
+    ),
+    query(
+      `select l.*
+       from "Lesson" l
+       join "StudentCourse" sc on sc."courseId" = l."courseId"
+       where sc."studentId" = $1
+       order by l."courseId" asc, l."dateLabel" asc, l."id" asc`,
+      [studentId]
+    )
+  ]);
+
+  const student = studentResult.rows[0] || null;
+  if (!student) {
+    return null;
+  }
+
+  return {
+    student,
+    abilities: abilitiesResult.rows,
+    quizSubmissions: quizResult.rows,
+    homeworks: homeworkResult.rows,
+    courses: coursesResult.rows,
+    lessons: lessonsResult.rows
+  };
+}
+
+function transformStudentGraph(snapshot) {
+  const student = snapshot.student;
+  const courses = snapshot.courses.map((course) => ({
+    id: course.id,
+    studentIds: [student.id],
+    title: course.title,
+    subject: course.subject,
+    totalLessons: course.totalLessons,
+    completedLessons: course.completedLessons,
+    nextLesson: course.nextLessonAt,
+    schedule: course.schedule,
+    teacher: course.teacherName,
+    milestones: [],
+    lessonIds: snapshot.lessons.filter((lesson) => lesson.courseId === course.id).map((lesson) => lesson.id)
+  }));
+
+  const lessonHomeworkMap = new Map();
+  snapshot.homeworks
+    .filter((item) => item.lessonId)
+    .forEach((item) => {
+      if (!lessonHomeworkMap.has(item.lessonId)) {
+        lessonHomeworkMap.set(item.lessonId, item);
+      }
+    });
+
+  const lessons = snapshot.lessons.map((lesson) => {
+    const currentHomework = lessonHomeworkMap.get(lesson.id) || null;
+    const derivedHomeworkStatus = lesson.requiresHomework === false
+      ? "无作业"
+      : currentHomework
+      ? currentHomework.status === "已批改"
+        ? "已完成"
+        : "已提交"
+      : "待开始";
+
+    return {
+      id: lesson.id,
+      date: lesson.dateLabel,
+      weekday: lesson.weekday,
+      time: lesson.timeLabel,
+      title: lesson.title,
+      studentIds: [student.id],
+      ppt: lesson.ppt,
+      notes: lesson.notes,
+      highlights: Array.isArray(lesson.highlights) ? lesson.highlights : lesson.highlights || [],
+      mistakes: Array.isArray(lesson.mistakes) ? lesson.mistakes : lesson.mistakes || [],
+      completion: lesson.completion,
+      understanding: lesson.understanding,
+      requiresHomework: lesson.requiresHomework !== false,
+      homeworkStatus: derivedHomeworkStatus,
+      wrongCount: lesson.wrongCount,
+      metrics: lesson.metrics || {},
+      homeworkContent: currentHomework ? (currentHomework.content || "") : "",
+      homeworkId: currentHomework ? currentHomework.id : null
+    };
+  });
+
+  return {
+    student: {
+      id: student.id,
+      name: student.name,
+      grade: student.grade,
+      group: student.groupName,
+      goal: student.goal,
+      score: student.score,
+      attendance: student.attendance,
+      progress: snapshot.quizSubmissions.slice(-5).map((item) => item.score),
+      risk: student.risk,
+      summary: student.summary,
+      parentNote: student.parentNote,
+      teacherFeedback: student.teacherFeedback
+    },
+    courses,
+    lessons
+  };
+}
+
+function transformLearningRecordsFromSnapshot(snapshot) {
+  return {
+    quizHistory: snapshot.quizSubmissions.map((item) => ({
+      date: item.dateLabel,
+      name: item.name,
+      score: item.score,
+      note: item.note
+    })),
+    homework: snapshot.homeworks.map((item) => ({
+      id: item.id,
+      lessonId: item.lessonId,
+      date: item.dateLabel,
+      title: item.title,
+      status: item.status,
+      score: item.score,
+      content: item.content || "",
+      teacherNote: item.teacherNote || ""
+    })),
+    progress: snapshot.quizSubmissions.slice(-5).map((item) => item.score)
   };
 }
 
@@ -875,6 +1127,209 @@ async function setLessonHomeworkPolicy(lessonId, requiresHomework) {
     ok: true,
     overview: await buildStudentOverview(1),
     learningRecords: await buildLearningRecords(1)
+  };
+}
+
+async function getQuizCatalogFromDb() {
+  try {
+    const [subjectResult, topicResult] = await Promise.all([
+      query(`select * from "QuestionSubject" order by "id" asc`),
+      query(`select * from "QuestionTopic" order by "subjectId" asc, "id" asc`)
+    ]);
+
+    if (!subjectResult.rows.length) {
+      throw new Error("No subjects in database");
+    }
+
+    const topicsBySubject = new Map();
+    for (const topic of topicResult.rows) {
+      if (!topicsBySubject.has(topic.subjectId)) {
+        topicsBySubject.set(topic.subjectId, []);
+      }
+      topicsBySubject.get(topic.subjectId).push({
+        id: topic.id,
+        label: topic.label,
+        summary: topic.summary,
+        keywords: Array.isArray(topic.keywords) ? topic.keywords : topic.keywords || []
+      });
+    }
+
+    return {
+      levels: [
+        { id: "basic", label: "初级", description: "先把基础概念和典型题型做稳。" },
+        { id: "intermediate", label: "中级", description: "加入变化题和多一步判断。" },
+        { id: "advanced", label: "高级", description: "接近考试实战，强调综合与速度。" }
+      ],
+      subjects: subjectResult.rows.map((subject) => ({
+        id: subject.id,
+        label: subject.label,
+        shortLabel: subject.shortLabel,
+        accent: subject.accent,
+        description: subject.description,
+        mapTitle: subject.mapTitle,
+        topics: topicsBySubject.get(subject.id) || []
+      }))
+    };
+  } catch (error) {
+    const localCatalog = path.join(root, "data", "quiz-catalog.json");
+    try {
+      return JSON.parse(fs.readFileSync(localCatalog, "utf8"));
+    } catch (fallbackError) {
+      return { subjects: [], levels: [] };
+    }
+  }
+}
+
+async function getQuizSessionQuestionsFromDb(subjectId, topicId, levelId, count) {
+  try {
+    const normalized = await getQuestionRecordsViaPg({ subjectId, topicId, levelId });
+    if (!normalized.length) {
+      throw new Error("No questions in database");
+    }
+    const imported = normalized.filter((item) => item.id.startsWith("eju-sequence-pdf-") || item.id.startsWith("sequence-"));
+    if (imported.length) {
+      return imported.slice(0, count || imported.length);
+    }
+    const featured = normalized.filter((item) => item.id.startsWith("eju-"));
+    const others = normalized.filter((item) => !item.id.startsWith("eju-"));
+    const shuffled = others
+      .map((item) => ({ sortKey: Math.random(), item }))
+      .sort((a, b) => a.sortKey - b.sortKey)
+      .map((entry) => entry.item);
+
+    return [...featured, ...shuffled].slice(0, count || 5);
+  } catch (error) {
+    const localQuestions = getQuizQuestions().filter((item) => {
+      const subjectMatch = !subjectId || item.subjectId === subjectId;
+      const topicMatch = !topicId || item.topicId === topicId;
+      const levelMatch = !levelId || item.levelId === levelId;
+      return subjectMatch && topicMatch && levelMatch;
+    });
+    return localQuestions.slice(0, count || localQuestions.length);
+  }
+}
+
+async function buildStudentOverview(studentId) {
+  try {
+    const snapshot = await getStudentGraphViaPg(studentId);
+    if (!snapshot) {
+      throw new Error("Student not found in pg");
+    }
+    return transformStudentGraph(snapshot);
+  } catch (error) {
+    const localData = loadStudentDataFromFile();
+    return {
+      student: localData.student || null,
+      courses: localData.courses || [],
+      lessons: localData.lessons || []
+    };
+  }
+}
+
+async function buildLearningRecords(studentId) {
+  try {
+    const snapshot = await getStudentGraphViaPg(studentId);
+    if (!snapshot) {
+      throw new Error("Student not found in pg");
+    }
+    return transformLearningRecordsFromSnapshot(snapshot);
+  } catch (error) {
+    return buildLearningRecordsFromLocalData(loadStudentDataFromFile());
+  }
+}
+
+async function buildStudentBootstrap(studentId) {
+  try {
+    const [snapshot, quizCatalog] = await Promise.all([
+      getStudentGraphViaPg(studentId),
+      getQuizCatalogFromDb()
+    ]);
+
+    if (!snapshot) {
+      throw new Error("Student not found in pg");
+    }
+
+    return {
+      overview: transformStudentGraph(snapshot),
+      learningRecords: transformLearningRecordsFromSnapshot(snapshot),
+      quizCatalog
+    };
+  } catch (error) {
+    return buildStudentBootstrapFromLocalData();
+  }
+}
+
+async function saveQuizSessionSubmission(studentId, questionIds, answers, sessionMeta) {
+  const normalizedQuestions = await getQuestionRecordsViaPg({ ids: questionIds || [] });
+  const review = buildQuizReview(answers, normalizedQuestions);
+
+  const snapshot = await getStudentGraphViaPg(studentId);
+  if (!snapshot) {
+    throw new Error("Student not found");
+  }
+
+  let correct = 0;
+  const weakLabels = [];
+
+  await withTransaction(async (client) => {
+    for (const question of normalizedQuestions) {
+      const raw = String(answers[question.id] || "").trim().replace(/\s+/g, "").toLowerCase();
+      const answer = String(question.answer || "").trim().replace(/\s+/g, "").toLowerCase();
+      if (raw === answer) {
+        correct += 1;
+      } else {
+        const ability = snapshot.abilities[question.abilityIndex];
+        if (ability) {
+          weakLabels.push(ability.label);
+          await client.query(
+            `update "StudentAbility" set "value" = $2 where "id" = $1`,
+            [ability.id, Math.max(40, ability.value - 3)]
+          );
+        }
+      }
+    }
+
+    const score = Math.round((correct / Math.max(1, normalizedQuestions.length)) * 100);
+    const uniqueWeakLabels = [...new Set(weakLabels)];
+    const label = [sessionMeta?.subjectLabel, sessionMeta?.topicLabel, sessionMeta?.levelLabel].filter(Boolean).join(" / ") || "在线练习";
+    const note = uniqueWeakLabels.length ? `主要薄弱点：${uniqueWeakLabels.join(" / ")}` : `${label} 表现稳定`;
+    const nextScore = Math.round(snapshot.student.score * 0.75 + score * 0.25);
+    const nextRisk = nextScore < 75 || snapshot.student.attendance < 80 ? "高风险" : nextScore < 85 ? "中风险" : "低风险";
+    const summary = uniqueWeakLabels.length
+      ? `刚完成 ${label} 练习，当前主要薄弱点集中在 ${uniqueWeakLabels.join(" / ")}。`
+      : `刚完成 ${label} 练习，整体表现稳定。`;
+    const teacherFeedback = uniqueWeakLabels.length
+      ? `建议下次课优先复盘 ${label} 中出错的题型和步骤。`
+      : `可以继续推进到更高难度的 ${label} 练习。`;
+    const parentNote = uniqueWeakLabels.length
+      ? `本轮 ${label} 中出现了 ${review.wrongCount} 道错题，建议先看老师标准讲解再追问。`
+      : `本轮 ${label} 表现较稳，可以继续挑战下一组题。`;
+
+    await client.query(
+      `insert into "QuizSubmission" ("studentId", "name", "score", "note", "dateLabel", "createdAt")
+       values ($1, $2, $3, $4, $5, now())`,
+      [studentId, label, score, note, "2026-04-03"]
+    );
+
+    await client.query(
+      `update "Student"
+       set "score" = $2,
+           "risk" = $3,
+           "summary" = $4,
+           "teacherFeedback" = $5,
+           "parentNote" = $6,
+           "updatedAt" = now()
+       where "id" = $1`,
+      [studentId, nextScore, nextRisk, summary, teacherFeedback, parentNote]
+    );
+  });
+
+  return {
+    ok: true,
+    score: Math.round((correct / Math.max(1, normalizedQuestions.length)) * 100),
+    review,
+    overview: await buildStudentOverview(studentId),
+    learningRecords: await buildLearningRecords(studentId)
   };
 }
 
