@@ -1,0 +1,87 @@
+{
+  "levels": [
+    { "id": "basic", "label": "初级", "description": "先把基础概念和典型题型做稳。" },
+    { "id": "intermediate", "label": "中级", "description": "加入变化题和多一步判断。" },
+    { "id": "advanced", "label": "高级", "description": "接近考试实战，强调综合与速度。" }
+  ],
+  "subjects": [
+    {
+      "id": "japanese",
+      "label": "日语",
+      "shortLabel": "国語 / 日本語",
+      "accent": "accent-japanese",
+      "description": "围绕读解、语法、词汇做分层练习。",
+      "mapTitle": "日语知识点地图",
+      "topics": [
+        { "id": "reading", "label": "読解", "summary": "段落主旨、信息定位、推断。", "keywords": ["主旨", "段落", "线索"] },
+        { "id": "grammar", "label": "文法", "summary": "助词、句型、时态与敬语。", "keywords": ["助词", "句型", "时态"] },
+        { "id": "vocab", "label": "語彙", "summary": "词义辨析、固定搭配、语境判断。", "keywords": ["词义", "搭配", "语境"] }
+      ]
+    },
+    {
+      "id": "english",
+      "label": "英语",
+      "shortLabel": "English",
+      "accent": "accent-english",
+      "description": "适合做短时高频训练，强调读解和表达。",
+      "mapTitle": "英语知识点地图",
+      "topics": [
+        { "id": "reading", "label": "Reading", "summary": "主旨、细节、推断。", "keywords": ["main idea", "detail", "inference"] },
+        { "id": "grammar", "label": "Grammar", "summary": "时态、从句、语法一致。", "keywords": ["tense", "clause", "agreement"] },
+        { "id": "vocab", "label": "Vocabulary", "summary": "词义辨析、语境选择。", "keywords": ["meaning", "context", "usage"] }
+      ]
+    },
+    {
+      "id": "science",
+      "label": "理综",
+      "shortLabel": "Physics / Chem / Bio",
+      "accent": "accent-science",
+      "description": "强调概念理解和实验推理。",
+      "mapTitle": "理综知识点地图",
+      "topics": [
+        { "id": "physics", "label": "物理", "summary": "力学、电学、图像判断。", "keywords": ["受力", "电路", "图像"] },
+        { "id": "chemistry", "label": "化学", "summary": "反应类型、物质性质。", "keywords": ["反应", "性质", "现象"] },
+        { "id": "biology", "label": "生物", "summary": "结构功能、过程判断。", "keywords": ["结构", "功能", "过程"] }
+      ]
+    },
+    {
+      "id": "humanities",
+      "label": "文综",
+      "shortLabel": "History / Geo / Civics",
+      "accent": "accent-humanities",
+      "description": "注重材料理解和逻辑归纳。",
+      "mapTitle": "文综知识点地图",
+      "topics": [
+        { "id": "history", "label": "历史", "summary": "事件因果、阶段特征。", "keywords": ["背景", "影响", "阶段"] },
+        { "id": "geography", "label": "地理", "summary": "区位、气候、图表。", "keywords": ["区位", "气候", "图表"] },
+        { "id": "civics", "label": "公民", "summary": "制度、观点判断、材料分析。", "keywords": ["制度", "观点", "材料"] }
+      ]
+    },
+    {
+      "id": "math1",
+      "label": "数学1",
+      "shortLabel": "Math I",
+      "accent": "accent-math1",
+      "description": "基础函数、方程、不等式。",
+      "mapTitle": "数学1知识点地图",
+      "topics": [
+        { "id": "linear", "label": "一次函数", "summary": "图像、斜率、截距。", "keywords": ["斜率", "截距", "图像"] },
+        { "id": "equation", "label": "方程基础", "summary": "移项、代入、列式。", "keywords": ["移项", "代入", "列式"] },
+        { "id": "inequality", "label": "不等式", "summary": "区间、比较、判断。", "keywords": ["区间", "比较", "判断"] }
+      ]
+    },
+    {
+      "id": "math2",
+      "label": "数学2",
+      "shortLabel": "Math II",
+      "accent": "accent-math2",
+      "description": "进阶函数、数列、图像分析。",
+      "mapTitle": "数学2知识点地图",
+      "topics": [
+        { "id": "sequence", "label": "数列", "summary": "等差、等比、递推。", "keywords": ["首项", "公差", "递推"] },
+        { "id": "quadratic", "label": "二次函数", "summary": "顶点、最值、图像。", "keywords": ["顶点", "最值", "开口"] },
+        { "id": "graph", "label": "图像综合", "summary": "函数图像与条件判断。", "keywords": ["图像", "交点", "变化"] }
+      ]
+    }
+  ]
+}

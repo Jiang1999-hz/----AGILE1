@@ -1,0 +1,24 @@
+question_id,source_pdf,page_image,page_number,subject_id,topic_id,level_id,status,original_prompt,rewritten_prompt,answer,blank_labels,teacher_explanation,notes
+sequence-001,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-01.png,1,math2,sequence,basic,ready_for_import,"数列 {a_k} が a_k = k^2 - 2k + 2 (k ≧ 1) で与えられているとき，初項から第 n 項までの和は (A n^3 - B n^2 + C n) / D である。","数列 {u_k} を u_k = k^2 - 2k + 2 (k ≧ 1) で定める。初項から第 n 項までの和を整理すると (A n^3 - B n^2 + C n) / D の形になる。A, B, C, D を順に求めよ。","1,6,11,6",A|B|C|D,"Σ(k^2 - 2k + 2) を Σk^2, Σk, Σ1 に分けて計算し，通分して係数を読み取る。","原题表述微调；变量名 a_k 改为 u_k。"
+sequence-002,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-02.png,2,math2,sequence,basic,ready_for_import,"初項 2，公比 -2/3 の等比数列 {a_n} を考える。このとき，b_n = a_{n+1}a_n (n ≧ 1) とおくと，数列 {b_n} は初項 -AB/C，公比 D/E の等比数列であり，したがって Σ[b_n] = -FGH/I である。","初項が 2，公比が -2/3 である等比数列 {u_n} を考える。v_n = u_{n+1}u_n (n ≧ 1) と定めると，{v_n} も等比数列になる。その初項を -AB/C，公比を D/E とするとき，無限和 Σ[v_n] を -FGH/I の形で表せ。","-8,3,4,9,-24,5",AB|C|D|E|FGH|I,"u_n の一般項を求めてから v_n = u_{n+1}u_n を整理すると，初項 -8/3，公比 4/9 の等比数列になる。無限和公式で -24/5 を得る。","原题表述微调；a_n,b_n 改为 u_n,v_n。"
+sequence-003,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-03.png,3,math2,sequence,basic,ready_for_import,"一般項 a_n = pn^2 + qn + r (n ≧ 1) で与えられる数列 {a_n} において，a_1 = 2，a_2 = 9，a_3 = 22，a_4 = JK である。また，はじめの 8 項の和は LMN である。","一般項を u_n = pn^2 + qn + r (n ≧ 1) とする数列 {u_n} がある。u_1 = 2，u_2 = 9，u_3 = 22 のとき，u_4 を JK，最初の 8 項の和を LMN として求めよ。","41,492",JK|LMN,"u_1,u_2,u_3 から p,q,r の连立方程式を作って一般項を決める。そこから u_4 と最初の 8 項の和を計算する。","原题表述微调；a_n 改为 u_n。"
+sequence-004,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-04.png,4,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-005,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-05.png,5,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-006,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-06.png,6,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-007,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-07.png,7,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-008,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-08.png,8,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-009,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-09.png,9,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-010,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-10.png,10,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-011,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-11.png,11,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-012,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-12.png,12,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-013,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-13.png,13,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-014,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-14.png,14,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-015,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-15.png,15,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-016,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-16.png,16,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-017,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-17.png,17,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-018,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-18.png,18,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-019,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-19.png,19,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-020,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-20.png,20,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-021,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-21.png,21,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-022,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-22.png,22,math2,sequence,basic,pending_rewrite,,,,,,
+sequence-023,13、数列22.pdf,tmp/pdf-pages/13-数列22-cropped/page-23.png,23,math2,sequence,basic,pending_rewrite,,,,,,

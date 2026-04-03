@@ -1,0 +1,6 @@
+.env
+node_modules/
+tmp/
+.venv-ocr/
+scripts/__pycache__/
+*.pyc

@@ -1,0 +1,82 @@
+{
+  "questions": [
+    {
+      "id": "sequence-001",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "数列 {u_k} を u_k = k^2 - 2k + 2 (k ≧ 1) で定める。初項から第 n 項までの和を整理すると (A n^3 - B n^2 + C n) / D の形になる。A, B, C, D を順に求めよ。",
+      "answer": "1,6,11,6",
+      "blankLabels": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "Σ(k^2 - 2k + 2) を Σk^2, Σk, Σ1 に分けて計算し，通分して係数を読み取る。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-01.png",
+      "notes": "原题表述微调；变量名 a_k 改为 u_k。"
+    },
+    {
+      "id": "sequence-002",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "初項が 2，公比が -2/3 である等比数列 {u_n} を考える。v_n = u_{n+1}u_n (n ≧ 1) と定めると，{v_n} も等比数列になる。その初項を -AB/C，公比を D/E とするとき，無限和 Σ[v_n] を -FGH/I の形で表せ。",
+      "answer": "-8,3,4,9,-24,5",
+      "blankLabels": [
+        "AB",
+        "C",
+        "D",
+        "E",
+        "FGH",
+        "I"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "u_n の一般項を求めてから v_n = u_{n+1}u_n を整理すると，初項 -8/3，公比 4/9 の等比数列になる。無限和公式で -24/5 を得る。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-02.png",
+      "notes": "原题表述微调；a_n,b_n 改为 u_n,v_n。"
+    },
+    {
+      "id": "sequence-003",
+      "subjectId": "math2",
+      "topicId": "sequence",
+      "levelId": "basic",
+      "type": "text",
+      "question": "一般項を u_n = pn^2 + qn + r (n ≧ 1) とする数列 {u_n} がある。u_1 = 2，u_2 = 9，u_3 = 22 のとき，u_4 を JK，最初の 8 項の和を LMN として求めよ。",
+      "answer": "41,492",
+      "blankLabels": [
+        "JK",
+        "LMN"
+      ],
+      "explanation": {
+        "assetType": "text",
+        "assetLabel": "老师标准讲解",
+        "assetUrl": null,
+        "summary": "u_1,u_2,u_3 から p,q,r の连立方程式を作って一般項を決める。そこから u_4 と最初の 8 項の和を計算する。",
+        "steps": [],
+        "followUp": ""
+      },
+      "sourcePdf": "13、数列22.pdf",
+      "sourceImage": "tmp/pdf-pages/13-数列22-cropped/page-03.png",
+      "notes": "原题表述微调；a_n 改为 u_n。"
+    }
+  ]
+}

@@ -19,7 +19,7 @@
       </div>
       <div class="login-note">
         <strong>演示建议：</strong>
-        <p>先用学生身份演示做题与沟通，再切换老师身份演示学生管理，最后切 admin 展示经营视角。</p>
+        <p>先用学生身份演示做题与讲解，再切换老师身份演示学生管理，最后切 admin 展示运营视角。</p>
       </div>
     </div>
   </div>
@@ -47,7 +47,7 @@
       <div class="sidebar-footer">
         <p class="eyebrow">Demo Value</p>
         <ul>
-          <li>学生做题即沉淀成进度数据</li>
+          <li>学生做题会沉淀成进度数据</li>
           <li>老师能快速看到作业与风险</li>
           <li>管理员能看运营与预警</li>
         </ul>
@@ -63,6 +63,7 @@
         </div>
         <div class="topbar-actions">
           <span class="role-badge" id="role-badge">-</span>
+          <button class="primary-btn" id="open-checklist-btn" type="button">Checklist</button>
           <button class="ghost-btn" id="quick-switch-student" type="button">学生</button>
           <button class="ghost-btn" id="quick-switch-teacher" type="button">老师</button>
           <button class="ghost-btn" id="quick-switch-admin" type="button">Admin</button>
@@ -74,5 +75,11 @@
   </div>
 
   <script src="./app.js"></script>
+  <script src="./src/features/student-shell-experience.js"></script>
+  <script src="./src/features/student-learning-experience.js"></script>
+  <script src="./src/features/student-quiz-experience.js"></script>
+  <script src="./src/features/teacher-experience.js"></script>
+  <script src="./src/features/scheduling-experience.js"></script>
+  <script src="./src/features/admin-experience.js"></script>
 </body>
 </html>
