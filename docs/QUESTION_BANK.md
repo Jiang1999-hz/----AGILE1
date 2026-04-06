@@ -1,27 +1,71 @@
-# Question Bank Structure
+# Question Bank
 
-当前学生做题 + 老师标准讲解的资源，已经整理成独立题库文件：
+当前题库主文件：
 
-- [question-bank.json](/C:/Users/Jiang/Documents/New%20project/data/question-bank.json)
+- `data/question-bank.json`
 
-当前后端读取顺序是：
+数据库导入入口：
 
-1. 先读数据库题库表
-2. 如果数据库还没有题目，再回退到本地 `question-bank.json`
+- `scripts/seed-student-s1.js`
 
-## 当前结构
+## 一道题的数据结构
 
-每一道题包含两部分：
+每道题至少包含这些字段：
 
-1. 题目本体
 - `id`
-- `abilityIndex`
+- `subjectId`
+- `topicId`
+- `levelId`
 - `type`
 - `question`
-- `choices`
 - `answer`
+- `blankLabels`
+- `explanation`
 
-2. 老师讲解资源
+## 字段说明
+
+### `question`
+
+题面使用 HTML 字符串存储，当前主要是数学讲义风格：
+
+- `math-rich-prompt`
+- `math-jp-line`
+- `math-answer-line`
+- `math-boxed-letter`
+- `inline-fraction`
+- `math-fraction`
+
+目标是让题面尽量接近原 PDF 的阅读顺序，而不是普通文本堆叠。
+
+### `answer`
+
+填空题答案统一按空位顺序保存：
+
+- 单空：`"4"`
+- 多空：`"6,9,2,1"`
+- 连续字母空位也按一个空处理
+  - 例如 `KL`、`CDE`、`HIJ`
+
+前端显示时会按 `blankLabels` 拆开。
+
+### `blankLabels`
+
+表示题面中的空位标签，例如：
+
+```json
+["A", "B", "C"]
+```
+
+或者：
+
+```json
+["J", "KL", "M", "N"]
+```
+
+### `explanation`
+
+当前保留：
+
 - `assetType`
 - `assetLabel`
 - `assetUrl`
@@ -29,70 +73,12 @@
 - `steps`
 - `followUp`
 
-## 设计意图
+目前学生端主要使用 `summary`，后续会继续补完整的分步讲解。
 
-这套结构的目标是把：
+## 当前原则
 
-- 学生作答
-- 老师标准讲解
-- AI 围绕讲解追问
-
-拆成可以独立维护的资源层。
-
-这样后续可以自然扩展到：
-
-- 老师后台录入题目
-- 老师上传视频 / 图片 / 图文讲解
-- 数据库存储题库
-- AI 回答时按题目和步骤做上下文限定
-
-## 已落地的数据库设计
-
-目前 Prisma 已经补上这几张表：
-
-- `QuestionSubject`
-- `QuestionTopic`
-- `Question`
-- `QuestionChoice`
-- `QuestionExplanation`
-- `QuestionExplanationStep`
-
-对应文件：
-
-- [schema.prisma](/C:/Users/Jiang/Documents/New%20project/prisma/schema.prisma)
-
-## 表关系
-
-- `Question`
-  - 一道题的题干、答案、题型、能力维度
-- `QuestionChoice`
-  - 选择题选项
-- `QuestionExplanation`
-  - 这道题对应的一份老师标准讲解
-- `QuestionExplanationStep`
-  - 标准讲解里的逐步拆解
-
-关系是：
-
-- `QuestionSubject 1 - n QuestionTopic`
-- `QuestionSubject 1 - n Question`
-- `QuestionTopic 1 - n Question`
-- `Question 1 - n QuestionChoice`
-- `Question 1 - 1 QuestionExplanation`
-- `QuestionExplanation 1 - n QuestionExplanationStep`
-
-## Seed
-
-题库 seed 现在也已经接入：
-
-- [seed-student-s1.js](/C:/Users/Jiang/Documents/New%20project/scripts/seed-student-s1.js)
-
-它会把：
-
-- 学生数据
-- 课程 / 课次
-- 题库
-- 标准讲解
-- 讲解步骤
-
-一起导入数据库。
+- 题干必须让学生一眼看出“题目在问什么”
+- 空位必须和题面融合，不额外重复列一遍
+- 公式优先做成讲义式排版
+- 标准答案必须和 `blankLabels` 顺序严格一致
+- 如果原始 OCR 内容已坏，直接人工补正，不再保留乱码文本

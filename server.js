@@ -87,6 +87,7 @@ function buildQuizReview(answers, sourceQuestions) {
       id: question.id,
       question: question.question,
       type: question.type,
+      blankLabels: Array.isArray(question.blankLabels) ? question.blankLabels : [],
       studentAnswer: rawAnswer || "未作答",
       correctAnswer: question.answer,
       correct,
@@ -165,6 +166,7 @@ function normalizeQuestionRecord(record) {
     abilityIndex: record.abilityIndex,
     type: record.type,
     question: record.prompt,
+    blankLabels: Array.isArray(record.blankLabels) ? record.blankLabels : [],
     choices: (record.choices || [])
       .slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)

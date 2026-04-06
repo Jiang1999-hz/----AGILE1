@@ -250,6 +250,14 @@ async function submitQuizSession() {
   if (!form || !state.quizFlow.questions.length) return;
   const formData = new FormData(form);
   state.quizFlow.questions.forEach((question) => {
+    if (question.type === "text" && Array.isArray(question.blankLabels) && question.blankLabels.length) {
+      const parts = Array.from(form.querySelectorAll(`[data-blank-question="${question.id}"]`))
+        .sort((a, b) => Number(a.dataset.blankIndex) - Number(b.dataset.blankIndex))
+        .map((input) => input.value.trim());
+      answers[question.id] = parts.join(",");
+      return;
+    }
+
     answers[question.id] = (formData.get(question.id) || "").toString();
   });
 
@@ -273,7 +281,7 @@ async function submitQuizSession() {
     state.studentOverview = payload.overview;
     state.learningRecords = payload.learningRecords;
     state.quizFlow.review = payload.review || null;
-    state.quizFlow.selectedQuestionId = payload.review?.wrongQuestions?.[0]?.id || null;
+    state.quizFlow.selectedQuestionId = payload.review?.questions?.[0]?.id || null;
     state.quizFlow.explainDraft = "";
     state.quizFlow.explainMessages = [];
     showToast("success", "练习结果已保存");

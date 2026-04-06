@@ -110,12 +110,134 @@ function buildGeneratedQuestionBank(catalog) {
   return generated;
 }
 
+const repairedQuestionOverrides = {
+  "sequence-014": {
+    question: `<div class="math-rich-prompt"><p class="math-jp-line"><strong>3 で割ると 2 余り，4 で割ると 3 余る自然数を，小さい方から順に並べた数列 {a<sub>n</sub>} を考える。</strong></p><p class="math-jp-line"><strong>(1)</strong> 一般項は</p><div class="math-answer-line"><span>a<sub>n</sub> = </span><span class="math-boxed-letter-wide">A</span><span>n − </span><span class="math-boxed-letter">B</span></div><p class="math-jp-line"><strong>(2)</strong> 初項から第 n 項までの和は</p><div class="math-answer-line"><span>a<sub>1</sub> + … + a<sub>n</sub> = n(</span><span class="math-boxed-letter">C</span><span>n + </span><span class="math-boxed-letter">D</span><span>)</span></div><p class="math-jp-line">また，その平方和は</p><div class="math-answer-line"><span>a<sub>1</sub><sup>2</sup> + … + a<sub>n</sub><sup>2</sup> = n(</span><span class="math-boxed-letter-wide">E</span><span>n<sup>2</sup> + </span><span class="math-boxed-letter-wide">F</span><span>n + </span><span class="math-boxed-letter-wide">G</span><span>)</span></div><p class="math-jp-line"><strong>(3)</strong> 異なる 2 項の積の和を S とすると</p><div class="math-answer-line"><span>S = </span><span class="inline-fraction"><span class="inline-fraction-top">n</span><span class="inline-fraction-bottom">2</span></span><span>(36n<sup>3</sup> + </span><span class="math-boxed-letter-wide">H</span><span>n<sup>2</sup> − 35n − </span><span class="math-boxed-letter-wide">I</span><span>)</span></div></div>`,
+    explanation: {
+      assetType: "text",
+      assetLabel: "老师标准讲解",
+      assetUrl: null,
+      summary: "3 で割ると 2 余り，4 で割ると 3 余る数は 12n−1 の形になる。和と平方和を求めたあと，(和)^2 = 平方和 + 2S を使えば S を整理できる。",
+      steps: [],
+      followUp: ""
+    },
+    rewrittenPrompt: "合同条件から一般項を作り，和・平方和・2 項積の和へ順に進む問題。",
+    notes: "12n−1 型の数列を使った整理問題。"
+  },
+  "sequence-015": {
+    question: `<div class="math-rich-prompt"><p class="math-jp-line"><strong>等差数列 {a<sub>n</sub>} と等比数列 {b<sub>n</sub>} があり，どちらも初項を c とし，それぞれ公差・公比を d とする。</strong></p><p class="math-jp-line"><strong>(1)</strong> a<sub>5</sub> = b<sub>3</sub>，a<sub>7</sub> = b<sub>5</sub> であるから</p><div class="math-answer-line"><span>c + </span><span class="math-boxed-letter">A</span><span>d = cd<sup><span class="math-boxed-letter">B</span></sup>，　c + </span><span class="math-boxed-letter">C</span><span>d = cd<sup><span class="math-boxed-letter">D</span></sup></span></div><p class="math-jp-line">が成り立つ。これより</p><div class="math-answer-line"><span>d = </span><span class="inline-fraction"><span class="inline-fraction-top">√<span class="math-boxed-letter">E</span></span><span class="inline-fraction-bottom"><span class="math-boxed-letter">F</span></span></span><span>，　c = </span><span class="math-boxed-letter">G</span><span>√</span><span class="math-boxed-letter">H</span></div><p class="math-jp-line"><strong>(2)</strong> {b<sub>n</sub>} の偶数番目の項を第 2m 項まで足すと</p><div class="math-answer-line"><span class="math-boxed-letter-wide">I</span><span>{(</span><span class="math-fraction"><span class="math-fraction-top">J</span><span class="math-fraction-bottom">K</span></span><span>)<sup>m</sup> − </span><span class="math-boxed-letter">L</span><span>}</span></div><p class="math-jp-line">となる。</p></div>`,
+    explanation: {
+      assetType: "text",
+      assetLabel: "老师标准讲解",
+      assetUrl: null,
+      summary: "a_5=c+4d，a_7=c+6d，b_3=cd^2，b_5=cd^4 とおいて連立すると d^2=3/2，d=√6/2，c=4√6。偶数番目の項は初項 12，公比 3/2 の等比数列になるので，和は 24{(3/2)^m−1}。",
+      steps: [],
+      followUp: ""
+    },
+    rewrittenPrompt: "等差条件と等比条件を同時に使って c, d を求め，偶数項の和へ進む問題。",
+    notes: "等差と等比をつなぐ典型問題。"
+  },
+  "sequence-016": {
+    question: `<div class="math-rich-prompt"><p class="math-jp-line"><strong>数列 {a<sub>n</sub>} は，a<sub>1</sub> = 1，a<sub>n+1</sub> = 2a<sub>n</sub><sup>2</sup> で定められている。</strong></p><p class="math-jp-line">このとき</p><div class="math-answer-line"><span>log<sub>10</sub>a<sub>n+1</sub> = log<sub>10</sub></span><span class="math-boxed-letter">A</span><span> + </span><span class="math-boxed-letter">B</span><span>log<sub>10</sub>a<sub>n</sub></span></div><p class="math-jp-line">である。ここで b<sub>n</sub> = log<sub>10</sub>a<sub>n</sub> + log<sub>10</sub>2 とおくと，{b<sub>n</sub>} は公比</p><div class="math-answer-line"><span class="math-boxed-letter">C</span></div><p class="math-jp-line">の等比数列になる。したがって</p><div class="math-answer-line"><span>log<sub>10</sub>a<sub>n</sub> = (</span><span class="math-boxed-letter">D</span><span><sup>n−1</sup> − </span><span class="math-boxed-letter">E</span><span>)log<sub>10</sub>2</span></div><p class="math-jp-line">であり，a<sub>n</sub> &lt; 10<sup>60</sup> を満たす最大の n は</p><div class="math-answer-line"><span class="math-boxed-letter-wide">F</span></div><p class="math-jp-line">である。</p></div>`,
+    explanation: {
+      assetType: "text",
+      assetLabel: "老师标准讲解",
+      assetUrl: null,
+      summary: "両辺の常用対数をとると log a_(n+1) = log 2 + 2 log a_n。b_n = log a_n + log 2 とおけば b_(n+1) = 2b_n となるので，そこから log a_n を求め，最後に 10^60 と比べればよい。",
+      steps: [],
+      followUp: ""
+    },
+    rewrittenPrompt: "漸化式を対数で一次化して，一般項と範囲を求める問題。",
+    notes: "対数変換の典型。"
+  },
+  "sequence-017": {
+    question: `<div class="math-rich-prompt"><p class="math-jp-line"><strong>数列 {a<sub>n</sub>} は，初項から第 n 項までの和が</strong></p><div class="math-answer-line"><span><span class="math-sigma">∑<sub>k=1</sub><sup>n</sup></span>a<sub>k</sub> = n<sup>2</sup> + 3n</span></div><p class="math-jp-line"><strong>を満たしている。</strong></p><p class="math-jp-line"><strong>(1)</strong> 一般項は</p><div class="math-answer-line"><span>a<sub>n</sub> = </span><span class="math-boxed-letter">A</span><span>n + </span><span class="math-boxed-letter">B</span></div><p class="math-jp-line"><strong>(2)</strong> b<sub>n</sub> = n<sup>2</sup> − 5n − 6 とおくと，b<sub>n</sub> &lt; 0 となる項は</p><div class="math-answer-line"><span class="math-boxed-letter">C</span><span>個あり，その和は −</span><span class="math-boxed-letter-wide">D</span></div><p class="math-jp-line"><strong>(3)</strong></p><div class="math-answer-line"><span><span class="math-sigma">∑<sub>k=1</sub><sup>n</sup></span></span><span class="inline-fraction"><span class="inline-fraction-top">k<sup>2</sup>b<sub>k</sub></span><span class="inline-fraction-bottom">a<sub>k</sub></span></span><span> = </span><span class="inline-fraction"><span class="inline-fraction-top">1</span><span class="inline-fraction-bottom"><span class="math-boxed-letter">E</span></span></span><span>n(n + </span><span class="math-boxed-letter">F</span><span>)(n<sup>2</sup> − </span><span class="math-boxed-letter">G</span><span>n − </span><span class="math-boxed-letter">H</span><span>)</span></div></div>`,
+    explanation: {
+      assetType: "text",
+      assetLabel: "老师标准讲解",
+      assetUrl: null,
+      summary: "S_n − S_(n−1) を計算すると a_n = 2n + 2。b_n = (n−6)(n+1) だから，負になるのは n=1 から 5 までで，和は −50。さらに k^2b_k/a_k を整理すると (k^3−6k^2)/2 になり，公式で和を求められる。",
+      steps: [],
+      followUp: ""
+    },
+    rewrittenPrompt: "部分和から一般項を出し，別の数列 b_n と組み合わせて和を整理する問題。",
+    notes: "S_n から a_n を作る定番。"
+  },
+  "sequence-018": {
+    question: `<div class="math-rich-prompt"><p class="math-jp-line"><strong>数列 {a<sub>n</sub>} は，a<sub>1</sub> = 1，a<sub>2</sub> = 10，</strong></p><div class="math-answer-line"><span>(a<sub>n</sub>)<sup>2</sup>a<sub>n-2</sub> = (a<sub>n-1</sub>)<sup>3</sup>　(n = 3,4, …)</span></div><p class="math-jp-line"><strong>を満たしている。</strong></p><p class="math-jp-line">b<sub>n</sub> = log<sub>10</sub>a<sub>n</sub> とおくと</p><div class="math-answer-line"><span class="math-boxed-letter">A</span><span>b<sub>n</sub> + b<sub>n-2</sub> = </span><span class="math-boxed-letter">B</span><span>b<sub>n-1</sub></span></div><p class="math-jp-line">である。したがって</p><div class="math-answer-line"><span>b<sub>n</sub> − b<sub>n-1</sub> = </span><span class="inline-fraction"><span class="inline-fraction-top">1</span><span class="inline-fraction-bottom"><span class="math-boxed-letter">C</span></span></span><span>(b<sub>n-1</sub> − b<sub>n-2</sub>)</span></div><p class="math-jp-line">となり，さらに</p><div class="math-answer-line"><span>b<sub>n</sub> = </span><span class="math-boxed-letter">D</span><span> − (</span><span class="inline-fraction"><span class="inline-fraction-top">1</span><span class="inline-fraction-bottom"><span class="math-boxed-letter">C</span></span></span><span>)<sup>n − </span><span class="math-boxed-letter">E</span><span></span></div><p class="math-jp-line">が得られる。よって</p><div class="math-answer-line"><span>lim a<sub>n</sub> = </span><span class="math-boxed-letter-wide">F</span></div></div>`,
+    explanation: {
+      assetType: "text",
+      assetLabel: "老师标准讲解",
+      assetUrl: null,
+      summary: "対数をとると 2b_n + b_(n−2) = 3b_(n−1)。差分 d_n = b_n − b_(n−1) をおくと d_n = (1/2)d_(n−1) なので，b_1=0，b_2=1 から b_n = 2 − (1/2)^(n−2)。したがって a_n は 100 に近づく。",
+      steps: [],
+      followUp: ""
+    },
+    rewrittenPrompt: "対数変換で線形漸化式に直し，極限まで求める問題。",
+    notes: "積の漸化式を log で処理する。"
+  },
+  "sequence-019": {
+    question: `<div class="math-rich-prompt"><p class="math-jp-line"><strong>a<sub>1</sub> = 18，a<sub>n+1</sub> − 12a<sub>n</sub> + 3<sup>n+2</sup> = 0　(n = 1,2,3, …)</strong></p><p class="math-jp-line">を満たす数列 {a<sub>n</sub>} を考える。</p><p class="math-jp-line">b<sub>n</sub> = a<sub>n</sub> / </p><div class="math-answer-line"><span class="math-boxed-letter">A</span><span><sup>n</sup></span></div><p class="math-jp-line">とおくと，b<sub>1</sub> = </p><div class="math-answer-line"><span class="math-boxed-letter">B</span></div><p class="math-jp-line">であり，さらに</p><div class="math-answer-line"><span>b<sub>n+1</sub> − </span><span class="math-boxed-letter">C</span><span>b<sub>n</sub> + </span><span class="math-boxed-letter">D</span><span> = 0</span></div><p class="math-jp-line">が成り立つ。したがって</p><div class="math-answer-line"><span>a<sub>n</sub> = </span><span class="math-boxed-letter">E</span><span><sup>n</sup>(</span><span class="math-boxed-letter">F</span><span>・</span><span class="math-boxed-letter">G</span><span><sup>n−1</sup> + </span><span class="math-boxed-letter">H</span><span>)</span></div></div>`,
+    explanation: {
+      assetType: "text",
+      assetLabel: "老师标准讲解",
+      assetUrl: null,
+      summary: "3^n で割って b_n = a_n / 3^n とおくと，b_(n+1) − 4b_n + 3 = 0。さらに b_(n+1) − 1 = 4(b_n − 1) と変形すれば，b_n = 5・4^(n−1) + 1 がわかる。よって a_n = 3^n(5・4^(n−1) + 1)。",
+      steps: [],
+      followUp: ""
+    },
+    rewrittenPrompt: "3^n で割って一次化し，一般項を求める漸化式の問題。",
+    notes: "差分の置き換えで整理する。"
+  },
+  "sequence-020": {
+    question: `<div class="math-rich-prompt"><p class="math-jp-line"><strong>a<sub>1</sub> = 2/9，</strong></p><div class="math-answer-line"><span>a<sub>n</sub> = </span><span class="inline-fraction"><span class="inline-fraction-top">(n + 1)(2n − 3)</span><span class="inline-fraction-bottom">3n(2n + 1)</span></span><span>a<sub>n−1</sub>　(n = 2,3,4, …)</span></div><p class="math-jp-line">を満たす数列 {a<sub>n</sub>} を考える。このとき</p><div class="math-answer-line"><span>a<sub>n</sub> = </span><span class="inline-fraction"><span class="inline-fraction-top">n + </span><span class="math-boxed-letter">A</span><span></span><span class="inline-fraction-bottom">3<sup>n + </sup><span class="math-boxed-letter">B</span><span>(</span><span class="math-boxed-letter">C</span><span>n − </span><span class="math-boxed-letter">D</span><span>)(2n + 1)</span></span></span></div><p class="math-jp-line">であり，したがって</p><div class="math-answer-line"><span><span class="math-sigma">∑<sub>n=1</sub><sup>∞</sup></span> a<sub>n</sub> = </span><span class="math-fraction"><span class="math-fraction-top">E</span><span class="math-fraction-bottom"><span class="math-boxed-letter-wide">F</span></span></span></div><p class="math-jp-line">である。</p></div>`,
+    explanation: {
+      assetType: "text",
+      assetLabel: "老师标准讲解",
+      assetUrl: null,
+      summary: "b_n = (n+1)/(3^n a_n) とおくと b_n = 3(2n−1)(2n+1) となるので，a_n = (n+1)/(3^(n+1)(2n−1)(2n+1))。さらに a_n を望ましい差の形に直すと無限和は 1/12 に収束する。",
+      steps: [],
+      followUp: ""
+    },
+    rewrittenPrompt: "積の漸化式を telescoping しやすい一般項に直し，無限和を求める問題。",
+    notes: "一般項から部分分数型へ。"
+  },
+  "sequence-021": {
+    question: `<div class="math-rich-prompt"><p class="math-jp-line"><strong>数列 {a<sub>n</sub>} の初項から第 n 項までの和を S<sub>n</sub> とする。S<sub>n</sub> = (n<sup>2</sup> − 17n)/4 を満たす数列 {a<sub>n</sub>} を考え，b<sub>n</sub> = a<sub>n</sub>a<sub>n+5</sub> とおく。</strong></p><p class="math-jp-line"><strong>(1)</strong> 一般項は</p><div class="math-answer-line"><span>a<sub>n</sub> = </span><span class="inline-fraction"><span class="inline-fraction-top">n − </span><span class="math-boxed-letter">B</span><span></span><span class="inline-fraction-bottom"><span class="math-boxed-letter">A</span></span></span></div><p class="math-jp-line">であるから</p><div class="math-answer-line"><span>b<sub>n</sub> = </span><span class="inline-fraction"><span class="inline-fraction-top">n<sup>2</sup> − </span><span class="math-boxed-letter-wide">CD</span><span>n + </span><span class="math-boxed-letter-wide">EF</span><span></span><span class="inline-fraction-bottom"><span class="math-boxed-letter">G</span></span></span></div><p class="math-jp-line">となる。</p><p class="math-jp-line"><strong>(2)</strong> T<sub>n</sub> = b<sub>1</sub> + … + b<sub>n</sub> とおくと，T<sub>n</sub> が最小になるのは</p><div class="math-answer-line"><span>n = </span><span class="math-boxed-letter">H</span><span> または </span><span class="math-boxed-letter">I</span></div><p class="math-jp-line">のときで，その最小値は</p><div class="math-answer-line"><span class="math-boxed-letter">J</span></div><p class="math-jp-line">である。</p></div>`,
+    explanation: {
+      assetType: "text",
+      assetLabel: "老师标准讲解",
+      assetUrl: null,
+      summary: "a_n = S_n − S_(n−1) より a_n = (n−9)/2。したがって b_n = ((n−9)(n−4))/4 = (n^2−13n+36)/4。T_n を順に見ると最小になるのは n=8 または 9 のときで，最小値は 6。",
+      steps: [],
+      followUp: ""
+    },
+    rewrittenPrompt: "部分和から一般項を作り，積の数列 b_n とその部分和 T_n の最小値を調べる問題。",
+    notes: "T_n の最小化まで含む整理問題。"
+  },
+  "sequence-022": {
+    question: `<div class="math-rich-prompt"><p class="math-jp-line"><strong>a<sub>n</sub> = 4n<sup>2</sup> + 5n − 6 で与えられる数列 {a<sub>n</sub>} を考える。</strong></p><p class="math-jp-line">このとき</p><div class="math-answer-line"><span>a<sub>n</sub> = (n + </span><span class="math-boxed-letter">A</span><span>)(</span><span class="math-boxed-letter">B</span><span>n − </span><span class="math-boxed-letter">C</span><span>)</span></div><p class="math-jp-line">と因数分解できる。したがって a<sub>n</sub> が 5 の倍数になるのは</p><div class="math-answer-line"><span>n = 5k − </span><span class="math-boxed-letter">D</span><span> または n = 5k − </span><span class="math-boxed-letter">E</span></div><p class="math-jp-line">である。初項から第 20 項までのうち，5 の倍数である項の個数は</p><div class="math-answer-line"><span class="math-boxed-letter">F</span></div><p class="math-jp-line">個であり，それらの和は</p><div class="math-answer-line"><span class="math-boxed-letter-wide">G</span></div><p class="math-jp-line">である。</p></div>`,
+    explanation: {
+      assetType: "text",
+      assetLabel: "老师标准讲解",
+      assetUrl: null,
+      summary: "a_n = (n+2)(4n−3) と因数分解すると，5 の倍数になる条件は n ≡ 2,3 (mod 5)。1 から 20 までに 8 個あり，実際に足し合わせると 4048 になる。",
+      steps: [],
+      followUp: ""
+    },
+    rewrittenPrompt: "因数分解して合同条件に落とし，個数と総和を求める問題。",
+    notes: "mod 5 の整理問題。"
+  }
+};
+
 async function main() {
   const store = readStore();
   const questionBank = readQuestionBank();
   const quizCatalog = readQuizCatalog();
-  const generatedQuestionBank = buildGeneratedQuestionBank(quizCatalog);
   const { student, courses, lessons } = store;
+  const disabledQuestionIds = new Set([
+    "sequence-023"
+  ]);
 
   await prisma.message.deleteMany();
   await prisma.homework.deleteMany();
@@ -274,15 +396,13 @@ async function main() {
     }
   }
 
-  const allQuestions = [
-    ...generatedQuestionBank,
-    ...questionBank.questions.map((question) => ({
-      ...question,
-      subjectId: question.subjectId || "math1",
-      topicId: question.topicId || "equation",
-      levelId: question.levelId || "basic"
-    }))
-  ];
+  const allQuestions = questionBank.questions.map((question) => ({
+    ...question,
+    ...(repairedQuestionOverrides[question.id] || {}),
+    subjectId: question.subjectId || "math2",
+    topicId: question.topicId || "sequence",
+    levelId: question.levelId || "basic"
+  }));
 
   for (const question of allQuestions) {
     await prisma.question.create({
@@ -291,10 +411,12 @@ async function main() {
         subjectId: question.subjectId,
         topicId: question.topicId,
         levelId: question.levelId,
-        abilityIndex: question.abilityIndex,
+        abilityIndex: Number.isInteger(question.abilityIndex) ? question.abilityIndex : 0,
         type: question.type,
         prompt: question.question,
         answer: question.answer,
+        blankLabels: question.blankLabels || null,
+        active: !disabledQuestionIds.has(question.id),
         choices: {
           create: (question.choices || []).map((choice, index) => ({
             label: choice,

@@ -1,6 +1,36 @@
 (function mountStudentQuizExperience() {
-  function renderQuestionBody(questionHtml) {
-    return `<div class="quiz-question-copy">${questionHtml}</div>`;
+  function escapeAttr(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function splitAnswerParts(value) {
+    return String(value || "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  function hasBlankLabels(question) {
+    return question.type === "text" && Array.isArray(question.blankLabels) && question.blankLabels.length > 0;
+  }
+
+  function enhanceQuestionHtml(questionHtml) {
+    return String(questionHtml || "")
+      .replace(/<p>\s*<\/p>/g, "")
+      .replace(/\?\s+\?/g, "……");
+  }
+
+  function renderQuestionBody(question) {
+    const html = enhanceQuestionHtml(question.question);
+    return `
+      <div class="quiz-question-frame">
+        <div class="quiz-question-copy">${html}</div>
+      </div>
+    `;
   }
 
   function answerState(ctx, questionId) {
@@ -11,6 +41,76 @@
 
   function submittedAnswer(ctx, questionId) {
     return ctx.state.quizFlow.submittedAnswers?.[questionId] || "";
+  }
+
+  function renderLabeledAnswer(question, value) {
+    if (!hasBlankLabels(question)) {
+      return `<strong>${String(value || "未作答")}</strong>`;
+    }
+
+    const labels = question.blankLabels;
+    const parts = splitAnswerParts(value);
+    return `
+      <div class="quiz-answer-badges">
+        ${labels.map((label, index) => `
+          <div class="quiz-answer-badge">
+            <span>${label}</span>
+            <strong>${parts[index] || "—"}</strong>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function explanationSummary(question) {
+    return question?.explanation?.summary || "标准解答还没有补充到这道题，稍后会补成更像老师讲义的版本。";
+  }
+
+  function explanationSteps(question) {
+    return question?.explanation?.steps || [];
+  }
+
+  function renderAnswerInput(ctx, item) {
+    if (item.type === "choice") {
+      return `
+        <div class="quiz-options">
+          ${item.choices.map((choice) => `
+            <label class="quiz-option">
+              <input type="radio" name="${item.id}" value="${escapeAttr(choice)}" ${submittedAnswer(ctx, item.id) === choice ? "checked" : ""}>
+              <span>${choice}</span>
+            </label>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    if (hasBlankLabels(item)) {
+      const currentParts = splitAnswerParts(submittedAnswer(ctx, item.id));
+      return `
+        <div class="quiz-blank-row">
+          ${item.blankLabels.map((label, index) => `
+            <label class="quiz-blank-field">
+              <span class="quiz-blank-label">${label}</span>
+              <input
+                class="quiz-blank-input"
+                type="text"
+                inputmode="decimal"
+                data-blank-question="${item.id}"
+                data-blank-index="${index}"
+                value="${escapeAttr(currentParts[index] || "")}"
+                placeholder="${label}"
+              >
+            </label>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    return `
+      <div style="margin-top:12px;">
+        <input class="quiz-input" type="text" name="${item.id}" value="${escapeAttr(submittedAnswer(ctx, item.id))}" placeholder="请输入答案">
+      </div>
+    `;
   }
 
   function renderPracticeStage(ctx) {
@@ -24,9 +124,13 @@
           <span class="tag">5 题</span>
         </div>
         <form class="quiz-form" id="student-quiz-form">
-          ${ctx.state.quizFlow.questions.map((item, index) => item.type === "choice"
-            ? `<div class="quiz-card ${answerState(ctx, item.id)}" data-question-card="${item.id}"><div class="quiz-question-head">${index + 1}.</div>${renderQuestionBody(item.question)}<div class="quiz-options">${item.choices.map((choice) => `<label class="quiz-option"><input type="radio" name="${item.id}" value="${choice}" ${submittedAnswer(ctx, item.id) === choice ? "checked" : ""}><span>${choice}</span></label>`).join("")}</div></div>`
-            : `<div class="quiz-card ${answerState(ctx, item.id)}" data-question-card="${item.id}"><div class="quiz-question-head">${index + 1}.</div>${renderQuestionBody(item.question)}<div style="margin-top:12px;"><input class="quiz-input" type="text" name="${item.id}" value="${submittedAnswer(ctx, item.id)}" placeholder="请输入答案"></div></div>`).join("")}
+          ${ctx.state.quizFlow.questions.map((item, index) => `
+            <div class="quiz-card ${answerState(ctx, item.id)}">
+              <div class="quiz-question-head">${index + 1}.</div>
+              ${renderQuestionBody(item)}
+              ${renderAnswerInput(ctx, item)}
+            </div>
+          `).join("")}
         </form>
         <div class="quiz-actions">
           <button class="primary-btn" id="submit-student-quiz" type="button">${ctx.state.loading ? "提交中..." : "提交作答"}</button>
@@ -36,79 +140,165 @@
     `;
   }
 
-  function renderSidePanel(ctx) {
-    const selectedWrongQuestion = ctx.state.quizFlow.review?.wrongQuestions?.find((item) => item.id === ctx.state.quizFlow.selectedQuestionId) || ctx.state.quizFlow.review?.wrongQuestions?.[0] || null;
+  function renderResultNavigator(ctx) {
+    const questions = ctx.state.quizFlow.review?.questions || [];
+    return `
+      <div class="quiz-result-nav">
+        ${questions.map((item, index) => `
+          <button class="quiz-result-tab ${item.correct ? "is-correct" : "is-wrong"} ${ctx.state.quizFlow.selectedQuestionId === item.id ? "is-active" : ""}" data-review-question="${item.id}" type="button">${index + 1}</button>
+        `).join("")}
+      </div>
+    `;
+  }
 
-    if (!ctx.state.quizFlow.review) {
+  function renderQuestionDetail(ctx) {
+    const selectedQuestion = ctx.state.quizFlow.review?.questions?.find((item) => item.id === ctx.state.quizFlow.selectedQuestionId)
+      || ctx.state.quizFlow.review?.questions?.[0]
+      || null;
+
+    if (!selectedQuestion) {
       return `
-        <section class="panel">
-          <p class="eyebrow">Guide</p>
-          <h3>提交后查看结果</h3>
-          <p class="profile-meta">答对的题会变成淡绿色，答错的题会变成淡红色。点击错题后，右侧会显示老师标准讲解和 AI 追问框。</p>
-        </section>
+        <div class="quiz-review-card">
+          <p class="profile-meta">先完成这一组题目，提交后这里会显示每一道题的详细信息。</p>
+        </div>
       `;
     }
 
+    const steps = explanationSteps(selectedQuestion);
+
     return `
-      <section class="panel">
-        <p class="eyebrow">Result</p>
-        <h3>本次得分 ${Math.round((ctx.state.quizFlow.review.correctCount / Math.max(1, ctx.state.quizFlow.review.questions.length)) * 100)}</h3>
-        <p class="profile-meta">共 ${ctx.state.quizFlow.review.questions.length} 题，答错 ${ctx.state.quizFlow.review.wrongCount} 题。</p>
-
-        ${selectedWrongQuestion ? `
-          <div class="quiz-side-section">
-            <p class="eyebrow">Selected Wrong Question</p>
-            <div class="todo-item active-review-item">
-              ${renderQuestionBody(selectedWrongQuestion.question)}
-              <p>你的答案：${selectedWrongQuestion.studentAnswer}</p>
-              <p>正确答案：${selectedWrongQuestion.correctAnswer}</p>
-            </div>
+      <div class="quiz-review-card">
+        <div class="quiz-review-head">
+          <div>
+            <p class="eyebrow">Question</p>
+            <h3>${selectedQuestion.correct ? "这题答对了" : "这题需要复盘"}</h3>
           </div>
+          <span class="quiz-status-pill ${selectedQuestion.correct ? "is-correct" : "is-wrong"}">${selectedQuestion.correct ? "正确" : "错误"}</span>
+        </div>
 
-          <div class="quiz-side-section">
-            <p class="eyebrow">Teacher Explanation</p>
-            ${selectedWrongQuestion.explanation ? `
-              <div class="todo-list">
-                <div class="todo-item">
-                  <strong>${selectedWrongQuestion.explanation.assetLabel || "标准讲解"}</strong>
-                  <p>${selectedWrongQuestion.explanation.summary || "这道题有老师提前准备好的讲解。"}</p>
-                </div>
-                ${(selectedWrongQuestion.explanation.steps || []).map((step) => `
-                  <div class="todo-item">
-                    <strong>${step.line || "步骤"} / ${step.title || ""}</strong>
+        <div class="quiz-review-block">
+          <p class="eyebrow">题目</p>
+          ${renderQuestionBody(selectedQuestion)}
+        </div>
+
+        <div class="quiz-answer-grid">
+          <div class="answer-strip answer-strip-student">
+            <span>你的答案</span>
+            ${renderLabeledAnswer(selectedQuestion, selectedQuestion.studentAnswer)}
+          </div>
+          <div class="answer-strip answer-strip-correct">
+            <span>标准答案</span>
+            ${renderLabeledAnswer(selectedQuestion, selectedQuestion.correctAnswer)}
+          </div>
+        </div>
+
+        <div class="quiz-review-block">
+          <p class="eyebrow">老师标准解答</p>
+          <div class="quiz-explanation-card">
+            <p>${explanationSummary(selectedQuestion)}</p>
+            ${steps.length ? `
+              <div class="quiz-step-list">
+                ${steps.map((step) => `
+                  <div class="quiz-step-card">
+                    <strong>${step.line || "步骤"}${step.title ? ` · ${step.title}` : ""}</strong>
                     <p>${step.detail || ""}</p>
                   </div>
                 `).join("")}
               </div>
-            ` : `<p class="profile-meta">这道题暂时还没有配置标准讲解。</p>`}
+            ` : `<p class="profile-meta">这道题的分步讲解还在补写，先保留摘要版。</p>`}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAiPanel() {
+    return `
+      <section class="panel quiz-ai-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">AI Tutor</p>
+            <h3>讲题对话框</h3>
+          </div>
+          <span class="tag">草图</span>
+        </div>
+
+        <div class="quiz-chat-shell">
+          <div class="quiz-chat-thread">
+            <div class="quiz-bubble-row ai">
+              <div class="message-card ai">
+                <div class="message-meta"><strong>AI 助手</strong><span class="small-note">开场</span></div>
+                <p class="message-body">我会只围绕你当前点开的这道题来解释，不会突然跳到别的题。</p>
+              </div>
+            </div>
+            <div class="quiz-bubble-row ai">
+              <div class="message-card ai">
+                <div class="message-meta"><strong>AI 助手</strong><span class="small-note">建议</span></div>
+                <p class="message-body">你可以直接问“这一步为什么这样做”“能不能更简单一点”或者“先解释这个知识点”。</p>
+              </div>
+            </div>
           </div>
 
-          <div class="quiz-side-section">
-            <p class="eyebrow">AI Follow-up</p>
-            <div class="message-list chat-thread">
-              <div class="message-card ai">
-                <div class="message-meta"><strong>AI 助手</strong><span class="small-note">提示</span></div>
-                <p class="message-body">你可以问“第 2 步是什么意思”“为什么这里要通分”这类问题。</p>
-              </div>
-              ${ctx.state.quizFlow.explainMessages.map((item) => `
-                <div class="message-card ${item.from}">
-                  <div class="message-meta"><strong>${item.title}</strong><span class="small-note">${item.time}</span></div>
-                  <p class="message-body">${item.body}</p>
-                </div>
-              `).join("")}
-            </div>
-            <div class="chat-input-shell">
-              <textarea class="prompt-input" id="quiz-explain-input" rows="4" placeholder="例如：第 2 步为什么可以直接套公式？">${ctx.state.quizFlow.explainDraft}</textarea>
-              <div class="prompt-actions">
-                <button class="primary-btn" id="send-quiz-explain-btn" type="button">发送追问</button>
-              </div>
+          <div class="quiz-chat-suggestions">
+            <button class="chip-btn" type="button">这一步为什么这么做？</button>
+            <button class="chip-btn" type="button">能不能更简单一点？</button>
+            <button class="chip-btn" type="button">先解释这个知识点</button>
+            <button class="chip-btn" type="button">如果能画图就更好了</button>
+          </div>
+
+          <div class="quiz-chat-input-dock">
+            <textarea class="prompt-input" rows="4" placeholder="这里之后会接入新的 AI 对话模块。现在先把结果页结构和聊天形式定下来。" disabled></textarea>
+            <div class="prompt-actions">
+              <button class="primary-btn" type="button" disabled>发送提问</button>
             </div>
           </div>
-        ` : `
-          <div class="quiz-side-section">
-            <p class="profile-meta">这次全部答对了，可以直接去下一组练习。</p>
-          </div>
-        `}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderGuideStage() {
+    return `
+      <section class="panel">
+        <p class="eyebrow">Guide</p>
+        <h3>提交后查看结果</h3>
+        <p class="profile-meta">做完 5 道题并提交后，结果页会切换成复盘模式。左边是 1 到 5 的题号按钮和单题详情，右边是 AI 讲题对话框。</p>
+      </section>
+    `;
+  }
+
+  function renderResultStage(ctx) {
+    const total = ctx.state.quizFlow.review?.questions?.length || 0;
+    const correctCount = ctx.state.quizFlow.review?.correctCount || 0;
+    const wrongCount = ctx.state.quizFlow.review?.wrongCount || 0;
+    const score = total ? Math.round((correctCount / total) * 100) : 0;
+
+    return `
+      <section class="quiz-stage-shell quiz-stage-review">
+        <section class="quiz-main-column">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Result Overview</p>
+                <h3>本次得分 ${score}</h3>
+              </div>
+              <span class="tag">${correctCount} 对 / ${wrongCount} 错</span>
+            </div>
+
+            <p class="profile-meta">先点题号看单题详情。绿色表示答对，红色表示需要复盘，这样会比把 5 道题全部摊开更清楚。</p>
+
+            ${renderResultNavigator(ctx)}
+            ${renderQuestionDetail(ctx)}
+
+            <div class="quiz-actions">
+              <button class="ghost-btn" data-quiz-back="level" type="button">换一组题再练</button>
+            </div>
+          </section>
+        </section>
+
+        <aside class="quiz-side-column">
+          ${renderAiPanel()}
+        </aside>
       </section>
     `;
   }
@@ -117,27 +307,89 @@
     const catalog = ctx.state.quizCatalog || { subjects: [], levels: [] };
 
     if (!ctx.state.quizFlow.subjectId) {
-      return `<section class="panel"><div class="panel-head"><div><p class="eyebrow">Practice Library</p><h3>先选择学科题库</h3></div></div><div class="quiz-subject-grid">${catalog.subjects.map((item) => `<button class="quiz-subject-card ${item.accent || ""}" data-quiz-subject="${item.id}" type="button"><strong>${item.label}</strong><p>${item.description || ""}</p></button>`).join("")}</div></section>`;
+      return `
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Practice Library</p>
+              <h3>先选择学科题库</h3>
+            </div>
+          </div>
+          <div class="quiz-subject-grid">
+            ${catalog.subjects.map((item) => `
+              <button class="quiz-subject-card ${item.accent || ""}" data-quiz-subject="${item.id}" type="button">
+                <strong>${item.label}</strong>
+                <p>${item.description || ""}</p>
+              </button>
+            `).join("")}
+          </div>
+        </section>
+      `;
     }
 
     if (!ctx.state.quizFlow.topicId) {
-      return `<section class="panel"><div class="panel-head"><div><p class="eyebrow">Knowledge Map</p><h3>${ctx.quizSubject()?.label || ""}</h3></div></div><div class="knowledge-node-grid">${ctx.quizSubject()?.topics.map((item) => `<button class="knowledge-node" data-quiz-topic="${item.id}" type="button"><strong>${item.label}</strong><p>${item.summary || ""}</p></button>`).join("") || ""}</div><div class="feedback-toolbar" style="margin-top:12px;"><button class="ghost-btn" data-quiz-back="subject" type="button">返回学科</button></div></section>`;
+      return `
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Knowledge Map</p>
+              <h3>${ctx.quizSubject()?.label || ""}</h3>
+            </div>
+          </div>
+          <div class="knowledge-node-grid">
+            ${ctx.quizSubject()?.topics.map((item) => `
+              <button class="knowledge-node" data-quiz-topic="${item.id}" type="button">
+                <strong>${item.label}</strong>
+                <p>${item.summary || ""}</p>
+              </button>
+            `).join("") || ""}
+          </div>
+          <div class="feedback-toolbar" style="margin-top:12px;">
+            <button class="ghost-btn" data-quiz-back="subject" type="button">返回学科</button>
+          </div>
+        </section>
+      `;
     }
 
     if (!ctx.state.quizFlow.levelId || !ctx.state.quizFlow.questions.length) {
-      return `<section class="panel"><div class="panel-head"><div><p class="eyebrow">Difficulty</p><h3>${ctx.quizSubject()?.label || ""} / ${ctx.quizTopic()?.label || ""}</h3></div></div><div class="quiz-level-grid">${catalog.levels.map((item) => `<button class="quiz-level-card ${ctx.state.quizFlow.levelId === item.id ? "active" : ""}" data-quiz-level="${item.id}" type="button"><strong>${item.label}</strong><p>${item.description || ""}</p></button>`).join("")}</div><div class="feedback-toolbar" style="margin-top:12px;"><button class="ghost-btn" data-quiz-back="topic" type="button">返回知识点</button><button class="primary-btn" id="start-quiz-session-btn" type="button">开始 5 题练习</button></div></section>`;
+      return `
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Difficulty</p>
+              <h3>${ctx.quizSubject()?.label || ""} / ${ctx.quizTopic()?.label || ""}</h3>
+            </div>
+          </div>
+          <div class="quiz-level-grid">
+            ${catalog.levels.map((item) => `
+              <button class="quiz-level-card ${ctx.state.quizFlow.levelId === item.id ? "active" : ""}" data-quiz-level="${item.id}" type="button">
+                <strong>${item.label}</strong>
+                <p>${item.description || ""}</p>
+              </button>
+            `).join("")}
+          </div>
+          <div class="feedback-toolbar" style="margin-top:12px;">
+            <button class="ghost-btn" data-quiz-back="topic" type="button">返回知识点</button>
+            <button class="primary-btn" id="start-quiz-session-btn" type="button">开始 5 题练习</button>
+          </div>
+        </section>
+      `;
     }
 
-    return `
-      <section class="quiz-stage-shell quiz-stage-compact">
-        <section class="quiz-main-column">
-          ${renderPracticeStage(ctx)}
+    if (!ctx.state.quizFlow.review) {
+      return `
+        <section class="quiz-stage-shell quiz-stage-compact">
+          <section class="quiz-main-column">
+            ${renderPracticeStage(ctx)}
+          </section>
+          <aside class="quiz-side-column">
+            ${renderGuideStage()}
+          </aside>
         </section>
-        <aside class="quiz-side-column">
-          ${renderSidePanel(ctx)}
-        </aside>
-      </section>
-    `;
+      `;
+    }
+
+    return renderResultStage(ctx);
   }
 
   function bind(ctx) {
@@ -172,14 +424,9 @@
       });
     });
 
-    ctx.contentEl.querySelectorAll("[data-question-card]").forEach((card) => {
-      card.addEventListener("click", () => {
-        const questionId = card.dataset.questionCard;
-        const reviewItem = ctx.state.quizFlow.review?.questions?.find((item) => item.id === questionId);
-        if (!reviewItem || reviewItem.correct) return;
-        ctx.state.quizFlow.selectedQuestionId = questionId;
-        ctx.state.quizFlow.explainDraft = "";
-        ctx.state.quizFlow.explainMessages = [];
+    ctx.contentEl.querySelectorAll("[data-review-question]").forEach((button) => {
+      button.addEventListener("click", () => {
+        ctx.state.quizFlow.selectedQuestionId = button.dataset.reviewQuestion;
         ctx.renderApp();
       });
     });
@@ -189,32 +436,6 @@
 
     const submitQuizButton = document.getElementById("submit-student-quiz");
     if (submitQuizButton) submitQuizButton.addEventListener("click", ctx.submitQuizSession);
-
-    const explainInput = document.getElementById("quiz-explain-input");
-    if (explainInput) {
-      explainInput.addEventListener("input", () => {
-        ctx.state.quizFlow.explainDraft = explainInput.value;
-      });
-    }
-
-    const sendExplainButton = document.getElementById("send-quiz-explain-btn");
-    if (sendExplainButton) {
-      sendExplainButton.addEventListener("click", () => {
-        const text = (ctx.state.quizFlow.explainDraft || "").trim();
-        const selectedWrongQuestion = ctx.state.quizFlow.review?.wrongQuestions?.find((item) => item.id === ctx.state.quizFlow.selectedQuestionId) || ctx.state.quizFlow.review?.wrongQuestions?.[0];
-        if (!text || !selectedWrongQuestion) return;
-
-        const firstStep = selectedWrongQuestion.explanation?.steps?.[0];
-        const reply = firstStep
-          ? `我先围绕老师讲解回答你。这道题可以先看「${firstStep.title || firstStep.line}」这一步：${firstStep.detail}`
-          : "我会围绕这道题已有的老师标准讲解来回答你。你可以继续追问具体是哪一步没看懂。";
-
-        ctx.state.quizFlow.explainMessages.push({ from: "student", title: "我", time: "刚刚", body: text });
-        ctx.state.quizFlow.explainMessages.push({ from: "ai", title: "AI 助手", time: "刚刚", body: reply });
-        ctx.state.quizFlow.explainDraft = "";
-        ctx.renderApp();
-      });
-    }
   }
 
   window.StudentQuizExperience = {

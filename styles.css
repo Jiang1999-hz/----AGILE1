@@ -585,11 +585,209 @@ button { cursor: pointer; border: none; }
   align-items: start;
 }
 
+.quiz-stage-review {
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  align-items: start;
+}
+
 .quiz-main-column,
 .quiz-side-column,
 .quiz-side-section {
   display: grid;
   gap: 16px;
+}
+
+.quiz-result-nav {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 64px));
+  gap: 12px;
+  margin: 18px 0 22px;
+}
+
+.quiz-result-tab {
+  min-height: 56px;
+  border-radius: 18px;
+  border: 1px solid transparent;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 24px rgba(88, 61, 46, 0.06);
+}
+
+.quiz-result-tab.is-correct {
+  background: rgba(227, 247, 237, 0.96);
+  color: #12695f;
+  border-color: rgba(25, 143, 137, 0.2);
+}
+
+.quiz-result-tab.is-wrong {
+  background: rgba(255, 239, 239, 0.98);
+  color: #9a3333;
+  border-color: rgba(193, 74, 74, 0.16);
+}
+
+.quiz-result-tab.is-active {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(88, 61, 46, 0.12);
+  border-color: rgba(31, 41, 51, 0.14);
+}
+
+.quiz-review-card,
+.quiz-explanation-card,
+.quiz-ai-panel,
+.quiz-chat-input-dock,
+.quiz-step-card {
+  border-radius: 22px;
+}
+
+.quiz-review-card {
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(63, 49, 41, 0.08);
+  display: grid;
+  gap: 18px;
+}
+
+.quiz-review-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.quiz-status-pill {
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.quiz-status-pill.is-correct {
+  background: rgba(25, 143, 137, 0.12);
+  color: #12695f;
+}
+
+.quiz-status-pill.is-wrong {
+  background: rgba(193, 74, 74, 0.12);
+  color: #9a3333;
+}
+
+.quiz-review-block {
+  display: grid;
+  gap: 10px;
+}
+
+.quiz-answer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.answer-strip {
+  min-height: 92px;
+}
+
+.answer-strip strong {
+  font-size: 22px;
+}
+
+.quiz-answer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.quiz-answer-badge {
+  min-width: 70px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(63, 49, 41, 0.1);
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+}
+
+.quiz-answer-badge span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.quiz-answer-badge strong {
+  font-size: 24px;
+}
+
+.quiz-explanation-card {
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(63, 49, 41, 0.07);
+  display: grid;
+  gap: 14px;
+}
+
+.quiz-explanation-card p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.quiz-step-list {
+  display: grid;
+  gap: 12px;
+}
+
+.quiz-step-card {
+  padding: 14px 16px;
+  background: rgba(246, 239, 230, 0.68);
+  border: 1px solid rgba(63, 49, 41, 0.06);
+}
+
+.quiz-step-card strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.quiz-step-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.quiz-ai-panel {
+  min-height: 100%;
+}
+
+.quiz-chat-shell {
+  display: grid;
+  gap: 16px;
+}
+
+.quiz-chat-thread {
+  display: grid;
+  gap: 12px;
+}
+
+.quiz-bubble-row {
+  display: flex;
+}
+
+.quiz-bubble-row.ai {
+  justify-content: flex-start;
+}
+
+.quiz-chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quiz-chat-input-dock {
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(63, 49, 41, 0.08);
 }
 
 .quiz-breadcrumb {
@@ -1095,6 +1293,116 @@ button { cursor: pointer; border: none; }
   color: var(--ink);
 }
 
+.quiz-question-copy .math-rich-prompt,
+.quiz-review-copy .math-rich-prompt {
+  display: grid;
+  gap: 10px;
+}
+
+.math-jp-line {
+  line-height: 1.9;
+  font-size: 19px;
+}
+
+.math-formula {
+  text-align: center;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin: 4px 0 8px;
+}
+
+.math-condition {
+  font-size: 20px;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.math-answer-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+  font-size: 24px;
+  line-height: 1.8;
+}
+
+.math-fraction,
+.inline-fraction {
+  display: inline-grid;
+  justify-items: center;
+  vertical-align: middle;
+}
+
+.math-fraction-top,
+.inline-fraction-top {
+  border-bottom: 2px solid rgba(63, 49, 41, 0.72);
+  padding: 0 8px 4px;
+  line-height: 1.1;
+}
+
+.math-fraction-bottom,
+.inline-fraction-bottom {
+  padding-top: 3px;
+  line-height: 1.1;
+}
+
+.math-boxed-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.8em;
+  min-height: 1.8em;
+  padding: 0.12em 0.28em;
+  border: 2px solid rgba(213, 107, 73, 0.72);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 243, 234, 0.98), rgba(255, 233, 214, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 14px rgba(213, 107, 73, 0.12);
+  font-weight: 800;
+  color: var(--accent-deep);
+}
+
+.math-boxed-letter-wide {
+  min-width: 2.6em;
+  padding: 0.12em 0.42em;
+}
+
+.quiz-blank-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 110px));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.quiz-blank-field {
+  display: grid;
+  gap: 8px;
+}
+
+.quiz-blank-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.quiz-blank-input {
+  width: 100%;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 2px solid rgba(213, 107, 73, 0.22);
+  background: rgba(255, 251, 247, 0.96);
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-deep);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
 .quiz-side-column .panel {
   position: sticky;
   top: 18px;
@@ -1136,7 +1444,7 @@ button { cursor: pointer; border: none; }
 }
 
 @media (max-width: 1200px) {
-  .app-shell, .teacher-layout, .student-database, .student-dashboard, .metric-grid, .grid-2, .admin-grid, .ops-grid, .db-summary-row, .profile-stats, .quiz-result-grid, .profile-badges, .calendar-board, .course-flow-layout, .quiz-explain-layout, .quiz-subject-grid, .quiz-level-grid, .knowledge-node-grid { grid-template-columns: 1fr; }
+  .app-shell, .teacher-layout, .student-database, .student-dashboard, .metric-grid, .grid-2, .admin-grid, .ops-grid, .db-summary-row, .profile-stats, .quiz-result-grid, .profile-badges, .calendar-board, .course-flow-layout, .quiz-explain-layout, .quiz-subject-grid, .quiz-level-grid, .knowledge-node-grid, .quiz-stage-review, .quiz-answer-grid { grid-template-columns: 1fr; }
   .quiz-level-ready { flex-direction: column; align-items: flex-start; }
   .app-shell { grid-template-columns: 1fr; }
   .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
@@ -1146,4 +1454,78 @@ button { cursor: pointer; border: none; }
   .login-options, .db-header, .db-row { grid-template-columns: 1fr; }
   .topbar, .topbar-actions, .profile-hero, .table-toolbar, .teacher-workspace-head, .workspace-actions, .teacher-inline-stats, .section-row, .profile-subpanel, .table-meta-row, .table-meta-actions, .sidebar-top-actions, .lesson-stats { flex-direction: column; align-items: stretch; }
   .main { padding: 18px; }
+  .quiz-result-nav { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+.quiz-question-frame {
+  display: grid;
+  gap: 14px;
+}
+
+.quiz-question-copy {
+  overflow-x: auto;
+}
+
+.quiz-question-copy .math-rich-prompt {
+  min-width: min(100%, 760px);
+}
+
+.quiz-question-copy .math-rich-prompt > * {
+  max-width: 100%;
+}
+
+.quiz-question-copy .math-jp-line,
+.quiz-review-card .math-jp-line {
+  word-break: keep-all;
+}
+
+.quiz-question-copy .math-answer-line,
+.quiz-review-card .math-answer-line {
+  justify-content: flex-start;
+  gap: 8px 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(63, 49, 41, 0.08);
+  font-size: clamp(20px, 2.1vw, 25px);
+  overflow-x: auto;
+}
+
+.quiz-question-copy .math-answer-line span,
+.quiz-review-card .math-answer-line span {
+  white-space: nowrap;
+}
+
+.quiz-question-copy .inline-fraction,
+.quiz-question-copy .math-fraction,
+.quiz-review-card .inline-fraction,
+.quiz-review-card .math-fraction {
+  flex: 0 0 auto;
+  display: inline-grid;
+  align-items: center;
+  justify-items: center;
+  margin: 0 2px;
+}
+
+.quiz-question-copy .inline-fraction-top,
+.quiz-question-copy .math-fraction-top,
+.quiz-review-card .inline-fraction-top,
+.quiz-review-card .math-fraction-top {
+  min-width: 100%;
+  white-space: nowrap;
+  border-bottom-width: 2.5px;
+}
+
+.quiz-question-copy .inline-fraction-bottom,
+.quiz-question-copy .math-fraction-bottom,
+.quiz-review-card .inline-fraction-bottom,
+.quiz-review-card .math-fraction-bottom {
+  white-space: nowrap;
+}
+
+.quiz-question-copy .math-boxed-letter,
+.quiz-question-copy .math-boxed-letter-wide,
+.quiz-review-card .math-boxed-letter,
+.quiz-review-card .math-boxed-letter-wide {
+  flex: 0 0 auto;
 }
