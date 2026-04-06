@@ -8,6 +8,11 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const root = __dirname;
 const port = process.env.PORT || 4173;
+const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434").replace(/\/+$/, "");
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen2.5:14b";
+const OLLAMA_TEMPERATURE = Number(process.env.OLLAMA_TEMPERATURE || 0.3);
+const CHAT_MAX_HISTORY = Number(process.env.CHAT_MAX_HISTORY || 10);
+const CHAT_TIMEOUT_MS = Number(process.env.CHAT_TIMEOUT_MS || 30000);
 
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -127,6 +132,165 @@ function readBody(req) {
     });
     req.on("error", reject);
   });
+}
+
+function stripHtml(input) {
+  return String(input || "")
+    .replace(/<sub>/gi, "_")
+    .replace(/<\/sub>/gi, "")
+    .replace(/<sup>/gi, "^")
+    .replace(/<\/sup>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
+function formatExplanationSteps(explanation) {
+  const steps = explanation?.steps || [];
+  if (!steps.length) return "暂无分步解答。";
+  return steps
+    .map((step, index) => {
+      const parts = [step.line || `步骤 ${index + 1}`, step.title].filter(Boolean).join(" - ");
+      return `${parts}\n${step.detail || ""}`.trim();
+    })
+    .join("\n\n");
+}
+
+function buildQuizFollowUpMessages({ question, conversation, userMessage }) {
+  const questionText = stripHtml(question?.question);
+  const answerLabels = Array.isArray(question?.blankLabels) && question.blankLabels.length
+    ? `空位标签：${question.blankLabels.join("、")}`
+    : "空位标签：无";
+  const explanationSummary = question?.explanation?.summary || "暂无标准解答摘要。";
+  const explanationSteps = formatExplanationSteps(question?.explanation);
+  const prompt = [
+    "你是一个私塾数学讲题 AI。",
+    "你只围绕当前这道题、学生答案、标准答案和标准解答来回答。",
+    "不要跳到别的题，不要扩展成泛泛聊天。",
+    "如果学生问某一步，就优先解释那一步。",
+    "如果学生说还是不懂，就换一种更简单的说法，不要只是重复。",
+    "回答请使用自然中文，像老师讲题，不要写程序员式说明。",
+    "如果要写公式，请像教材一样把关键公式单独放一行。",
+    "不要输出 \\( \\) \\[ \\] 这类 LaTeX 包裹符号。",
+    "不要堆反斜杠命令，尽量直接写清楚的数学表达式。",
+    "如果需要解释公式，先给一句自然引导，再写公式，再用短句解释。",
+    "",
+    "当前题目：",
+    questionText,
+    "",
+    answerLabels,
+    `学生答案：${question?.studentAnswer || "未作答"}`,
+    `标准答案：${question?.correctAnswer || "暂无"}`,
+    "",
+    "标准解答摘要：",
+    explanationSummary,
+    "",
+    "标准解答步骤：",
+    explanationSteps
+  ].join("\n");
+
+  return [
+    { role: "system", content: prompt },
+    ...(Array.isArray(conversation) ? conversation.slice(-CHAT_MAX_HISTORY) : []),
+    { role: "user", content: String(userMessage || "").trim() }
+  ];
+}
+
+async function requestOllamaChat(messages, stream) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CHAT_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: OLLAMA_MODEL,
+        stream,
+        messages,
+        options: {
+          temperature: OLLAMA_TEMPERATURE,
+          num_ctx: 4096
+        }
+      }),
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || `Ollama 请求失败：${response.status}`);
+    }
+
+    return response;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("AI 响应超时，请稍后重试");
+    }
+    if (error.message && /fetch failed|ECONNREFUSED|connect/i.test(error.message)) {
+      throw new Error("本地 AI 服务未启动，请检查 Ollama");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function createQuizFollowUpReply(payload) {
+  const messages = buildQuizFollowUpMessages(payload);
+  const response = await requestOllamaChat(messages, false);
+  const data = await response.json();
+  return {
+    reply: data?.message?.content?.trim() || ""
+  };
+}
+
+async function streamQuizFollowUpReply(res, payload) {
+  const messages = buildQuizFollowUpMessages(payload);
+  const response = await requestOllamaChat(messages, true);
+
+  res.writeHead(200, {
+    "Content-Type": "text/plain; charset=utf-8",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive"
+  });
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  for await (const chunk of response.body) {
+    buffer += decoder.decode(chunk, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const data = JSON.parse(trimmed);
+      const content = data?.message?.content || "";
+      if (content) {
+        res.write(content);
+      }
+    }
+  }
+
+  if (buffer.trim()) {
+    const data = JSON.parse(buffer.trim());
+    const content = data?.message?.content || "";
+    if (content) {
+      res.write(content);
+    }
+  }
+
+  res.end();
 }
 
 let cachedQuestionBank = null;
@@ -823,6 +987,18 @@ async function handleStudentApi(req, res) {
     return true;
   }
 
+  if (req.method === "POST" && pathname === "/api/student/1/quiz-followup") {
+    const payload = await readBody(req);
+    sendJson(res, 200, await createQuizFollowUpReply(payload));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/student/1/quiz-followup-stream") {
+    const payload = await readBody(req);
+    await streamQuizFollowUpReply(res, payload);
+    return true;
+  }
+
   if (req.method === "POST" && pathname.startsWith("/api/student/1/lessons/") && pathname.endsWith("/homework")) {
     const lessonId = pathname.split("/")[5];
     const payload = await readBody(req);
@@ -888,7 +1064,9 @@ module.exports = {
   buildLearningRecords,
   getQuizCatalogFromDb,
   getQuizSessionQuestionsFromDb,
-  saveQuizSessionSubmission
+  saveQuizSessionSubmission,
+  createQuizFollowUpReply,
+  streamQuizFollowUpReply
 };
 
 if (require.main === module) {

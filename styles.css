@@ -778,6 +778,10 @@ button { cursor: pointer; border: none; }
   justify-content: flex-start;
 }
 
+.quiz-bubble-row.student {
+  justify-content: flex-end;
+}
+
 .quiz-chat-suggestions {
   display: flex;
   flex-wrap: wrap;
@@ -997,6 +1001,59 @@ button { cursor: pointer; border: none; }
 .message-card.ai { background: linear-gradient(135deg, rgba(25, 143, 137, 0.14), rgba(25, 143, 137, 0.06)); }
 .message-card.teacher { background: linear-gradient(135deg, rgba(213, 107, 73, 0.14), rgba(213, 107, 73, 0.06)); }
 .message-card.student { background: rgba(255, 255, 255, 0.76); }
+.quiz-ai-error-card {
+  border: 1px solid rgba(193, 74, 74, 0.25);
+  background: linear-gradient(135deg, rgba(193, 74, 74, 0.12), rgba(193, 74, 74, 0.04));
+}
+
+.ai-message-paragraph {
+  margin: 0 0 10px;
+  line-height: 1.85;
+}
+
+.ai-message-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.ai-message-list {
+  margin: 8px 0 0 18px;
+  padding: 0;
+  line-height: 1.8;
+}
+
+.ai-formula-card {
+  margin: 12px 0;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(63, 49, 41, 0.08);
+}
+
+.ai-formula-line {
+  text-align: center;
+  font-size: 32px;
+  line-height: 1.5;
+  color: #22324a;
+  font-family: "Times New Roman", "STIX Two Text", "Georgia", serif;
+}
+
+.ai-inline-fraction {
+  display: inline-grid;
+  justify-items: center;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.ai-inline-fraction-top {
+  border-bottom: 2px solid rgba(63, 49, 41, 0.72);
+  padding: 0 6px 3px;
+  line-height: 1.05;
+}
+
+.ai-inline-fraction-bottom {
+  padding-top: 2px;
+  line-height: 1.05;
+}
 
 .db-header, .db-row {
   display: grid;

@@ -70,6 +70,100 @@
     return question?.explanation?.steps || [];
   }
 
+  function selectedQuestionFromReview(ctx) {
+    return ctx.state.quizFlow.review?.questions?.find((item) => item.id === ctx.state.quizFlow.selectedQuestionId)
+      || ctx.state.quizFlow.review?.questions?.[0]
+      || null;
+  }
+
+  function aiThreadForQuestion(ctx, questionId) {
+    if (!questionId) return [];
+    return ctx.state.quizFlow.aiThreads?.[questionId] || [];
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function convertInlineMath(text) {
+    return text
+      .replace(/\\\(|\\\)|\\\[|\\\]/g, "")
+      .replace(/\\left/g, "")
+      .replace(/\\right/g, "")
+      .replace(/\\quad/g, " ")
+      .replace(/\\,/g, " ")
+      .replace(/\\!/g, "")
+      .replace(/\\;/g, " ")
+      .replace(/\\:/g, " ")
+      .replace(/\\ /g, " ")
+      .replace(/\\([\^\-\+\=\(\)\[\]\{\}])/g, "$1")
+      .replace(/\\sum_\{([^{}]+)\}\^\{([^{}]+)\}/g, '∑<sub>$1</sub><sup>$2</sup>')
+      .replace(/\\sum_\{([^{}]+)\}\^([A-Za-z0-9+\-]+)/g, '∑<sub>$1</sub><sup>$2</sup>')
+      .replace(/\\sum/g, "∑")
+      .replace(/\\times/g, "×")
+      .replace(/\\cdot/g, "·")
+      .replace(/\\leq/g, "≤")
+      .replace(/\\geq/g, "≥")
+      .replace(/\\neq/g, "≠")
+      .replace(/\\pm/g, "±")
+      .replace(/\\sqrt\{([^{}]+)\}/g, "√($1)")
+      .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '<span class="ai-inline-fraction"><span class="ai-inline-fraction-top">$1</span><span class="ai-inline-fraction-bottom">$2</span></span>')
+      .replace(/([A-Za-z0-9)\]])\^([A-Za-z0-9+\-]+)/g, '$1<sup>$2</sup>')
+      .replace(/([A-Za-z])_\{([^{}]+)\}/g, '$1<sub>$2</sub>')
+      .replace(/([A-Za-z])_([A-Za-z0-9+\-]+)/g, '$1<sub>$2</sub>')
+      .replace(/\{([^{}]+)\}/g, '$1');
+  }
+
+  function looksLikeFormulaLine(line) {
+    const plain = line.replace(/<[^>]+>/g, "").trim();
+    if (!plain) return false;
+    if (plain.length > 72) return false;
+    if (/[，。！？；：]/.test(plain)) return false;
+    const formulaCharCount = (plain.match(/[=+\-×÷^<>≤≥∑√()]/g) || []).length;
+    const letterCount = (plain.match(/[A-Za-z]/g) || []).length;
+    const digitCount = (plain.match(/\d/g) || []).length;
+    return formulaCharCount >= 1 && (letterCount + digitCount) >= 3;
+  }
+
+  function renderAiMessageBody(text) {
+    const safeText = escapeHtml(text || "");
+    const normalized = convertInlineMath(safeText);
+    const blocks = normalized.split(/\n{2,}/).map((block) => block.trim()).filter(Boolean);
+
+    return blocks.map((block) => {
+      const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
+      if (!lines.length) return "";
+
+      if (lines.every((line) => looksLikeFormulaLine(line))) {
+        return `
+          <div class="ai-formula-card">
+            ${lines.map((line) => `<div class="ai-formula-line">${line}</div>`).join("")}
+          </div>
+        `;
+      }
+
+      if (lines.every((line) => /^[•\-]/.test(line))) {
+        return `
+          <ul class="ai-message-list">
+            ${lines.map((line) => `<li>${line.replace(/^[•\-]\s*/, "")}</li>`).join("")}
+          </ul>
+        `;
+      }
+
+      return lines.map((line) => {
+        if (looksLikeFormulaLine(line)) {
+          return `<div class="ai-formula-card"><div class="ai-formula-line">${line}</div></div>`;
+        }
+        return `<p class="ai-message-paragraph">${line}</p>`;
+      }).join("");
+    }).join("");
+  }
+
   function renderAnswerInput(ctx, item) {
     if (item.type === "choice") {
       return `
@@ -212,7 +306,13 @@
     `;
   }
 
-  function renderAiPanel() {
+  function renderAiPanel(ctx) {
+    const selectedQuestion = selectedQuestionFromReview(ctx);
+    const questionId = selectedQuestion?.id || "";
+    const messages = aiThreadForQuestion(ctx, questionId);
+    const isStreaming = ctx.state.quizFlow.aiStreamingQuestionId === questionId;
+    const errorMessage = questionId ? ctx.state.quizFlow.aiErrorByQuestion?.[questionId] : "";
+
     return `
       <section class="panel quiz-ai-panel">
         <div class="panel-head">
@@ -220,7 +320,7 @@
             <p class="eyebrow">AI Tutor</p>
             <h3>讲题对话框</h3>
           </div>
-          <span class="tag">草图</span>
+          <span class="tag">${selectedQuestion ? selectedQuestion.id : "未选题"}</span>
         </div>
 
         <div class="quiz-chat-shell">
@@ -237,19 +337,35 @@
                 <p class="message-body">你可以直接问“这一步为什么这样做”“能不能更简单一点”或者“先解释这个知识点”。</p>
               </div>
             </div>
+            ${messages.map((item) => `
+              <div class="quiz-bubble-row ${item.from === "student" ? "student" : "ai"}">
+                <div class="message-card ${item.from}">
+                  <div class="message-meta"><strong>${item.title}</strong><span class="small-note">${item.time}</span></div>
+                  <div class="message-body">${renderAiMessageBody(item.body || (item.from === "ai" ? "..." : ""))}</div>
+                </div>
+              </div>
+            `).join("")}
+            ${errorMessage ? `
+              <div class="quiz-bubble-row ai">
+                <div class="message-card ai quiz-ai-error-card">
+                  <div class="message-meta"><strong>AI 助手</strong><span class="small-note">错误</span></div>
+                  <div class="message-body">${renderAiMessageBody(errorMessage)}</div>
+                </div>
+              </div>
+            ` : ""}
           </div>
 
           <div class="quiz-chat-suggestions">
-            <button class="chip-btn" type="button">这一步为什么这么做？</button>
-            <button class="chip-btn" type="button">能不能更简单一点？</button>
-            <button class="chip-btn" type="button">先解释这个知识点</button>
-            <button class="chip-btn" type="button">如果能画图就更好了</button>
+            <button class="chip-btn" data-ai-prompt="这一步为什么这么做？" type="button" ${selectedQuestion ? "" : "disabled"}>这一步为什么这么做？</button>
+            <button class="chip-btn" data-ai-prompt="能不能更简单一点？" type="button" ${selectedQuestion ? "" : "disabled"}>能不能更简单一点？</button>
+            <button class="chip-btn" data-ai-prompt="先解释这个知识点" type="button" ${selectedQuestion ? "" : "disabled"}>先解释这个知识点</button>
+            <button class="chip-btn" data-ai-prompt="如果能画图就更好了" type="button" ${selectedQuestion ? "" : "disabled"}>如果能画图就更好了</button>
           </div>
 
           <div class="quiz-chat-input-dock">
-            <textarea class="prompt-input" rows="4" placeholder="这里之后会接入新的 AI 对话模块。现在先把结果页结构和聊天形式定下来。" disabled></textarea>
+            <textarea class="prompt-input" id="quiz-ai-input" rows="4" placeholder="${selectedQuestion ? "输入你想继续追问的问题" : "先在左边点开一道题，再来追问"}" ${selectedQuestion ? "" : "disabled"}></textarea>
             <div class="prompt-actions">
-              <button class="primary-btn" type="button" disabled>发送提问</button>
+              <button class="primary-btn" id="send-quiz-ai-message" type="button" ${(selectedQuestion && !isStreaming) ? "" : "disabled"}>${isStreaming ? "讲解中..." : "发送提问"}</button>
             </div>
           </div>
         </div>
@@ -297,7 +413,7 @@
         </section>
 
         <aside class="quiz-side-column">
-          ${renderAiPanel()}
+          ${renderAiPanel(ctx)}
         </aside>
       </section>
     `;
@@ -436,6 +552,38 @@
 
     const submitQuizButton = document.getElementById("submit-student-quiz");
     if (submitQuizButton) submitQuizButton.addEventListener("click", ctx.submitQuizSession);
+
+    ctx.contentEl.querySelectorAll("[data-ai-prompt]").forEach((button) => {
+      button.addEventListener("click", () => {
+        ctx.sendQuizFollowUp(button.dataset.aiPrompt);
+      });
+    });
+
+    const sendAiButton = document.getElementById("send-quiz-ai-message");
+    const aiInput = document.getElementById("quiz-ai-input");
+    if (sendAiButton && aiInput) {
+      const sendCurrentMessage = () => {
+        const text = aiInput.value.trim();
+        if (!text) return;
+        aiInput.value = "";
+        ctx.sendQuizFollowUp(text);
+      };
+
+      sendAiButton.addEventListener("click", sendCurrentMessage);
+      aiInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendCurrentMessage();
+        }
+      });
+    }
+
+    const chatThread = ctx.contentEl.querySelector(".quiz-chat-thread");
+    if (chatThread) {
+      requestAnimationFrame(() => {
+        chatThread.scrollTop = chatThread.scrollHeight;
+      });
+    }
   }
 
   window.StudentQuizExperience = {

@@ -15,7 +15,10 @@
     submittedAnswers: {},
     selectedQuestionId: null,
     explainDraft: "",
-    explainMessages: []
+    explainMessages: [],
+    aiThreads: {},
+    aiErrorByQuestion: {},
+    aiStreamingQuestionId: null
   },
   loading: false,
   toast: null,
@@ -203,6 +206,20 @@ function quizLevel() {
   return (state.quizCatalog?.levels || []).find((item) => item.id === state.quizFlow.levelId) || null;
 }
 
+function resetQuizAiState() {
+  state.quizFlow.explainDraft = "";
+  state.quizFlow.explainMessages = [];
+  state.quizFlow.aiThreads = {};
+  state.quizFlow.aiErrorByQuestion = {};
+  state.quizFlow.aiStreamingQuestionId = null;
+}
+
+function selectedReviewQuestion() {
+  return state.quizFlow.review?.questions?.find((item) => item.id === state.quizFlow.selectedQuestionId)
+    || state.quizFlow.review?.questions?.[0]
+    || null;
+}
+
 function resetQuizFlow(from = "subject") {
   if (from === "subject") state.quizFlow.subjectId = null;
   if (from === "subject" || from === "topic") state.quizFlow.topicId = null;
@@ -211,8 +228,7 @@ function resetQuizFlow(from = "subject") {
   state.quizFlow.review = null;
   state.quizFlow.submittedAnswers = {};
   state.quizFlow.selectedQuestionId = null;
-  state.quizFlow.explainDraft = "";
-  state.quizFlow.explainMessages = [];
+  resetQuizAiState();
 }
 
 async function startQuizSession() {
@@ -234,8 +250,7 @@ async function startQuizSession() {
     state.quizFlow.review = null;
     state.quizFlow.submittedAnswers = {};
     state.quizFlow.selectedQuestionId = null;
-    state.quizFlow.explainDraft = "";
-    state.quizFlow.explainMessages = [];
+    resetQuizAiState();
   } catch (error) {
     showToast("error", "题目加载失败");
   } finally {
@@ -282,13 +297,86 @@ async function submitQuizSession() {
     state.learningRecords = payload.learningRecords;
     state.quizFlow.review = payload.review || null;
     state.quizFlow.selectedQuestionId = payload.review?.questions?.[0]?.id || null;
-    state.quizFlow.explainDraft = "";
-    state.quizFlow.explainMessages = [];
+    resetQuizAiState();
     showToast("success", "练习结果已保存");
   } catch (error) {
     showToast("error", "练习结果提交失败");
   } finally {
     state.loading = false;
+    renderApp();
+  }
+}
+
+async function sendQuizFollowUp(userMessage) {
+  const text = String(userMessage || "").trim();
+  const question = selectedReviewQuestion();
+  if (!question || !text) return;
+
+  const questionId = question.id;
+  if (state.quizFlow.aiStreamingQuestionId === questionId) return;
+
+  const existingThread = state.quizFlow.aiThreads[questionId] || [];
+  const conversation = existingThread.map((item) => ({
+    role: item.role,
+    content: item.body
+  }));
+
+  const nextThread = [
+    ...existingThread,
+    { role: "user", from: "student", title: "我", time: "刚刚", body: text },
+    { role: "assistant", from: "ai", title: "AI 助手", time: "思考中", body: "" }
+  ];
+
+  state.quizFlow.aiThreads[questionId] = nextThread;
+  state.quizFlow.aiErrorByQuestion[questionId] = "";
+  state.quizFlow.aiStreamingQuestionId = questionId;
+  renderApp();
+
+  try {
+    const response = await fetch("/api/student/1/quiz-followup-stream", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question,
+        conversation,
+        userMessage: text
+      })
+    });
+
+    if (!response.ok || !response.body) {
+      throw new Error("AI 请求失败");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let assistantText = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      assistantText += decoder.decode(value, { stream: true });
+      const thread = state.quizFlow.aiThreads[questionId];
+      if (thread?.length) {
+        thread[thread.length - 1].body = assistantText;
+        thread[thread.length - 1].time = "刚刚";
+        renderApp();
+      }
+    }
+
+    const finalText = assistantText.trim() || "我这次没有成功生成讲解，你可以换一种问法再试一次。";
+    const thread = state.quizFlow.aiThreads[questionId];
+    if (thread?.length) {
+      thread[thread.length - 1].body = finalText;
+      thread[thread.length - 1].time = "刚刚";
+    }
+  } catch (error) {
+    state.quizFlow.aiErrorByQuestion[questionId] = error.message || "AI 服务暂时不可用";
+    const thread = state.quizFlow.aiThreads[questionId];
+    if (thread?.length && thread[thread.length - 1].role === "assistant" && !thread[thread.length - 1].body) {
+      thread.pop();
+    }
+  } finally {
+    state.quizFlow.aiStreamingQuestionId = null;
     renderApp();
   }
 }
@@ -466,6 +554,7 @@ function bindEvents() {
     resetQuizFlow,
     startQuizSession,
     submitQuizSession,
+    sendQuizFollowUp,
     renderApp
   });
   studentShellExperience().bind?.({
