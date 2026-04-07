@@ -1406,24 +1406,27 @@ button { cursor: pointer; border: none; }
   line-height: 1.1;
 }
 
-.math-boxed-letter {
+.math-boxed-letter,
+.math-boxed-letter-wide {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.8em;
-  min-height: 1.8em;
-  padding: 0.12em 0.28em;
+  min-width: 1.45em;
+  min-height: 1.45em;
+  padding: 0.04em 0.2em;
   border: 2px solid rgba(213, 107, 73, 0.72);
-  border-radius: 10px;
+  border-radius: 8px;
   background: linear-gradient(180deg, rgba(255, 243, 234, 0.98), rgba(255, 233, 214, 0.96));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 14px rgba(213, 107, 73, 0.12);
   font-weight: 800;
+  font-size: 0.88em;
+  line-height: 1;
   color: var(--accent-deep);
 }
 
 .math-boxed-letter-wide {
-  min-width: 2.6em;
-  padding: 0.12em 0.42em;
+  min-width: 2.05em;
+  padding: 0.04em 0.3em;
 }
 
 .quiz-blank-row {
