@@ -18,14 +18,26 @@
     return question.type === "text" && Array.isArray(question.blankLabels) && question.blankLabels.length > 0;
   }
 
-  function enhanceQuestionHtml(questionHtml) {
-    return String(questionHtml || "")
+  function normalizeKnownQuestionHtml(question) {
+    if (question?.id === "sequence-001") {
+      return `<div class="math-rich-prompt"><p class="math-jp-line"><strong>数列 {u<sub>k</sub>} が</strong></p><div class="math-formula">u<sub>k</sub> = k<sup>2</sup> - 2k + 2 <span class="math-condition">(k ≧ 1)</span></div><p class="math-jp-line">で定められているとき，初項から第 n 項までの和は</p><div class="math-fraction"><div class="math-fraction-top"><span class="math-boxed-letter">A</span><span> n<sup>3</sup> - </span><span class="math-boxed-letter">B</span><span> n<sup>2</sup> + </span><span class="math-boxed-letter">C</span><span> n</span></div><div class="math-fraction-bottom"><span class="math-boxed-letter">D</span></div></div><p class="math-jp-line">である。</p></div>`;
+    }
+
+    if (question?.id === "sequence-020") {
+      return `<div class="math-rich-prompt"><p class="math-jp-line"><strong>已知 a<sub>1</sub> = 2/9，且对 n = 2,3,4, ... 有</strong></p><div class="math-answer-line"><span>a<sub>n</sub> = ((n + 1)(2n - 3) / (3n(2n + 1))) a<sub>n-1</sub></span></div><p class="math-jp-line">求通项公式以及无穷级数的和。</p><div class="math-answer-line"><span>a<sub>n</sub> = (n + </span><span class="math-boxed-letter">A</span><span>) / [3^(n + </span><span class="math-boxed-letter">B</span><span>) (</span><span class="math-boxed-letter">C</span><span>n - </span><span class="math-boxed-letter">D</span><span>) (2n + 1)]</span></div><p class="math-jp-line"><span><span class="math-sigma">Σ<sub>n=1</sub><sup>∞</sup></span> a<sub>n</sub> = </span></p><div class="math-answer-line"><span class="math-boxed-letter">E</span><span> / </span><span class="math-boxed-letter-wide">F</span></div></div>`;
+    }
+
+    return String(question?.question || "");
+  }
+
+  function enhanceQuestionHtml(question) {
+    return normalizeKnownQuestionHtml(question)
       .replace(/<p>\s*<\/p>/g, "")
       .replace(/\?\s+\?/g, "……");
   }
 
   function renderQuestionBody(question) {
-    const html = enhanceQuestionHtml(question.question);
+    const html = enhanceQuestionHtml(question);
     return `
       <div class="quiz-question-frame">
         <div class="quiz-question-copy">${html}</div>
@@ -95,6 +107,11 @@
       .replace(/\\\(|\\\)|\\\[|\\\]/g, "")
       .replace(/\\left/g, "")
       .replace(/\\right/g, "")
+      .replace(/\\infty/g, "∞")
+      .replace(/\\ldots/g, "...")
+      .replace(/\\cdots/g, "...")
+      .replace(/\\dots/g, "...")
+      .replace(/\\to/g, "→")
       .replace(/\\quad/g, " ")
       .replace(/\\,/g, " ")
       .replace(/\\!/g, "")
@@ -104,6 +121,8 @@
       .replace(/\\([\^\-\+\=\(\)\[\]\{\}])/g, "$1")
       .replace(/\\sum_\{([^{}]+)\}\^\{([^{}]+)\}/g, '∑<sub>$1</sub><sup>$2</sup>')
       .replace(/\\sum_\{([^{}]+)\}\^([A-Za-z0-9+\-]+)/g, '∑<sub>$1</sub><sup>$2</sup>')
+      .replace(/\\sum_([A-Za-z0-9=+\-]+)\^\{([^{}]+)\}/g, '∑<sub>$1</sub><sup>$2</sup>')
+      .replace(/\\sum_([A-Za-z0-9=+\-]+)\^([A-Za-z0-9+\-∞]+)/g, '∑<sub>$1</sub><sup>$2</sup>')
       .replace(/\\sum/g, "∑")
       .replace(/\\times/g, "×")
       .replace(/\\cdot/g, "·")
@@ -113,9 +132,12 @@
       .replace(/\\pm/g, "±")
       .replace(/\\sqrt\{([^{}]+)\}/g, "√($1)")
       .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '<span class="ai-inline-fraction"><span class="ai-inline-fraction-top">$1</span><span class="ai-inline-fraction-bottom">$2</span></span>')
+      .replace(/\\frac([A-Za-z0-9+\-()]+)\{([^{}]+)\}/g, '<span class="ai-inline-fraction"><span class="ai-inline-fraction-top">$1</span><span class="ai-inline-fraction-bottom">$2</span></span>')
+      .replace(/\\frac([A-Za-z0-9+\-()]+)([A-Za-z0-9+\-()]+)/g, '$1/$2')
       .replace(/([A-Za-z0-9)\]])\^([A-Za-z0-9+\-]+)/g, '$1<sup>$2</sup>')
       .replace(/([A-Za-z])_\{([^{}]+)\}/g, '$1<sub>$2</sub>')
       .replace(/([A-Za-z])_([A-Za-z0-9+\-]+)/g, '$1<sub>$2</sub>')
+      .replace(/\\([A-Za-z]+)/g, "$1")
       .replace(/\{([^{}]+)\}/g, '$1');
   }
 
@@ -407,7 +429,7 @@
             ${renderQuestionDetail(ctx)}
 
             <div class="quiz-actions">
-              <button class="ghost-btn" data-quiz-back="level" type="button">换一组题再练</button>
+              <button class="ghost-btn" data-review-return type="button">${ctx.state.quizFlow.reviewSource === "wrongbook" ? "返回错题本" : "换一组题再练"}</button>
             </div>
           </section>
         </section>
@@ -421,6 +443,10 @@
 
   function render(ctx) {
     const catalog = ctx.state.quizCatalog || { subjects: [], levels: [] };
+
+    if (ctx.state.quizFlow.review) {
+      return renderResultStage(ctx);
+    }
 
     if (!ctx.state.quizFlow.subjectId) {
       return `
@@ -492,20 +518,16 @@
       `;
     }
 
-    if (!ctx.state.quizFlow.review) {
-      return `
-        <section class="quiz-stage-shell quiz-stage-compact">
-          <section class="quiz-main-column">
-            ${renderPracticeStage(ctx)}
-          </section>
-          <aside class="quiz-side-column">
-            ${renderGuideStage()}
-          </aside>
+    return `
+      <section class="quiz-stage-shell quiz-stage-compact">
+        <section class="quiz-main-column">
+          ${renderPracticeStage(ctx)}
         </section>
-      `;
-    }
-
-    return renderResultStage(ctx);
+        <aside class="quiz-side-column">
+          ${renderGuideStage()}
+        </aside>
+      </section>
+    `;
   }
 
   function bind(ctx) {
@@ -545,6 +567,10 @@
         ctx.state.quizFlow.selectedQuestionId = button.dataset.reviewQuestion;
         ctx.renderApp();
       });
+    });
+
+    ctx.contentEl.querySelectorAll("[data-review-return]").forEach((button) => {
+      button.addEventListener("click", () => ctx.leaveQuizReview?.());
     });
 
     const startQuizButton = document.getElementById("start-quiz-session-btn");

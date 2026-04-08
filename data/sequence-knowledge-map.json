@@ -1,0 +1,206 @@
+{
+  "topicId": "sequence",
+  "version": 1,
+  "updatedAt": "2026-04-07",
+  "tiers": [
+    {
+      "id": "tier-1",
+      "label": "第一梯队：核心基础",
+      "description": "出现频率最高，做题与复盘时最先判断的基础知识。"
+    },
+    {
+      "id": "tier-2",
+      "label": "第二梯队：大题高频点",
+      "description": "综合题核心套路，常和前 n 项和、递推、构造放在一起考。"
+    },
+    {
+      "id": "tier-3",
+      "label": "第三梯队：进阶技巧",
+      "description": "区分度更高，常考最值、不等式、极限和特殊求和。"
+    },
+    {
+      "id": "tier-4",
+      "label": "第四梯队：数论与条件构造",
+      "description": "把数列和因式分解、倍数、余数条件结合起来。"
+    }
+  ],
+  "knowledgePoints": [
+    {
+      "id": "ap-basic",
+      "tierId": "tier-1",
+      "label": "等差数列基础",
+      "summary": "已知项、公差、通项、等差中项和基础计算。"
+    },
+    {
+      "id": "gp-basic",
+      "tierId": "tier-1",
+      "label": "等比数列基础",
+      "summary": "已知项、公比、通项、等比中项和无穷和。"
+    },
+    {
+      "id": "sum-basic",
+      "tierId": "tier-1",
+      "label": "前 n 项和",
+      "summary": "等差、等比和常见多项式数列的求和。"
+    },
+    {
+      "id": "sum-sn-an",
+      "tierId": "tier-2",
+      "label": "S_n 与 a_n 转化",
+      "summary": "用 a_n = S_n - S_(n-1) 由和反推通项，或把混合关系化成标准数列。"
+    },
+    {
+      "id": "recurrence-transform",
+      "tierId": "tier-2",
+      "label": "递推式变形",
+      "summary": "平移、换元、除以指数项、构造新数列，把递推式化成熟悉模型。"
+    },
+    {
+      "id": "log-transform",
+      "tierId": "tier-2",
+      "label": "对数变换递推",
+      "summary": "把乘方型或乘积型递推转成线性递推，再接等差或等比。"
+    },
+    {
+      "id": "special-sum",
+      "tierId": "tier-3",
+      "label": "复杂构造与特殊求和",
+      "summary": "两两乘积和、裂项求和、交错和、新数列求和。"
+    },
+    {
+      "id": "extreme-inequality",
+      "tierId": "tier-3",
+      "label": "最值与不等式",
+      "summary": "求满足条件的项数、和的最小值、范围判断等。"
+    },
+    {
+      "id": "limit",
+      "tierId": "tier-3",
+      "label": "极限",
+      "summary": "数列或和的极限，通常与通项整理或最高次项比较结合。"
+    },
+    {
+      "id": "number-theory-sequence",
+      "tierId": "tier-4",
+      "label": "数论型数列",
+      "summary": "倍数、余数、同余条件、分类讨论和自然数筛选。"
+    }
+  ],
+  "questionMappings": [
+    {
+      "questionId": "sequence-001",
+      "primaryKnowledgePointId": "sum-basic",
+      "secondaryKnowledgePointIds": ["special-sum"]
+    },
+    {
+      "questionId": "sequence-002",
+      "primaryKnowledgePointId": "gp-basic",
+      "secondaryKnowledgePointIds": ["special-sum"]
+    },
+    {
+      "questionId": "sequence-003",
+      "primaryKnowledgePointId": "sum-basic",
+      "secondaryKnowledgePointIds": ["ap-basic"]
+    },
+    {
+      "questionId": "sequence-004",
+      "primaryKnowledgePointId": "ap-basic",
+      "secondaryKnowledgePointIds": []
+    },
+    {
+      "questionId": "sequence-005",
+      "primaryKnowledgePointId": "ap-basic",
+      "secondaryKnowledgePointIds": []
+    },
+    {
+      "questionId": "sequence-006",
+      "primaryKnowledgePointId": "gp-basic",
+      "secondaryKnowledgePointIds": ["ap-basic", "number-theory-sequence"]
+    },
+    {
+      "questionId": "sequence-007",
+      "primaryKnowledgePointId": "ap-basic",
+      "secondaryKnowledgePointIds": ["gp-basic"]
+    },
+    {
+      "questionId": "sequence-008",
+      "primaryKnowledgePointId": "sum-sn-an",
+      "secondaryKnowledgePointIds": ["limit"]
+    },
+    {
+      "questionId": "sequence-009",
+      "primaryKnowledgePointId": "ap-basic",
+      "secondaryKnowledgePointIds": ["sum-basic"]
+    },
+    {
+      "questionId": "sequence-010",
+      "primaryKnowledgePointId": "sum-sn-an",
+      "secondaryKnowledgePointIds": ["ap-basic"]
+    },
+    {
+      "questionId": "sequence-011",
+      "primaryKnowledgePointId": "sum-basic",
+      "secondaryKnowledgePointIds": ["extreme-inequality"]
+    },
+    {
+      "questionId": "sequence-012",
+      "primaryKnowledgePointId": "ap-basic",
+      "secondaryKnowledgePointIds": ["sum-basic", "gp-basic"]
+    },
+    {
+      "questionId": "sequence-013",
+      "primaryKnowledgePointId": "gp-basic",
+      "secondaryKnowledgePointIds": ["special-sum"]
+    },
+    {
+      "questionId": "sequence-014",
+      "primaryKnowledgePointId": "number-theory-sequence",
+      "secondaryKnowledgePointIds": ["sum-basic", "special-sum"]
+    },
+    {
+      "questionId": "sequence-015",
+      "primaryKnowledgePointId": "gp-basic",
+      "secondaryKnowledgePointIds": ["ap-basic", "sum-basic"]
+    },
+    {
+      "questionId": "sequence-016",
+      "primaryKnowledgePointId": "log-transform",
+      "secondaryKnowledgePointIds": ["gp-basic", "extreme-inequality"]
+    },
+    {
+      "questionId": "sequence-017",
+      "primaryKnowledgePointId": "sum-sn-an",
+      "secondaryKnowledgePointIds": ["sum-basic", "extreme-inequality"]
+    },
+    {
+      "questionId": "sequence-018",
+      "primaryKnowledgePointId": "log-transform",
+      "secondaryKnowledgePointIds": ["recurrence-transform", "limit"]
+    },
+    {
+      "questionId": "sequence-019",
+      "primaryKnowledgePointId": "recurrence-transform",
+      "secondaryKnowledgePointIds": ["gp-basic"]
+    },
+    {
+      "questionId": "sequence-020",
+      "primaryKnowledgePointId": "special-sum",
+      "secondaryKnowledgePointIds": ["recurrence-transform", "gp-basic"]
+    },
+    {
+      "questionId": "sequence-021",
+      "primaryKnowledgePointId": "extreme-inequality",
+      "secondaryKnowledgePointIds": ["sum-sn-an"]
+    },
+    {
+      "questionId": "sequence-022",
+      "primaryKnowledgePointId": "number-theory-sequence",
+      "secondaryKnowledgePointIds": ["extreme-inequality"]
+    },
+    {
+      "questionId": "sequence-023",
+      "primaryKnowledgePointId": "number-theory-sequence",
+      "secondaryKnowledgePointIds": ["sum-basic"]
+    }
+  ]
+}

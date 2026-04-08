@@ -26,6 +26,7 @@ model Student {
   homeworks       Homework[]
   messages        Message[]
   enrollments     StudentCourse[]
+  wrongBookItems  WrongBookItem[]
 }
 
 model Course {
@@ -115,6 +116,7 @@ model Question {
   topic         QuestionTopic             @relation(fields: [subjectId, topicId], references: [subjectId, id], onDelete: Cascade)
   choices       QuestionChoice[]
   explanation   QuestionExplanation?
+  wrongBookItems WrongBookItem[]
 }
 
 model QuestionSubject {
@@ -208,4 +210,25 @@ model Message {
   timeLabel String
   createdAt DateTime @default(now())
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model WrongBookItem {
+  id                Int       @id @default(autoincrement())
+  studentId         Int
+  questionId        String
+  subjectId         String
+  topicId           String
+  levelId           String
+  questionType      String
+  wrongCount        Int       @default(1)
+  lastStudentAnswer String    @default("")
+  isMastered        Boolean   @default(false)
+  lastWrongAt       DateTime  @default(now())
+  masteredAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  student           Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  question          Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, questionId])
 }

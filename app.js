@@ -12,6 +12,7 @@
     levelId: null,
     questions: [],
     review: null,
+    reviewSource: null,
     submittedAnswers: {},
     selectedQuestionId: null,
     explainDraft: "",
@@ -19,6 +20,14 @@
     aiThreads: {},
     aiErrorByQuestion: {},
     aiStreamingQuestionId: null
+  },
+  wrongBookFilters: {
+    subjectId: "all",
+    questionType: "all",
+    frequency: "all",
+    knowledgePointId: "all",
+    includeMastered: false,
+    sortBy: "recent"
   },
   loading: false,
   toast: null,
@@ -55,6 +64,7 @@ const navByRole = {
     { id: "student-inbox", label: "Checklist" },
     { id: "student-calendar", label: "课程日历" },
     { id: "student-quiz", label: "在线做题" },
+    { id: "student-wrongbook", label: "错题本" },
     { id: "student-progress", label: "我的学习情况" },
     { id: "student-teacher", label: "和老师沟通" },
     { id: "student-ai", label: "和 AI 沟通" }
@@ -78,6 +88,7 @@ const pageTitles = {
   "student-inbox": "Checklist",
   "student-calendar": "课程日历",
   "student-quiz": "在线做题",
+  "student-wrongbook": "错题本",
   "student-progress": "我的学习情况",
   "student-teacher": "和老师沟通",
   "student-ai": "和 AI 沟通",
@@ -226,6 +237,7 @@ function resetQuizFlow(from = "subject") {
   if (from === "subject" || from === "topic" || from === "level") state.quizFlow.levelId = null;
   state.quizFlow.questions = [];
   state.quizFlow.review = null;
+  state.quizFlow.reviewSource = null;
   state.quizFlow.submittedAnswers = {};
   state.quizFlow.selectedQuestionId = null;
   resetQuizAiState();
@@ -296,6 +308,7 @@ async function submitQuizSession() {
     state.studentOverview = payload.overview;
     state.learningRecords = payload.learningRecords;
     state.quizFlow.review = payload.review || null;
+    state.quizFlow.reviewSource = "quiz-session";
     state.quizFlow.selectedQuestionId = payload.review?.questions?.[0]?.id || null;
     resetQuizAiState();
     showToast("success", "练习结果已保存");
@@ -407,6 +420,75 @@ async function submitHomework(lessonId) {
   }
 }
 
+async function markWrongBookMastered(questionId) {
+  if (!questionId) return;
+  state.loading = true;
+  renderApp();
+  try {
+    const payload = await fetchJson(`/api/student/1/wrongbook/${encodeURIComponent(questionId)}/mastered`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+    state.studentOverview = payload.overview;
+    state.learningRecords = payload.learningRecords;
+    showToast("success", "已标记为掌握");
+  } catch (error) {
+    showToast("error", "错题本更新失败");
+  } finally {
+    state.loading = false;
+    renderApp();
+  }
+}
+
+function openWrongBookReview(questionId) {
+  const item = (state.learningRecords?.wrongBook || []).find((entry) => entry.questionId === questionId);
+  if (!item) {
+    showToast("error", "没找到这道错题");
+    return;
+  }
+
+  state.quizFlow.questions = [];
+  state.quizFlow.review = {
+    correctCount: 0,
+    wrongCount: 1,
+    questions: [
+      {
+        id: item.questionId,
+        question: item.prompt,
+        type: item.questionType,
+        blankLabels: item.blankLabels || [],
+        studentAnswer: item.lastStudentAnswer || "",
+        correctAnswer: item.answer || "",
+        correct: false,
+        explanation: item.explanation || null
+      }
+    ]
+  };
+  state.quizFlow.reviewSource = "wrongbook";
+  state.quizFlow.submittedAnswers = {
+    [item.questionId]: item.lastStudentAnswer || ""
+  };
+  state.quizFlow.selectedQuestionId = item.questionId;
+  resetQuizAiState();
+  state.view = "student-quiz";
+  renderApp();
+}
+
+function leaveQuizReview() {
+  if (state.quizFlow.reviewSource === "wrongbook") {
+    resetQuizAiState();
+    state.quizFlow.review = null;
+    state.quizFlow.reviewSource = null;
+    state.quizFlow.selectedQuestionId = null;
+    state.view = "student-wrongbook";
+    renderApp();
+    return;
+  }
+
+  resetQuizFlow("level");
+  renderApp();
+}
+
 function renderToast() {
   if (!state.toast) return "";
   const cls = state.toast.type === "error" ? "student-toast-error" : "student-toast-success";
@@ -505,6 +587,7 @@ function renderCurrentView() {
     case "student-inbox": return studentShellExperience().renderChecklist?.({ state }) || `<section class="panel"><h3>Student shell module not loaded</h3></section>`;
     case "student-calendar": return studentLearningExperience().renderCalendar?.({ state, courses, lessons, selectedCourse, selectedLesson, getLessonHomework, courseProgress }) || `<section class="panel"><h3>Student learning module not loaded</h3></section>`;
     case "student-quiz": return studentQuizExperience().render?.({ state, quizSubject, quizTopic, quizLevel }) || `<section class="panel"><h3>Student quiz module not loaded</h3></section>`;
+    case "student-wrongbook": return studentLearningExperience().renderWrongBook?.({ state }) || `<section class="panel"><h3>Student learning module not loaded</h3></section>`;
     case "student-progress": return studentLearningExperience().renderProgress?.({ state, selectedStudent }) || `<section class="panel"><h3>Student learning module not loaded</h3></section>`;
     case "student-teacher": return studentShellExperience().renderMessagePanel?.("Teacher Chat", studentChatMessages, "输入想问老师的话", "teacher") || `<section class="panel"><h3>Student shell module not loaded</h3></section>`;
     case "student-ai": return studentShellExperience().renderMessagePanel?.("AI Chat", aiChatMessages.concat(state.quizFlow.explainMessages), "例如：第 2 步为什么这样做？", "ai") || `<section class="panel"><h3>Student shell module not loaded</h3></section>`;
@@ -543,7 +626,10 @@ function bindEvents() {
     contentEl,
     selectedCourse,
     submitHomework,
-    renderApp
+    renderApp,
+    markWrongBookMastered,
+    openWrongBookReview,
+    quizCatalog: state.quizCatalog
   });
   studentQuizExperience().bind?.({
     state,
@@ -552,6 +638,7 @@ function bindEvents() {
     quizTopic,
     quizLevel,
     resetQuizFlow,
+    leaveQuizReview,
     startQuizSession,
     submitQuizSession,
     sendQuizFollowUp,

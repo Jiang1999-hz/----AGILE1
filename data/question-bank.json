@@ -6,7 +6,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>数列 {u<sub>k</sub>} が</strong></p><div class=\"math-formula\">u<sub>k</sub> = k<sup>2</sup> - 2k + 2 <span class=\"math-condition\">(k ≧ 1)</span></div><p class=\"math-jp-line\">で定められているとき，初項から第 n 項までの和は</p><div class=\"math-fraction\"><div class=\"math-fraction-top\">A n<sup>3</sup> - B n<sup>2</sup> + C n</div><div class=\"math-fraction-bottom\">D</div></div><p class=\"math-jp-line\">である。</p></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>数列 {u<sub>k</sub>} が</strong></p><div class=\"math-formula\">u<sub>k</sub> = k<sup>2</sup> - 2k + 2 <span class=\"math-condition\">(k ≧ 1)</span></div><p class=\"math-jp-line\">で定められているとき，初項から第 n 項までの和は</p><div class=\"math-fraction\"><div class=\"math-fraction-top\"><span class=\"math-boxed-letter\">A</span><span> n<sup>3</sup> - </span><span class=\"math-boxed-letter\">B</span><span> n<sup>2</sup> + </span><span class=\"math-boxed-letter\">C</span><span> n</span></div><div class=\"math-fraction-bottom\"><span class=\"math-boxed-letter\">D</span></div></div><p class=\"math-jp-line\">である。</p></div>",
       "answer": "1,6,11,6",
       "blankLabels": [
         "A",
@@ -568,7 +568,7 @@
       "topicId": "sequence",
       "levelId": "basic",
       "type": "text",
-      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>已知 a<sub>1</sub> = 2/9，且对 n = 2,3,4, ... 有</strong></p><div class=\"math-answer-line\"><span>a<sub>n</sub> = ((n + 1)(2n - 3) / (3n(2n + 1))) a<sub>n-1</sub></span></div><p class=\"math-jp-line\">求通项公式以及无穷级数的和。</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = (n + </span><span class=\"math-boxed-letter\">A</span><span>) / [3<sup>n + </sup><span class=\"math-boxed-letter\">B</span><span>(</span><span class=\"math-boxed-letter\">C</span><span>n - </span><span class=\"math-boxed-letter\">D</span><span>)(2n + 1)]</span></div><p class=\"math-jp-line\"><span><span class=\"math-sigma\">Σ<sub>n=1</sub><sup>∞</sup></span> a<sub>n</sub> = </span></p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">E</span><span> / </span><span class=\"math-boxed-letter-wide\">F</span></div></div>",
+      "question": "<div class=\"math-rich-prompt\"><p class=\"math-jp-line\"><strong>已知 a<sub>1</sub> = 2/9，且对 n = 2,3,4, ... 有</strong></p><div class=\"math-answer-line\"><span>a<sub>n</sub> = ((n + 1)(2n - 3) / (3n(2n + 1))) a<sub>n-1</sub></span></div><p class=\"math-jp-line\">求通项公式以及无穷级数的和。</p><div class=\"math-answer-line\"><span>a<sub>n</sub> = (n + </span><span class=\"math-boxed-letter\">A</span><span>) / [3^(n + </span><span class=\"math-boxed-letter\">B</span><span>)(</span><span class=\"math-boxed-letter\">C</span><span>n - </span><span class=\"math-boxed-letter\">D</span><span>)(2n + 1)]</span></div><p class=\"math-jp-line\"><span><span class=\"math-sigma\">Σ<sub>n=1</sub><sup>∞</sup></span> a<sub>n</sub> = </span></p><div class=\"math-answer-line\"><span class=\"math-boxed-letter\">E</span><span> / </span><span class=\"math-boxed-letter-wide\">F</span></div></div>",
       "answer": "1,1,2,1,1,12",
       "blankLabels": [
         "A",

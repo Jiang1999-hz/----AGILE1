@@ -294,6 +294,7 @@ async function streamQuizFollowUpReply(res, payload) {
 }
 
 let cachedQuestionBank = null;
+let cachedSequenceKnowledgeMap = null;
 
 function loadQuestionBankFromFile() {
   try {
@@ -318,6 +319,51 @@ function getQuestionBank() {
     cachedQuestionBank = loadQuestionBankFromFile();
   }
   return cachedQuestionBank;
+}
+
+function loadSequenceKnowledgeMap() {
+  try {
+    const raw = fs.readFileSync(path.join(root, "data", "sequence-knowledge-map.json"), "utf8");
+    return JSON.parse(raw);
+  } catch (error) {
+    return {
+      knowledgePoints: [],
+      questionMappings: []
+    };
+  }
+}
+
+function getSequenceKnowledgeMap() {
+  if (!cachedSequenceKnowledgeMap) {
+    cachedSequenceKnowledgeMap = loadSequenceKnowledgeMap();
+  }
+  return cachedSequenceKnowledgeMap;
+}
+
+function getKnowledgeMappingForQuestion(questionId) {
+  const map = getSequenceKnowledgeMap();
+  const mapping = (map.questionMappings || []).find((item) => item.questionId === questionId);
+  if (!mapping) {
+    return {
+      primaryKnowledgePointId: null,
+      primaryKnowledgePointLabel: null,
+      secondaryKnowledgePointIds: [],
+      secondaryKnowledgePointLabels: []
+    };
+  }
+
+  const pointsById = new Map((map.knowledgePoints || []).map((item) => [item.id, item]));
+  const primary = pointsById.get(mapping.primaryKnowledgePointId);
+  const secondaryPoints = (mapping.secondaryKnowledgePointIds || [])
+    .map((id) => pointsById.get(id))
+    .filter(Boolean);
+
+  return {
+    primaryKnowledgePointId: mapping.primaryKnowledgePointId || null,
+    primaryKnowledgePointLabel: primary?.label || null,
+    secondaryKnowledgePointIds: mapping.secondaryKnowledgePointIds || [],
+    secondaryKnowledgePointLabels: secondaryPoints.map((item) => item.label)
+  };
 }
 
 function getQuizQuestions() {
@@ -543,7 +589,52 @@ function transformLearningRecords(student) {
         content: item.content || "",
         teacherNote: item.teacherNote || ""
       })),
-    progress: student.quizSubmissions.slice(-5).map((item) => item.score)
+    progress: student.quizSubmissions.slice(-5).map((item) => item.score),
+    wrongBook: (student.wrongBookItems || [])
+      .slice()
+      .sort((a, b) => {
+        if (a.isMastered !== b.isMastered) return Number(a.isMastered) - Number(b.isMastered);
+        if (b.wrongCount !== a.wrongCount) return b.wrongCount - a.wrongCount;
+        return new Date(b.lastWrongAt) - new Date(a.lastWrongAt);
+      })
+      .map((item) => {
+        const mapping = getKnowledgeMappingForQuestion(item.questionId);
+        return {
+          id: item.id,
+          questionId: item.questionId,
+          subjectId: item.subjectId,
+          topicId: item.topicId,
+          levelId: item.levelId,
+          questionType: item.questionType,
+          wrongCount: item.wrongCount,
+          lastStudentAnswer: item.lastStudentAnswer || "",
+          isMastered: item.isMastered,
+          lastWrongAt: item.lastWrongAt,
+          masteredAt: item.masteredAt,
+          primaryKnowledgePointId: mapping.primaryKnowledgePointId,
+          primaryKnowledgePointLabel: mapping.primaryKnowledgePointLabel,
+          secondaryKnowledgePointIds: mapping.secondaryKnowledgePointIds,
+          secondaryKnowledgePointLabels: mapping.secondaryKnowledgePointLabels,
+          prompt: item.question?.prompt || "",
+          answer: item.question?.answer || "",
+          blankLabels: Array.isArray(item.question?.blankLabels) ? item.question.blankLabels : [],
+          explanation: item.question?.explanation ? {
+            assetType: item.question.explanation.assetType,
+            assetLabel: item.question.explanation.assetLabel,
+            assetUrl: item.question.explanation.assetUrl,
+            summary: item.question.explanation.summary,
+            followUp: item.question.explanation.followUp,
+            steps: (item.question.explanation.steps || [])
+              .slice()
+              .sort((a, b) => a.sortOrder - b.sortOrder)
+              .map((step) => ({
+                line: step.lineLabel,
+                title: step.title,
+                detail: step.detail
+              }))
+          } : null
+        };
+      })
   };
 }
 
@@ -590,7 +681,20 @@ async function buildLearningRecords(studentId) {
     where: { id: studentId },
     include: {
       quizSubmissions: true,
-      homeworks: true
+      homeworks: true,
+      wrongBookItems: {
+        include: {
+          question: {
+            include: {
+              explanation: {
+                include: {
+                  steps: true
+                }
+              }
+            }
+          }
+        }
+      }
     }
   });
 
@@ -608,6 +712,19 @@ async function buildStudentBootstrap(studentId) {
       include: {
         quizSubmissions: true,
         homeworks: true,
+        wrongBookItems: {
+          include: {
+            question: {
+              include: {
+                explanation: {
+                  include: {
+                    steps: true
+                  }
+                }
+              }
+            }
+          }
+        },
         enrollments: {
           include: {
             course: {
@@ -753,6 +870,73 @@ async function saveQuizSubmission(studentId, answers) {
   };
 }
 
+async function upsertWrongBookItem(studentId, question, studentAnswer) {
+  const existing = await prisma.wrongBookItem.findUnique({
+    where: {
+      studentId_questionId: {
+        studentId,
+        questionId: question.id
+      }
+    }
+  });
+
+  if (existing) {
+    await prisma.wrongBookItem.update({
+      where: { id: existing.id },
+      data: {
+        wrongCount: existing.wrongCount + 1,
+        lastStudentAnswer: String(studentAnswer || "").trim(),
+        lastWrongAt: new Date(),
+        isMastered: false,
+        masteredAt: null
+      }
+    });
+    return;
+  }
+
+  await prisma.wrongBookItem.create({
+    data: {
+      studentId,
+      questionId: question.id,
+      subjectId: question.subjectId || "math2",
+      topicId: question.topicId || "sequence",
+      levelId: question.levelId || "basic",
+      questionType: question.type || "text",
+      wrongCount: 1,
+      lastStudentAnswer: String(studentAnswer || "").trim(),
+      isMastered: false,
+      lastWrongAt: new Date()
+    }
+  });
+}
+
+async function markWrongBookItemMastered(studentId, questionId) {
+  const existing = await prisma.wrongBookItem.findUnique({
+    where: {
+      studentId_questionId: {
+        studentId,
+        questionId
+      }
+    }
+  });
+
+  if (existing) {
+    await prisma.wrongBookItem.update({
+      where: { id: existing.id },
+      data: {
+        isMastered: true,
+        masteredAt: new Date()
+      }
+    });
+  }
+
+  return {
+    ok: true,
+    overview: await buildStudentOverview(studentId),
+    learningRecords: await buildLearningRecords(studentId)
+  };
+}
+
 async function saveQuizSessionSubmission(studentId, questionIds, answers, sessionMeta) {
   const quizQuestions = await prisma.question.findMany({
     where: {
@@ -793,6 +977,7 @@ async function saveQuizSessionSubmission(studentId, questionIds, answers, sessio
     if (raw === answer) {
       correct += 1;
     } else {
+      await upsertWrongBookItem(studentId, question, answers[question.id] || "");
       const ability = student.abilities.find((item, index) => index === question.abilityIndex);
       if (ability) {
         weakLabels.push(ability.label);
@@ -984,6 +1169,12 @@ async function handleStudentApi(req, res) {
   if (req.method === "POST" && pathname === "/api/student/1/quiz-session-submissions") {
     const payload = await readBody(req);
     sendJson(res, 200, await saveQuizSessionSubmission(1, payload.questionIds || [], payload.answers || {}, payload.sessionMeta || {}));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname.startsWith("/api/student/1/wrongbook/") && pathname.endsWith("/mastered")) {
+    const questionId = decodeURIComponent(pathname.split("/")[5] || "");
+    sendJson(res, 200, await markWrongBookItemMastered(1, questionId));
     return true;
   }
 
